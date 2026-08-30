@@ -80,11 +80,11 @@
 
   /* ---------- 首屏 ---------- */
   .hero { position: relative; padding: 88px 0 60px; text-align: center; }
-  .hero::before, .hero::after {
+  .hero::after {
     content: ""; position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none;
   }
-  .hero::before { width: 420px; height: 420px; background: rgba(72,90,235,.10); top: -120px; left: -140px; }
-  .hero::after { width: 360px; height: 360px; background: rgba(240,140,30,.09); bottom: -160px; right: -100px; }
+  /* 暖色光晕保留在右下角，避开居中标题（蓝色光晕已移除，防止垫在妙豆透明图后面显蓝底） */
+  .hero::after { width: 300px; height: 300px; background: rgba(240,140,30,.08); bottom: -140px; right: -120px; }
 
   .hero .eyebrow {
     display: inline-flex; align-items: center; gap: 8px;
@@ -98,7 +98,7 @@
     display: inline-flex; align-items: center; gap: 6px;
   }
   .hero h1 em { font-style: normal; background: linear-gradient(120deg, #4a5be8 20%, #7a63e8 60%, #f08c1e 110%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero h1 .brand-mark { height: 1.18em; width: auto; display: block; }
+  .hero h1 .brand-mark { height: 1.5em; width: auto; display: block; }
   .hero p { margin: 18px auto 0; max-width: 520px; color: var(--ink-2); font-size: 15.5px; line-height: 1.85; }
 
   .hero .stats { margin-top: 34px; display: inline-flex; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 8px; box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 12px 32px -16px rgba(23,29,41,.12); }
