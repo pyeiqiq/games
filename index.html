@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>妙豆游戏屋 · Miaodou Games</title>
+<meta name="description" content="妙豆游戏屋：收录合成大西瓜、型月立方连连看、警长抓坏蛋等趣味小游戏，持续上新。" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233c4bd8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 11h4M8 9v4'/%3E%3Cpath d='M15.5 10.5h.01M18 13h.01'/%3E%3Crect x='2' y='6' width='20' height='12' rx='3'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #f6f7f9;
+    --card: #ffffff;
+    --ink: #1c2230;
+    --ink-2: #5b6472;
+    --line: #e6e9f0;
+    --primary: #3c4bd8;
+    --primary-soft: #eef0fe;
+    --accent: #e8890c;
+    --radius: 16px;
+    --shadow: 0 1px 2px rgba(28,34,48,.05), 0 8px 24px -12px rgba(28,34,48,.14);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--ink);
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+
+  /* ---------- 顶栏 ---------- */
+  header {
+    position: sticky; top: 0; z-index: 10;
+    background: rgba(246,247,249,.86); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
+  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
+  .brand svg { color: var(--primary); }
+  .brand b { font-size: 17px; letter-spacing: .02em; }
+  .brand span { font-size: 12px; color: var(--ink-2); margin-left: 2px; }
+  .nav a.link {
+    font-size: 13px; color: var(--ink-2); text-decoration: none;
+    border: 1px solid var(--line); background: var(--card);
+    padding: 7px 14px; border-radius: 999px; transition: all .18s;
+  }
+  .nav a.link:hover { color: var(--primary); border-color: var(--primary); }
+
+  /* ---------- 首屏 ---------- */
+  .hero { padding: 64px 0 44px; text-align: center; }
+  .hero h1 { font-size: 40px; font-weight: 700; letter-spacing: .01em; }
+  .hero h1 em { font-style: normal; color: var(--primary); }
+  .hero p { margin: 16px auto 0; max-width: 560px; color: var(--ink-2); font-size: 15px; line-height: 1.8; }
+  .hero .meta { margin-top: 18px; display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
+  .hero .chip {
+    font-size: 12px; color: var(--ink-2); background: var(--card);
+    border: 1px solid var(--line); padding: 5px 12px; border-radius: 999px;
+  }
+
+  /* ---------- 游戏卡片 ---------- */
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; padding-bottom: 72px; }
+  .game {
+    position: relative; background: var(--card); border: 1px solid var(--line);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    overflow: hidden; display: flex; flex-direction: column;
+    transition: transform .22s ease, box-shadow .22s ease;
+  }
+  .game:hover { transform: translateY(-4px); box-shadow: 0 2px 4px rgba(28,34,48,.06), 0 20px 40px -18px rgba(28,34,48,.22); }
+  .cover {
+    height: 150px; display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+  }
+  .cover svg { color: #fff; opacity: .95; filter: drop-shadow(0 6px 12px rgba(0,0,0,.18)); }
+  .body { padding: 18px 20px 20px; display: flex; flex-direction: column; flex: 1; }
+  .tag-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .tag {
+    font-size: 11px; padding: 3px 10px; border-radius: 999px;
+    background: var(--primary-soft); color: var(--primary); font-weight: 500;
+  }
+  .tag.alt { background: #fdf3e4; color: var(--accent); }
+  .game h3 { font-size: 19px; font-weight: 650; }
+  .game .desc { margin-top: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.7; flex: 1; }
+  .game .btn {
+    margin-top: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    background: var(--primary); color: #fff; text-decoration: none;
+    padding: 11px 0; border-radius: 12px; font-size: 14px; font-weight: 600;
+    transition: opacity .18s, transform .18s;
+  }
+  .game .btn:hover { opacity: .92; transform: translateY(-1px); }
+  .game .btn svg { transition: transform .18s; }
+  .game .btn:hover svg { transform: translateX(3px); }
+
+  /* ---------- 预留卡片（未来游戏占位） ---------- */
+  .game.soon { border-style: dashed; box-shadow: none; align-items: center; justify-content: center; min-height: 280px; text-align: center; }
+  .game.soon .plus {
+    width: 54px; height: 54px; border-radius: 50%; border: 1.5px dashed var(--line);
+    display: flex; align-items: center; justify-content: center; color: var(--ink-2); margin-bottom: 14px;
+  }
+  .game.soon b { font-size: 15px; font-weight: 600; }
+  .game.soon p { margin-top: 6px; font-size: 12.5px; color: var(--ink-2); }
+
+  /* ---------- 页脚 ---------- */
+  footer { border-top: 1px solid var(--line); padding: 28px 0 34px; text-align: center; }
+  footer p { font-size: 12.5px; color: var(--ink-2); line-height: 1.9; }
+  footer a { color: var(--primary); text-decoration: none; }
+
+  @media (max-width: 560px) {
+    .hero h1 { font-size: 30px; }
+    .grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap nav">
+    <a class="brand" href="./">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4"/><path d="M15.5 10.5h.01M18 13h.01"/><rect x="2" y="6" width="20" height="12" rx="3"/></svg>
+      <b>妙豆游戏屋</b><span>Miaodou Games</span>
+    </a>
+    <a class="link" href="https://pyeiqiq.github.io/pro/" target="_blank" rel="noopener">工具箱主页</a>
+  </div>
+</header>
+
+<section class="wrap">
+  <div class="hero">
+    <h1>妙豆<em>游戏屋</em></h1>
+    <p>收录独立开发的趣味小游戏，覆盖合成、配对、迷宫等玩法。每款都是一份小作品，持续上新中。</p>
+    <div class="meta">
+      <span class="chip">已收录 3 款</span>
+      <span class="chip">免安装 · 即点即玩</span>
+      <span class="chip">持续上新</span>
+    </div>
+  </div>
+
+  <div class="grid" id="games"></div>
+</section>
+
+<footer>
+  <div class="wrap">
+    <p>妙豆游戏屋 · <a href="https://miaoddou.com/" target="_blank" rel="noopener">miaoddou.com</a> 出品</p>
+    <p>© 2026 Miaodou Games. All rights reserved.</p>
+  </div>
+</footer>
+
+<script>
+/* =========================================================
+ * 游戏清单：以后出新游戏，只需在这里加一个对象，
+ * 卡片会自动生成，无需改动页面结构。
+ * ========================================================= */
+const GAMES = [
+  {
+    key: "suika-re0",
+    title: "RE:0 合成大西瓜",
+    desc: "经典合成玩法：相同的果实相遇会进阶融合，从樱桃一路合到西瓜。策略落子，挑战最高分。",
+    tags: ["休闲合成", "经典玩法"],
+    url: "./suika-re0/",
+    colors: ["#f2a33c", "#e2703a"],
+    icon: "melon"
+  },
+  {
+    key: "fate-cube",
+    title: "Fate Cube · 型月立方连连看",
+    desc: "实心 3D 立方体英雄配对消除：旋转立方、寻找同源英灵，通关后黄金核心在中央显现。",
+    tags: ["3D 配对", "英灵主题"],
+    url: "./fate-cube/",
+    colors: ["#3c4bd8", "#6d5bd0"],
+    icon: "cube"
+  },
+  {
+    key: "police-maze-3d",
+    title: "警长抓坏蛋 · 迷宫大作战",
+    desc: "3D 迷宫追捕：扮演警长穿梭立体迷宫，追踪坏蛋，在转角与追逐中完成抓捕。",
+    tags: ["3D 迷宫", "追捕对决"],
+    url: "./police-maze-3d/",
+    colors: ["#1e6fd9", "#16a3b5"],
+    icon: "badge"
+  }
+];
+
+/* 统一的描边 SVG 图标（风格一致） */
+const ICONS = {
+  melon: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 3.5-6 7.2-6 11a6 6 0 0 0 12 0c0-3.8-2-7.5-6-11Z"/><path d="M9.5 12.5h.01M14 14.5h.01M11 16h.01"/></svg>',
+  cube: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 7v10l-8 4.2L4 17V7l8-4.2Z"/><path d="m4 7 8 4.2L20 7M12 11.2V21"/></svg>',
+  badge: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 11 14l4-4"/><path d="M12 3l2.1 1.7 2.7-.2 1 2.5 2.3 1.4-.8 2.6.8 2.6-2.3 1.4-1 2.5-2.7-.2L12 21l-2.1-1.7-2.7.2-1-2.5L3.9 15.6l.8-2.6L3.9 10.4l2.3-1.4 1-2.5 2.7.2L12 3Z"/></svg>'
+};
+
+const grid = document.getElementById("games");
+
+GAMES.forEach(g => {
+  const card = document.createElement("a");
+  card.className = "game";
+  card.href = g.url;
+  const tags = g.tags.map(t => `<span class="tag">${t}</span>`).join("");
+  card.innerHTML = `
+    <div class="cover" style="--c1:${g.colors[0]};--c2:${g.colors[1]}">${ICONS[g.icon]}</div>
+    <div class="body">
+      <div class="tag-row">${tags}</div>
+      <h3>${g.title}</h3>
+      <p class="desc">${g.desc}</p>
+      <span class="btn">开始游戏
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </span>
+    </div>`;
+  grid.appendChild(card);
+});
+
+/* 未来游戏占位卡片 */
+const soon = document.createElement("div");
+soon.className = "game soon";
+soon.innerHTML = `
+  <div>
+    <div class="plus">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+    </div>
+    <b>更多游戏开发中</b>
+    <p>新作品将在这里陆续上架，敬请期待</p>
+  </div>`;
+grid.appendChild(soon);
+</script>
+</body>
+</html>
