@@ -95,9 +95,10 @@
   .hero .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
   .hero h1 {
     margin-top: 24px; font-size: 52px; font-weight: 800; letter-spacing: .01em; line-height: 1.15;
+    display: inline-flex; align-items: center; gap: 6px;
   }
   .hero h1 em { font-style: normal; background: linear-gradient(120deg, #4a5be8 20%, #7a63e8 60%, #f08c1e 110%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
-  .hero h1 .brand-mark { height: 1.18em; width: auto; vertical-align: -.18em; margin-right: 2px; }
+  .hero h1 .brand-mark { height: 1.18em; width: auto; display: block; }
   .hero p { margin: 18px auto 0; max-width: 520px; color: var(--ink-2); font-size: 15.5px; line-height: 1.85; }
 
   .hero .stats { margin-top: 34px; display: inline-flex; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 8px; box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 12px 32px -16px rgba(23,29,41,.12); }
@@ -316,7 +317,7 @@
       <svg width="34" height="34" viewBox="0 0 24 24" fill="#f0b23e"><path d="M12 2l2.6 6.6L21 9l-5 4.4L17.5 21 12 17.3 6.5 21 8 13.4 3 9l6.4-.4L12 2z"/></svg>
     </span>
 
-    <h1 class="reveal" style="animation-delay:.15s"><img class="brand-mark" src="./assets/miaodou-logo.png" alt="妙豆" /> <em>游戏屋</em></h1>
+    <h1 class="reveal" style="animation-delay:.15s"><img class="brand-mark" src="./assets/miaodou-logo.png?v=3" alt="妙豆" /><em>游戏屋</em></h1>
     <p class="reveal" style="animation-delay:.25s">趣味小游戏，即点即玩，每款都是一份小作品。</p>
     <div class="stats reveal" style="animation-delay:.35s">
       <div class="stat"><b id="statGames">3<i>+</i></b><span>已收录游戏</span></div>
