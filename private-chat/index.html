@@ -77,6 +77,7 @@
   .btn.gold{background:linear-gradient(135deg,#f0a43a,#f0b429);}
   .btn.gray{background:rgba(255,255,255,.1);}
   .btn:disabled{opacity:.5;cursor:not-allowed;}
+  .btn.danger{background:linear-gradient(135deg,#e05555,#ff6b6b);}
   .room-input{
     width:100%;background:var(--panel);border:1px solid rgba(255,255,255,.12);
     color:var(--text);border-radius:10px;padding:11px 14px;font-size:15px;text-align:center;
@@ -97,22 +98,22 @@
   .chatroom{flex:1;display:none;flex-direction:column;min-height:0;}
   .room-head{
     padding:10px 18px;border-bottom:1px solid rgba(255,255,255,.06);
-    display:flex;align-items:center;gap:10px;font-size:13px;
+    display:flex;align-items:center;gap:8px;font-size:13px;flex-wrap:wrap;
   }
   .room-badge{
     background:rgba(91,140,255,.16);color:#cfe0ff;border:1px solid rgba(91,140,255,.35);
     border-radius:8px;padding:3px 10px;font-weight:700;letter-spacing:1px;
   }
-  .room-info{color:var(--muted);font-size:12px;}
+  .room-title-el{font-weight:600;font-size:14px;color:#fff;}
+  .room-info{color:var(--muted);font-size:11px;}
   .room-head .sp{flex:1;}
-  #shareBtn{
-    border:1px solid rgba(91,140,255,.5);background:rgba(91,140,255,.12);color:#cfe0ff;
-    border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;
+  .mini-btn{
+    border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:var(--text);
+    border-radius:8px;padding:4px 9px;font-size:11px;cursor:pointer;
   }
-  #leaveBtn{
-    border:1px solid rgba(255,107,107,.4);background:rgba(255,107,107,.1);color:#ffb3b3;
-    border-radius:8px;padding:4px 10px;font-size:11px;cursor:pointer;
-  }
+  .mini-btn:hover{background:rgba(255,255,255,.1);}
+  .mini-btn.blue{border-color:rgba(91,140,255,.5);background:rgba(91,140,255,.12);color:#cfe0ff;}
+  .mini-btn.red{border-color:rgba(255,107,107,.4);background:rgba(255,107,107,.1);color:#ffb3b3;}
   .body-chat{flex:1;display:flex;min-height:0;}
   #messages{
     flex:1;overflow-y:auto;padding:16px 14px;display:flex;flex-direction:column;gap:10px;
@@ -128,13 +129,16 @@
   #memlist{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:8px;}
   #memlist li{
     font-size:13px;padding:6px 8px;border-radius:8px;background:rgba(255,255,255,.04);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer;
   }
+  #memlist li:hover{background:rgba(255,255,255,.09);}
   #memlist li.me-item{background:rgba(91,140,255,.18);color:#cfe0ff;}
   #memlist li.owner-item{color:var(--gold);}
+  .hint-tip{font-size:10px;color:var(--muted);margin-top:10px;line-height:1.6;}
   .row{display:flex;flex-direction:column;max-width:80%;}
   .row.mine{align-self:flex-end;align-items:flex-end;}
-  .name{font-size:11px;color:var(--muted);margin:0 6px 4px;}
+  .name{font-size:11px;color:var(--muted);margin:0 6px 4px;cursor:pointer;}
+  .name:hover{color:var(--accent);}
   .bubble{
     position:relative;padding:10px 13px;border-radius:14px;line-height:1.45;
     font-size:15px;word-break:break-word;white-space:pre-wrap;
@@ -181,6 +185,24 @@
     border:1px solid rgba(255,255,255,.12);max-width:80vw;text-align:center;
   }
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+  /* 改名弹窗 */
+  .mask{
+    position:fixed;inset:0;background:rgba(5,8,18,.7);backdrop-filter:blur(4px);
+    display:none;align-items:center;justify-content:center;z-index:100;padding:20px;
+  }
+  .mask.show{display:flex;}
+  .modal{
+    width:100%;max-width:340px;background:var(--panel);border:1px solid rgba(255,255,255,.1);
+    border-radius:16px;padding:22px;box-shadow:0 20px 60px rgba(0,0,0,.5);
+  }
+  .modal h3{font-size:15px;margin:0 0 14px;}
+  .modal input{
+    width:100%;background:var(--bubble);border:1px solid rgba(255,255,255,.12);
+    color:var(--text);border-radius:10px;padding:11px 14px;font-size:14px;outline:none;
+  }
+  .modal input:focus{border-color:var(--accent);}
+  .modal .m-actions{display:flex;gap:10px;margin-top:16px;}
+  .modal .m-actions .btn{flex:1;text-align:center;}
   @media (max-width:560px){.members-side{width:96px;}}
 </style>
 </head>
@@ -205,7 +227,7 @@
       <div class="lobby-hero">
         <div class="big">💬</div>
         <h1>开个房间，说点悄悄话</h1>
-        <p>登录用户可创建专属房间，把房间号发给朋友，对方输入房间号即可加入。消息可设置自动销毁时长，读完即焚、不留痕迹。</p>
+        <p>登录用户可创建专属房间，把房间号发给朋友，对方输入房间号即可加入。进房自动分配随机昵称，消息可设销毁时长，读完即焚、不留痕迹。</p>
       </div>
       <div class="lobby-actions">
         <div class="l-card">
@@ -231,16 +253,19 @@
     <div class="chatroom" id="chatroom">
       <div class="room-head">
         <span class="room-badge" id="roomBadge">——</span>
-        <span class="room-info" id="roomInfo"></span>
+        <span class="room-title-el" id="roomTitle">…</span>
+        <button class="mini-btn" id="renameBtn" type="button" title="修改房间名">✏️</button>
         <span class="sp"></span>
-        <button id="shareBtn" type="button">复制房间号</button>
-        <button id="leaveBtn" type="button">退出</button>
+        <button class="mini-btn blue" id="shareBtn" type="button">复制房间号</button>
+        <button class="mini-btn" id="clearBtn" type="button">清屏</button>
+        <button class="mini-btn red" id="leaveBtn" type="button">退出</button>
       </div>
       <div class="body-chat">
         <div id="messages"></div>
         <aside class="members-side">
-          <div class="members-title">成员 <span id="memcount">0</span></div>
+          <div class="members-title">在线成员 <span id="memcount">0</span></div>
           <ul id="memlist"></ul>
+          <div class="hint-tip">双击成员名字可 @ 对方</div>
         </aside>
       </div>
       <footer>
@@ -257,6 +282,18 @@
           <button id="send">发送</button>
         </div>
       </footer>
+    </div>
+  </div>
+
+  <!-- 房间名弹窗 -->
+  <div class="mask" id="mask">
+    <div class="modal">
+      <h3>设置房间名</h3>
+      <input id="roomNameInput" maxlength="20" placeholder="给房间起个名字">
+      <div class="m-actions">
+        <button class="btn gray" id="nameCancel">取消</button>
+        <button class="btn" id="nameOk">保存</button>
+      </div>
     </div>
   </div>
 
@@ -280,15 +317,33 @@
       const r = await fetch(`${this.base}/${t}`, { method: "POST", headers: this.h(), body: JSON.stringify(body) });
       if (!r.ok && r.status !== 201) throw new Error("写入失败 " + r.status + " " + (await r.text()).slice(0, 120));
       return true;
+    },
+    async patch(t, q, body) {
+      const r = await fetch(`${this.base}/${t}?${q}`, { method: "PATCH", headers: this.h(), body: JSON.stringify(body) });
+      if (!r.ok && r.status !== 204) throw new Error("更新失败 " + r.status + " " + (await r.text()).slice(0, 120));
+      return true;
+    },
+    async del(t, q) {
+      const r = await fetch(`${this.base}/${t}?${q}`, { method: "DELETE", headers: this.h() });
+      if (!r.ok && r.status !== 204) throw new Error("删除失败 " + r.status + " " + (await r.text()).slice(0, 120));
+      return true;
     }
   };
 
-  /* 会话：复用游戏屋 localStorage 账号体系 */
+  /* 会话：仅用于判断登录身份（开房资格），聊天昵称用随机昵称 */
   let session = null;
   try { session = JSON.parse(localStorage.getItem("md_session") || "null"); } catch(e) { session = null; }
-  const myName = session ? session.username : "";
+  const accountName = session ? session.username : "";
   const isGuest = session ? !!session.is_guest : true;
   const isLoggedIn = !!(session && !session.is_guest);
+
+  /* ================= 随机昵称 ================= */
+  const COLORS = ["红", "橙", "黄", "绿", "青", "蓝", "紫", "粉", "金", "银"];
+  const ANIMALS = ["狐狸", "熊猫", "老虎", "兔子", "猫头鹰", "海豚", "刺猬", "考拉", "麋鹿", "水獭", "企鹅", "松鼠"];
+  function randomNick() {
+    return COLORS[Math.floor(Math.random() * COLORS.length)] + ANIMALS[Math.floor(Math.random() * ANIMALS.length)];
+  }
+  let myNick = randomNick();   // 每次进房随机分配
 
   const $ = id => document.getElementById(id);
   const status = $("status"), lobby = $("lobby"), chatroom = $("chatroom");
@@ -299,41 +354,35 @@
   function toast(msg) { toastEl.textContent = msg; toastEl.classList.add("show"); clearTimeout(toastTimer); toastTimer = setTimeout(() => toastEl.classList.remove("show"), 2400); }
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;" }[c])); }
 
-  /* 在线成员：记录本窗口看到的活跃发送者 */
-  const activeUsers = new Map(); // name -> lastSeen
-  function renderMembers() {
-    memcount.textContent = activeUsers.size;
-    memlist.innerHTML = "";
-    const list = [...activeUsers.keys()];
-    list.sort((a,b) => a===myName ? -1 : b===myName ? 1 : a.localeCompare(b));
-    for (const n of list) {
-      const li = document.createElement("li");
-      li.textContent = n + (n === myName ? "（我）" : "") + (n === roomOwner ? " 👑" : "");
-      if (n === myName) li.className = "me-item";
-      else if (n === roomOwner) li.className = "owner-item";
-      memlist.appendChild(li);
-    }
-  }
-
   /* ================= 房间逻辑 ================= */
   let roomId = null;
   let roomOwner = "";
+  let roomTitle = "";
   let pollTimer = null;
+  let heartbeatTimer = null;
   let lastMsgId = 0;
+  let renderedClientIds = new Set();  // 已渲染消息的 client_id，去重用
 
-  /* 随机 6 位数字房间号（排除易混淆数字） */
   function genRoomId() {
     const chars = "23456789";
     let s = "";
     for (let i = 0; i < 6; i++) s += chars[Math.floor(Math.random() * chars.length)];
     return s;
   }
-
   function setStatus(t, color) { status.textContent = t; status.style.color = color || ""; }
-
   function showChat() { lobby.style.display = "none"; chatroom.style.display = "flex"; }
+  function goLobby(msg) {
+    clearInterval(pollTimer); pollTimer = null;
+    clearInterval(heartbeatTimer); heartbeatTimer = null;
+    roomId = null;
+    messages.innerHTML = "";
+    renderedClientIds.clear();
+    chatroom.style.display = "none";
+    lobby.style.display = "flex";
+    setStatus(msg || "", "");
+  }
 
-  /* 创建房间（仅登录用户） */
+  /* ---------- 创建房间 ---------- */
   $("createBtn").addEventListener("click", async () => {
     const msg = $("createMsg");
     if (!API_ON) { msg.textContent = "后端未配置"; msg.className = "msg-line err"; return; }
@@ -351,18 +400,19 @@
         if (!dup.length) break;
         rid = genRoomId();
       }
-      await API.post("chat_rooms", { room_id: rid, owner: myName, status: "active" });
+      roomTitle = "悄悄话 · " + rid;
+      await API.post("chat_rooms", { room_id: rid, owner: accountName, status: "active", title: roomTitle });
       msg.textContent = "房间创建成功：" + rid;
       msg.className = "msg-line ok";
       toast("房间 " + rid + " 已创建，把房间号发给朋友吧");
-      enterRoom(rid, myName);
+      enterRoom(rid, accountName);
     } catch (e) {
       msg.textContent = "创建失败：" + e.message;
       msg.className = "msg-line err";
     } finally { btn.disabled = false; }
   });
 
-  /* 加入房间 */
+  /* ---------- 加入房间 ---------- */
   async function joinRoom() {
     const msg = $("joinMsg");
     const val = $("joinInput").value.trim();
@@ -370,12 +420,12 @@
     if (!/^\d{4,8}$/.test(val)) { msg.textContent = "请输入 4-8 位数字房间号"; msg.className = "msg-line err"; return; }
     const btn = $("joinBtn"); btn.disabled = true;
     try {
-      const rows = await API.get("chat_rooms", "room_id=eq." + val + "&select=room_id,owner,status");
+      const rows = await API.get("chat_rooms", "room_id=eq." + val + "&select=room_id,owner,status,title");
       if (!rows.length) { msg.textContent = "房间不存在，请检查房间号"; msg.className = "msg-line err"; return; }
-      if (rows[0].status !== "active") { msg.textContent = "房间已关闭"; msg.className = "msg-line err"; return; }
+      if (rows[0].status !== "active") { msg.textContent = "房间已解散"; msg.className = "msg-line err"; return; }
       msg.textContent = "加入成功！";
       msg.className = "msg-line ok";
-      enterRoom(val, rows[0].owner);
+      enterRoom(val, rows[0].owner, rows[0].title);
     } catch (e) {
       msg.textContent = "加入失败：" + e.message;
       msg.className = "msg-line err";
@@ -384,36 +434,107 @@
   $("joinBtn").addEventListener("click", joinRoom);
   $("joinInput").addEventListener("keydown", e => { if (e.key === "Enter") joinRoom(); });
 
-  /* 进入聊天室 */
-  function enterRoom(rid, owner) {
-    roomId = rid; roomOwner = owner || "";
+  /* ---------- 进入房间 ---------- */
+  async function enterRoom(rid, owner, title) {
+    roomId = rid; roomOwner = owner || ""; roomTitle = title || "";
+    myNick = randomNick();   // 每次进房重新随机昵称
     $("roomBadge").textContent = rid;
-    $("roomInfo").textContent = "房主：" + (owner || "—");
-    activeUsers.clear();
-    if (owner) { activeUsers.set(owner, Date.now()); renderMembers(); }
-    showChat();
-    setStatus("已连接房间 " + rid, "#3ecf8e");
-    addSystem("你已进入房间 " + rid + "，开始私密聊天吧");
+    $("roomTitle").textContent = roomTitle || ("悄悄话 · " + rid);
     messages.innerHTML = "";
+    renderedClientIds.clear();
     lastMsgId = 0;
+    showChat();
+    setStatus("已进入房间 " + rid + "，你的昵称：", "#3ecf8e");
+    status.textContent = "已进入房间 " + rid + " · 你的昵称：「" + myNick + "」";
+    addSystem("你以「" + myNick + "」的身份进入了房间，开始私密聊天吧");
+    addSystem("新成员只能看到进入后的消息，历史消息不展示");
+
+    try {
+      // 只拉比当前最新 id 更大的消息（新人不见历史）
+      const rows = await API.get("chat_messages", "room_id=eq." + rid + "&order=id.desc&limit=1&select=id");
+      if (rows.length) lastMsgId = rows[0].id;
+    } catch(e) {}
+
+    // 立即上报在线（随机昵称）
+    try { await API.post("chat_presence", { room_id: rid, username: myNick }); } catch(e) {}
+
     poll();
     pollTimer = setInterval(poll, 2000);
+    heartbeatTimer = setInterval(heartbeat, 10000);
     input.focus();
   }
 
-  /* 轮询拉取新消息 */
+  /* 心跳：刷新自己在线状态 + 更新成员列表 */
+  async function heartbeat() {
+    if (!roomId) return;
+    try { await API.patch("chat_presence", "room_id=eq." + roomId + "&username=eq." + encodeURIComponent(myNick), { last_seen: new Date().toISOString() }); } catch(e) {}
+    try { await refreshMembers(); } catch(e) {}
+  }
+
+  /* 在线成员列表（最近 30 秒活跃） */
+  let membersCache = [];
+  async function refreshMembers() {
+    if (!roomId) return;
+    const since = new Date(Date.now() - 30000).toISOString();
+    const rows = await API.get("chat_presence", "room_id=eq." + roomId + "&last_seen=gt." + since + "&select=username");
+    membersCache = rows.map(r => r.username);
+    renderMembers();
+  }
+
+  function renderMembers() {
+    memcount.textContent = membersCache.length;
+    memlist.innerHTML = "";
+    const list = [...membersCache].sort((a,b) => a===myNick ? -1 : b===myNick ? 1 : a.localeCompare(b));
+    for (const n of list) {
+      const li = document.createElement("li");
+      li.textContent = n + (n === myNick ? "（我）" : "") + (n === roomOwner ? " 👑" : "");
+      if (n === myNick) li.className = "me-item";
+      else if (n === roomOwner) li.className = "owner-item";
+      li.title = "双击 @ " + n;
+      li.addEventListener("dblclick", () => { mention(n); });
+      memlist.appendChild(li);
+    }
+  }
+
+  /* @ 某人：双击名字把 @昵称 插入输入框 */
+  function mention(name) {
+    const cur = input.value.trim();
+    input.value = cur ? cur + " @" + name + " " : "@" + name + " ";
+    input.focus();
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+    toast("已 @ " + name);
+  }
+
+  /* ---------- 轮询拉取新消息 ---------- */
   async function poll() {
     if (!roomId) return;
     try {
-      const q = "room_id=eq." + roomId + "&id=gt." + lastMsgId + "&order=id.asc&limit=50&select=id,room_id,sender,content,ttl,created_at";
+      const q = "room_id=eq." + roomId + "&id=gt." + lastMsgId + "&order=id.asc&limit=50&select=id,room_id,sender,content,ttl,client_id,created_at";
       const rows = await API.get("chat_messages", q);
+      let changed = false;
       for (const m of rows) {
+        if (m.client_id && renderedClientIds.has(m.client_id)) continue;  // 去重
         lastMsgId = Math.max(lastMsgId, m.id);
+        if (m.client_id) renderedClientIds.add(m.client_id);
         addMessage(m);
-        if (m.sender) activeUsers.set(m.sender, Date.now());
+        changed = true;
       }
-      renderMembers();
-    } catch(e) { /* 静默，下轮重试 */ }
+      if (changed) refreshMembers();
+    } catch(e) { /* 房间可能被解散，检查一下 */ checkRoomAlive(); }
+  }
+
+  /* 检查房间是否还存在（房主解散后踢出） */
+  async function checkRoomAlive() {
+    if (!roomId) return;
+    try {
+      const rows = await API.get("chat_rooms", "room_id=eq." + roomId + "&select=room_id,status");
+      if (!rows.length || rows[0].status !== "active") {
+        toast("房间已被解散");
+        addSystem("房主已解散房间，你已被移出");
+        setTimeout(() => goLobby("房间已解散，返回大厅"), 1500);
+      }
+    } catch(e) {}
   }
 
   /* ================= 消息渲染 ================= */
@@ -427,7 +548,7 @@
   }
 
   function addMessage(msg) {
-    const mine = msg.sender === myName;
+    const mine = msg.sender === myNick;
     const ttl = (typeof msg.ttl === "number" && msg.ttl >= 0) ? msg.ttl : 20000;
     const perm = ttl === 0;
     const row = document.createElement("div");
@@ -436,6 +557,10 @@
     const name = document.createElement("div");
     name.className = "name";
     name.textContent = mine ? "我" : (msg.sender || "匿名");
+    name.title = "双击 @ " + (msg.sender || "");
+    if (!mine) {
+      name.addEventListener("dblclick", () => { mention(msg.sender); });
+    }
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
@@ -463,7 +588,6 @@
     setTimeout(() => el.classList.add("fade"), Math.max(0, ms - 600));
     setTimeout(() => { if (el.parentNode) el.parentNode.removeChild(el); }, ms);
   }
-
   function scroll() { messages.scrollTop = messages.scrollHeight; }
 
   /* ================= 发送 ================= */
@@ -471,10 +595,11 @@
     const text = input.value.trim();
     if (!text || !roomId) return;
     const ttl = parseInt(ttlSel.value, 10) || 0;
-    const body = { room_id: roomId, sender: myName || "匿名", content: text, ttl };
-    // 乐观渲染：立即显示自己的消息，避免等轮询
-    const fake = { id: Date.now(), room_id: roomId, sender: myName || "匿名", content: text, ttl, created_at: new Date().toISOString() };
-    addMessage(fake);
+    const clientId = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    // 乐观渲染自己的消息（带 client_id，轮询去重）
+    renderedClientIds.add(clientId);
+    addMessage({ id: 0, sender: myNick, content: text, ttl, client_id: clientId, created_at: new Date().toISOString() });
+    const body = { room_id: roomId, sender: myNick, content: text, ttl, client_id: clientId };
     API.post("chat_messages", body).then(() => {}).catch(() => toast("发送失败，请重试"));
     input.value = "";
     input.focus();
@@ -482,7 +607,13 @@
   sendBtn.addEventListener("click", send);
   input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
 
-  /* 复制房间号 */
+  /* ================= 清屏（仅本地） ================= */
+  $("clearBtn").addEventListener("click", () => {
+    messages.innerHTML = "";
+    addSystem("🧹 屏幕已清空（仅你本地，不影响他人）");
+  });
+
+  /* ================= 复制房间号 ================= */
   $("shareBtn").addEventListener("click", async () => {
     if (!roomId) return;
     let ok = false;
@@ -499,26 +630,53 @@
     toast(ok ? "房间号 " + roomId + " 已复制" : "复制失败，请手动记下 " + roomId);
   });
 
-  /* 退出 */
-  $("leaveBtn").addEventListener("click", () => {
-    clearInterval(pollTimer); pollTimer = null;
-    roomId = null;
-    chatroom.style.display = "none";
-    lobby.style.display = "flex";
-    setStatus("已退出房间", "");
-    messages.innerHTML = "";
-    activeUsers.clear();
+  /* ================= 房间名设置（房主） ================= */
+  const mask = $("mask"), nameInput = $("roomNameInput");
+  $("renameBtn").addEventListener("click", () => {
+    if (roomOwner !== accountName) { toast("只有房主可以设置房间名"); return; }
+    nameInput.value = roomTitle || "";
+    mask.classList.add("show");
+    setTimeout(() => nameInput.focus(), 50);
+  });
+  $("nameCancel").addEventListener("click", () => mask.classList.remove("show"));
+  mask.addEventListener("click", e => { if (e.target === mask) mask.classList.remove("show"); });
+  $("nameOk").addEventListener("click", async () => {
+    const t = nameInput.value.trim().slice(0, 20);
+    if (!t) { toast("房间名不能为空"); return; }
+    try {
+      await API.patch("chat_rooms", "room_id=eq." + roomId, { title: t });
+      roomTitle = t;
+      $("roomTitle").textContent = t;
+      mask.classList.remove("show");
+      addSystem("房主将房间名改为「" + t + "」");
+      toast("房间名已更新");
+    } catch (e) { toast("保存失败：" + e.message); }
+  });
+
+  /* ================= 退出 / 解散 ================= */
+  $("leaveBtn").addEventListener("click", async () => {
+    const isOwner = roomOwner === accountName;
+    if (isOwner) {
+      if (!confirm("你是房主，退出将解散房间，所有消息将被清除。确定吗？")) return;
+      try {
+        await API.del("chat_rooms", "room_id=eq." + roomId);   // 级联删除消息 + presence
+        toast("房间已解散");
+        goLobby("房间已解散");
+      } catch (e) { toast("解散失败：" + e.message); }
+    } else {
+      goLobby("已退出房间");
+    }
   });
 
   /* ================= 初始化 ================= */
   function init() {
     if (!API_ON) { setStatus("后端未配置，聊天不可用", "#ff6b6b"); }
     else if (isLoggedIn) {
-      setStatus("已登录：" + myName, "#3ecf8e");
-      $("whoami").textContent = myName;
+      setStatus("已登录：" + accountName, "#3ecf8e");
+      $("whoami").textContent = accountName;
       $("guestNote").innerHTML = "";
     } else {
-      $("whoami").textContent = isGuest ? (myName || "游客") : "";
+      $("whoami").textContent = isGuest ? (accountName || "游客") : "";
       setStatus(isGuest ? "当前为游客身份" : "未登录", "#f0b429");
       $("guestNote").innerHTML = "当前是<b>游客身份</b>，可以直接输入房间号加入朋友开的房间；要<b>创建自己的房间</b>，请先到游戏屋首页 <a href=\"../\">登录 / 注册</a>。";
     }
