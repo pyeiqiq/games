@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>后台管理 · 妙豆游戏屋</title>
+<meta name="robots" content="noindex,nofollow" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233346d9' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='10' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #f7f8fb; --bg-deep: #eef1f7; --card: #ffffff;
+    --ink: #171d29; --ink-2: #5a6473; --ink-3: #9aa3b2;
+    --line: #e7eaf1;
+    --primary: #3346d9; --primary-deep: #2a3ab8; --primary-soft: #edf0fe;
+    --accent: #f08c1e; --green: #1e8e4e; --red: #c0392b;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg); color: var(--ink); -webkit-font-smoothing: antialiased;
+  }
+
+  /* ---------- 登录页 ---------- */
+  .login-page {
+    min-height: 100vh; display: flex; align-items: center; justify-content: center;
+    background: radial-gradient(900px 500px at 20% -10%, rgba(72,90,235,.10), transparent 60%),
+                radial-gradient(700px 400px at 90% 110%, rgba(240,140,30,.08), transparent 60%), var(--bg);
+    padding: 20px;
+  }
+  .login-card {
+    width: 400px; max-width: 100%; background: var(--card);
+    border: 1px solid var(--line); border-radius: 22px; padding: 34px 30px;
+    box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 24px 60px -24px rgba(23,29,41,.25);
+  }
+  .login-card .lock {
+    width: 52px; height: 52px; border-radius: 16px; margin: 0 auto 18px;
+    background: linear-gradient(135deg, #4a5be8, #2a3ab8); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 10px 22px -8px rgba(51,70,217,.55);
+  }
+  .login-card h1 { font-size: 21px; text-align: center; }
+  .login-card .sub { text-align: center; font-size: 13px; color: var(--ink-2); margin-top: 8px; line-height: 1.7; }
+
+  .field { margin-top: 16px; }
+  .field label { display: block; font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; font-weight: 500; }
+  .field input, .field textarea, .field select {
+    width: 100%; font-size: 14.5px; font-family: inherit;
+    border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 11px 14px; outline: none; transition: border .18s, box-shadow .18s;
+    background: var(--bg);
+  }
+  .field textarea { min-height: 90px; resize: vertical; line-height: 1.7; }
+  .field input:focus, .field textarea:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(51,70,217,.12); background: #fff; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+    border: none; cursor: pointer; font-family: inherit;
+    background: var(--primary); color: #fff; font-size: 14.5px; font-weight: 600;
+    padding: 12px 24px; border-radius: 12px;
+    box-shadow: 0 10px 20px -8px rgba(51,70,217,.55);
+    transition: background .18s, transform .18s;
+  }
+  .btn:hover { background: var(--primary-deep); transform: translateY(-1px); }
+  .btn:disabled { opacity: .6; cursor: default; transform: none; }
+  .btn.block { width: 100%; margin-top: 18px; }
+  .btn.ghost {
+    background: var(--card); color: var(--ink-2); border: 1px solid var(--line); box-shadow: none;
+  }
+  .btn.ghost:hover { color: var(--primary); border-color: var(--primary); }
+  .btn.sm { padding: 8px 16px; font-size: 13px; border-radius: 10px; }
+
+  .msg { display: none; margin-top: 14px; font-size: 13px; padding: 10px 12px; border-radius: 10px; line-height: 1.6; }
+  .msg.err { display: block; background: #fdeceb; color: var(--red); }
+  .msg.ok { display: block; background: #e9f7ef; color: var(--green); }
+
+  /* ---------- 管理界面 ---------- */
+  .app { display: none; min-height: 100vh; }
+  .app.show { display: block; }
+  .topbar {
+    position: sticky; top: 0; z-index: 40;
+    background: rgba(247,248,251,.86); backdrop-filter: blur(12px);
+    border-bottom: 1px solid var(--line);
+  }
+  .topbar-inner {
+    max-width: 1160px; margin: 0 auto; padding: 0 26px;
+    height: 62px; display: flex; align-items: center; justify-content: space-between;
+  }
+  .topbar .t-brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 16px; }
+  .topbar .t-brand .bm {
+    width: 34px; height: 34px; border-radius: 11px;
+    background: linear-gradient(135deg, #4a5be8, #2a3ab8); color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .topbar .t-brand small { font-weight: 400; color: var(--ink-3); font-size: 12px; margin-left: 2px; }
+  .topbar .t-right { display: flex; align-items: center; gap: 12px; font-size: 13px; color: var(--ink-2); }
+  .topbar .t-right a { color: var(--ink-2); text-decoration: none; padding: 7px 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--card); transition: all .18s; cursor: pointer; }
+  .topbar .t-right a:hover { color: var(--primary); border-color: var(--primary); }
+
+  .tabs {
+    max-width: 1160px; margin: 26px auto 0; padding: 0 26px;
+    display: flex; gap: 6px; background: var(--bg-deep); border-radius: 14px; padding: 6px;
+    width: fit-content;
+  }
+  .tabs button {
+    border: none; background: transparent; cursor: pointer; font-family: inherit;
+    font-size: 14px; font-weight: 600; color: var(--ink-2);
+    padding: 9px 22px; border-radius: 10px; transition: all .18s;
+  }
+  .tabs button.on { background: var(--card); color: var(--primary); box-shadow: 0 2px 8px rgba(23,29,41,.1); }
+
+  .panel { max-width: 1160px; margin: 22px auto 60px; padding: 0 26px; display: none; }
+  .panel.show { display: block; }
+
+  .panel h2 { font-size: 21px; margin-bottom: 4px; }
+  .panel .p-sub { font-size: 13px; color: var(--ink-3); margin-bottom: 22px; }
+
+  /* 概览卡片 */
+  .stat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 18px; }
+  .stat-card {
+    background: var(--card); border: 1px solid var(--line); border-radius: 18px;
+    padding: 20px 22px; box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 10px 28px -20px rgba(23,29,41,.16);
+  }
+  .stat-card .s-label { font-size: 12.5px; color: var(--ink-3); }
+  .stat-card .s-value { margin-top: 8px; font-size: 30px; font-weight: 800; letter-spacing: .01em; }
+  .stat-card .s-value.small { font-size: 20px; }
+  .stat-card .s-extra { margin-top: 6px; font-size: 12px; color: var(--ink-3); }
+
+  .rank-card { margin-top: 22px; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 22px 24px; box-shadow: 0 1px 2px rgba(23,29,41,.04); }
+  .rank-card h3 { font-size: 15px; margin-bottom: 16px; }
+  .rank-row { display: flex; align-items: center; gap: 14px; margin-bottom: 14px; }
+  .rank-row:last-child { margin-bottom: 0; }
+  .rank-row .rk { width: 22px; height: 22px; border-radius: 7px; background: var(--primary-soft); color: var(--primary); font-size: 12px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex: none; }
+  .rank-row:nth-child(2) .rk { background: #fdf2e2; color: #c96f0a; }
+  .rank-row:nth-child(3) .rk { background: #e9f7ef; color: #1e8e4e; }
+  .rank-row .r-name { font-size: 14px; font-weight: 600; flex: 1; }
+  .rank-row .r-bar-wrap { flex: 2; height: 8px; background: var(--bg-deep); border-radius: 99px; overflow: hidden; }
+  .rank-row .r-bar { height: 100%; background: linear-gradient(90deg, #4a5be8, #7a63e8); border-radius: 99px; }
+  .rank-row .r-num { width: 64px; text-align: right; font-size: 13px; color: var(--ink-2); font-variant-numeric: tabular-nums; }
+
+  /* 表格 */
+  .table-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; overflow: hidden; box-shadow: 0 1px 2px rgba(23,29,41,.04); }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th {
+    text-align: left; font-weight: 600; color: var(--ink-3); font-size: 12px;
+    padding: 13px 18px; border-bottom: 1px solid var(--line); background: #fafbfd;
+    white-space: nowrap;
+  }
+  td { padding: 12px 18px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  tr:last-child td { border-bottom: none; }
+  .table-scroll { overflow-x: auto; }
+
+  .pill { display: inline-flex; align-items: center; font-size: 11.5px; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+  .pill.admin { background: #fdf2e2; color: #c96f0a; }
+  .pill.reg { background: var(--primary-soft); color: var(--primary); }
+  .pill.guest { background: #eef1f4; color: var(--ink-2); }
+  .pill.on { background: #e9f7ef; color: #1e8e4e; }
+  .pill.off { background: #fdeceb; color: #c0392b; }
+
+  .num { font-variant-numeric: tabular-nums; }
+  .muted { color: var(--ink-3); font-size: 12px; }
+  .empty { padding: 44px; text-align: center; color: var(--ink-3); font-size: 13.5px; }
+
+  /* 开关 */
+  .switch { position: relative; display: inline-block; width: 44px; height: 24px; flex: none; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .switch .sl {
+    position: absolute; inset: 0; border-radius: 99px; background: #d7dce6; cursor: pointer; transition: .22s;
+  }
+  .switch .sl::before {
+    content: ""; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+    background: #fff; top: 3px; left: 3px; transition: .22s; box-shadow: 0 2px 5px rgba(0,0,0,.2);
+  }
+  .switch input:checked + .sl { background: var(--green); }
+  .switch input:checked + .sl::before { transform: translateX(20px); }
+
+  .g-row { display: flex; align-items: center; gap: 16px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+  .g-row:last-child { border-bottom: none; }
+  .g-swatch { width: 44px; height: 44px; border-radius: 12px; flex: none; }
+  .g-info { flex: 1; min-width: 0; }
+  .g-info b { font-size: 14.5px; display: block; }
+  .g-info span { font-size: 12px; color: var(--ink-3); }
+  .g-meta { text-align: right; font-size: 12.5px; color: var(--ink-2); line-height: 1.8; }
+
+  .set-card { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 24px; box-shadow: 0 1px 2px rgba(23,29,41,.04); margin-bottom: 20px; }
+  .set-card h3 { font-size: 15.5px; margin-bottom: 4px; }
+  .set-card .s-desc { font-size: 12.5px; color: var(--ink-3); margin-bottom: 14px; }
+
+  #toast {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+    background: #232a3a; color: #fff; font-size: 13.5px;
+    padding: 11px 20px; border-radius: 12px; z-index: 200;
+    opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.22,.68,.32,1);
+    box-shadow: 0 14px 34px -10px rgba(23,29,41,.5); max-width: 86vw;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  @media (max-width: 640px) {
+    .tabs { overflow-x: auto; width: auto; }
+    .g-meta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<!-- ========== 登录页 ========== -->
+<div class="login-page" id="loginPage">
+  <div class="login-card">
+    <div class="lock">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1>后台管理</h1>
+    <p class="sub">妙豆游戏屋 · 仅限管理员访问<br>首次使用：用户名填 <b>admin</b> 并设置密码即可创建管理员</p>
+    <div class="field">
+      <label>管理员用户名</label>
+      <input id="aUser" placeholder="admin" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <input id="aPass" type="password" placeholder="6-32 位" autocomplete="current-password" />
+    </div>
+    <button class="btn block" id="aLogin" type="button">进入后台</button>
+    <div class="msg" id="aMsg"></div>
+  </div>
+</div>
+
+<!-- ========== 管理界面 ========== -->
+<div class="app" id="app">
+  <div class="topbar">
+    <div class="topbar-inner">
+      <div class="t-brand">
+        <span class="bm"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="10" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        妙豆游戏屋 <small>后台管理</small>
+      </div>
+      <div class="t-right">
+        <a href="./index.html">查看前台</a>
+        <a id="btnLogout">退出登录</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="tabs">
+    <button class="on" data-panel="p-overview" type="button">概览</button>
+    <button data-panel="p-users" type="button">用户</button>
+    <button data-panel="p-games" type="button">游戏管理</button>
+    <button data-panel="p-settings" type="button">站点设置</button>
+  </div>
+
+  <!-- 概览 -->
+  <div class="panel show" id="p-overview">
+    <h2>概览</h2>
+    <p class="p-sub" id="overviewTime"></p>
+    <div class="stat-grid" id="statGrid"></div>
+    <div class="rank-card">
+      <h3>游戏热度榜（按游玩次数）</h3>
+      <div id="rankList"></div>
+    </div>
+  </div>
+
+  <!-- 用户 -->
+  <div class="panel" id="p-users">
+    <h2>用户</h2>
+    <p class="p-sub">注册用户与游客的身份、登录与游玩情况（最多统计最近 2000 次登录 / 5000 次游玩）</p>
+    <div class="table-card table-scroll">
+      <table>
+        <thead><tr>
+          <th>用户名</th><th>类型</th><th>注册时间</th><th>登录次数</th><th>最近登录</th><th>游玩次数</th>
+        </tr></thead>
+        <tbody id="userRows"><tr><td colspan="6" class="empty">加载中…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 游戏管理 -->
+  <div class="panel" id="p-games">
+    <h2>游戏管理</h2>
+    <p class="p-sub">控制每款游戏在前台的展示状态，下架后前台立即隐藏（玩家 1 分钟内刷新可见）</p>
+    <div class="table-card" id="gameRows"></div>
+  </div>
+
+  <!-- 站点设置 -->
+  <div class="panel" id="p-settings">
+    <h2>站点设置</h2>
+    <p class="p-sub">常规运营配置</p>
+    <div class="set-card">
+      <h3>站点公告</h3>
+      <p class="s-desc">显示在前台顶部的公告条，留空则不显示。</p>
+      <div class="field" style="margin-top:0">
+        <textarea id="setNotice" placeholder="例如：新游戏《XX》已上线，欢迎试玩！"></textarea>
+      </div>
+      <button class="btn sm" id="saveNotice" type="button">保存公告</button>
+    </div>
+    <div class="set-card">
+      <h3>修改管理员密码</h3>
+      <p class="s-desc">修改当前 admin 账号的登录密码。</p>
+      <div class="field"><label>新密码</label><input id="np1" type="password" placeholder="6-32 位" /></div>
+      <div class="field"><label>确认新密码</label><input id="np2" type="password" placeholder="再输入一次" /></div>
+      <button class="btn sm" id="savePass" type="button">修改密码</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="./config.js"></script>
+<script>
+/* =========================================================
+ * 后台管理 · 妙豆游戏屋
+ * ========================================================= */
+const CFG = window.MD_CONFIG || {};
+const API_ON = !!(CFG.envId && CFG.apiKey);
+
+const GAME_META = {
+  "suika-re0":     { title: "RE:0 合成大西瓜",            sub: "Re:0 主题 · 合成进阶", colors: ["#ffb84d", "#f0782e"] },
+  "fate-cube":     { title: "Fate Cube · 型月立方连连看",  sub: "3D 配对 · 英灵主题",   colors: ["#4453d8", "#6d5bd0"] },
+  "police-maze-3d":{ title: "警长抓坏蛋 · 迷宫大作战",     sub: "3D 迷宫 · 追捕对决",   colors: ["#2a74d8", "#18a8a8"] }
+};
+
+const SALT = "miaodou-games-v1";
+async function sha256(s) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+const hashPass = (u, p) => sha256(u + ":" + p + ":" + SALT);
+
+const API = {
+  base: `https://${CFG.envId}.api.tcloudbasegateway.com/v1/rdb/rest`,
+  h() { return { "apikey": CFG.apiKey, "Authorization": "Bearer " + CFG.apiKey, "Content-Type": "application/json", "Accept": "application/json" }; },
+  async get(t, q) {
+    const r = await fetch(`${this.base}/${t}${q ? "?" + q : ""}`, { headers: this.h() });
+    if (!r.ok) throw new Error("GET " + t + " " + r.status);
+    return r.json();
+  },
+  async post(t, body) {
+    const r = await fetch(`${this.base}/${t}`, { method: "POST", headers: this.h(), body: JSON.stringify(body) });
+    if (!r.ok && r.status !== 201) throw new Error("POST " + t + " " + r.status);
+    return true;
+  },
+  async patch(t, q, body) {
+    const r = await fetch(`${this.base}/${t}${q ? "?" + q : ""}`, { method: "PATCH", headers: this.h(), body: JSON.stringify(body) });
+    if (!r.ok) throw new Error("PATCH " + t + " " + r.status);
+    return true;
+  }
+};
+
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const fmtTime = s => s ? new Date(s).toLocaleString("zh-CN", { hour12: false }) : "—";
+
+let admin = null;
+try { admin = JSON.parse(localStorage.getItem("md_admin") || "null"); } catch (e) {}
+
+/* ================= 登录 ================= */
+const aMsg = document.getElementById("aMsg");
+function showMsg(t, cls) { aMsg.textContent = t; aMsg.className = "msg " + cls; }
+
+document.getElementById("aLogin").onclick = async () => {
+  const btn = document.getElementById("aLogin");
+  if (!API_ON) { showMsg("后端未配置：请在 config.js 中填入 anon key", "err"); return; }
+  const u = document.getElementById("aUser").value.trim();
+  const p = document.getElementById("aPass").value;
+  if (!/^[\w\u4e00-\u9fa5]{2,16}$/.test(u)) { showMsg("用户名需 2-16 位", "err"); return; }
+  if (p.length < 6 || p.length > 32) { showMsg("密码需 6-32 位", "err"); return; }
+
+  btn.disabled = true;
+  try {
+    const h = await hashPass(u, p);
+    const rows = await API.get("users", "username=eq." + encodeURIComponent(u) + "&select=username,pass_hash,role,is_guest");
+    if (rows.length) {
+      if (rows[0].pass_hash !== h) { showMsg("密码不正确", "err"); return; }
+      if (rows[0].role !== "admin") { showMsg("该账号不是管理员", "err"); return; }
+    } else {
+      if (u !== "admin") { showMsg("账号不存在（首次使用请以 admin 为用户名创建）", "err"); return; }
+      await API.post("users", { username: "admin", pass_hash: h, role: "admin", is_guest: false });
+      toast("管理员账号已创建");
+    }
+    admin = { username: u };
+    localStorage.setItem("md_admin", JSON.stringify(admin));
+    enterApp();
+  } catch (e) {
+    showMsg("网络异常：" + esc(e.message), "err");
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+function enterApp() {
+  document.getElementById("loginPage").style.display = "none";
+  document.getElementById("app").classList.add("show");
+  loadAll();
+}
+document.getElementById("btnLogout").onclick = () => {
+  admin = null;
+  localStorage.removeItem("md_admin");
+  location.reload();
+};
+
+/* ================= 标签切换 ================= */
+document.querySelectorAll(".tabs button").forEach(b => {
+  b.onclick = () => {
+    document.querySelectorAll(".tabs button").forEach(x => x.classList.toggle("on", x === b));
+    document.querySelectorAll(".panel").forEach(p => p.classList.toggle("show", p.id === b.dataset.panel));
+  };
+});
+
+/* ================= 数据加载与渲染 ================= */
+let DATA = { users: [], logins: [], plays: [], gameSettings: {} };
+
+async function loadAll() {
+  if (!admin) return;
+  try {
+    const [users, logins, plays, gs] = await Promise.all([
+      API.get("users", "select=username,role,is_guest,created_at&order=created_at.desc&limit=500"),
+      API.get("login_logs", "select=username,is_guest,login_at&order=login_at.desc&limit=2000"),
+      API.get("play_logs", "select=username,game_key,played_at&order=played_at.desc&limit=5000"),
+      API.get("game_settings", "select=game_key,visible&order=sort.asc")
+    ]);
+    DATA = { users, logins, plays, gameSettings: Object.fromEntries(gs.map(r => [r.game_key, r.visible])) };
+  } catch (e) {
+    toast("数据加载失败：" + esc(e.message));
+    return;
+  }
+  renderOverview();
+  renderUsers();
+  renderGames();
+  loadNotice();
+  document.getElementById("overviewTime").textContent = "数据更新于 " + new Date().toLocaleString("zh-CN", { hour12: false }) + "（刷新页面重新统计）";
+}
+
+function renderOverview() {
+  const { users, logins, plays } = DATA;
+  const reg = users.filter(u => !u.is_guest && u.role !== "admin").length;
+  const guests = users.filter(u => u.is_guest).length;
+  const today = new Date().toDateString();
+  const playsToday = plays.filter(p => new Date(p.played_at).toDateString() === today).length;
+
+  // 游戏热度
+  const cnt = {};
+  plays.forEach(p => cnt[p.game_key] = (cnt[p.game_key] || 0) + 1);
+  const ranked = Object.entries(cnt).sort((a, b) => b[1] - a[1]);
+  const total = plays.length;
+  const topName = ranked.length ? (GAME_META[ranked[0][0]] || { title: ranked[0][0] }).title : "—";
+
+  document.getElementById("statGrid").innerHTML = `
+    <div class="stat-card"><div class="s-label">注册用户</div><div class="s-value">${reg}</div><div class="s-extra">不含游客与管理员</div></div>
+    <div class="stat-card"><div class="s-label">游客用户</div><div class="s-value">${guests}</div><div class="s-extra">自动生成的临时身份</div></div>
+    <div class="stat-card"><div class="s-label">累计登录</div><div class="s-value">${logins.length}</div><div class="s-extra">含游客进入</div></div>
+    <div class="stat-card"><div class="s-label">累计游玩</div><div class="s-value">${total}</div><div class="s-extra">今日 ${playsToday} 次</div></div>
+    <div class="stat-card"><div class="s-value small" style="margin-top:14px">最受欢迎</div><div class="s-value small" style="margin-top:6px">${esc(topName)}</div><div class="s-extra">${ranked.length ? "游玩 " + ranked[0][1] + " 次" : "暂无数据"}</div></div>`;
+
+  const max = ranked.length ? ranked[0][1] : 1;
+  document.getElementById("rankList").innerHTML = ranked.length
+    ? ranked.map(([k, n]) => `
+      <div class="rank-row">
+        <span class="rk">${esc((GAME_META[k] || { title: k }).title.slice(0, 1))}</span>
+        <span class="r-name">${esc((GAME_META[k] || { title: k }).title)}</span>
+        <span class="r-bar-wrap"><span class="r-bar" style="width:${Math.max(4, Math.round(n / max * 100))}%"></span></span>
+        <span class="r-num">${n} 次</span>
+      </div>`).join("")
+    : '<div class="empty" style="padding:20px">暂无游玩记录</div>';
+}
+
+function renderUsers() {
+  const { users, logins, plays } = DATA;
+  const loginCnt = {}, lastLogin = {}, playCnt = {};
+  logins.forEach(l => {
+    loginCnt[l.username] = (loginCnt[l.username] || 0) + 1;
+    if (!lastLogin[l.username] || new Date(l.login_at) > new Date(lastLogin[l.username])) lastLogin[l.username] = l.login_at;
+  });
+  plays.forEach(p => playCnt[p.username] = (playCnt[p.username] || 0) + 1);
+
+  document.getElementById("userRows").innerHTML = users.length ? users.map(u => {
+    const cls = u.role === "admin" ? "admin" : (u.is_guest ? "guest" : "reg");
+    const label = u.role === "admin" ? "管理员" : (u.is_guest ? "游客" : "注册用户");
+    return `<tr>
+      <td><b>${esc(u.username)}</b></td>
+      <td><span class="pill ${cls}">${label}</span></td>
+      <td class="num muted">${fmtTime(u.created_at)}</td>
+      <td class="num">${loginCnt[u.username] || 0}</td>
+      <td class="num muted">${fmtTime(lastLogin[u.username])}</td>
+      <td class="num">${playCnt[u.username] || 0}</td>
+    </tr>`;
+  }).join("") : '<tr><td colspan="6" class="empty">暂无用户</td></tr>';
+}
+
+function renderGames() {
+  const { gameSettings, plays } = DATA;
+  const cnt = {};
+  plays.forEach(p => cnt[p.game_key] = (cnt[p.game_key] || 0) + 1);
+
+  const keys = [...new Set([...Object.keys(GAME_META), ...Object.keys(gameSettings)])];
+  document.getElementById("gameRows").innerHTML = keys.map(k => {
+    const m = GAME_META[k] || { title: k, sub: "（未在前台清单中登记）", colors: ["#c9d0dd", "#aab3c2"] };
+    const visible = gameSettings[k] !== false;
+    return `<div class="g-row">
+      <span class="g-swatch" style="background:linear-gradient(140deg,${m.colors[0]},${m.colors[1]})"></span>
+      <div class="g-info"><b>${esc(m.title)}</b><span>${esc(m.sub)} · key: ${esc(k)}</span></div>
+      <div class="g-meta">游玩 <b class="num">${cnt[k] || 0}</b> 次</div>
+      <span class="pill ${visible ? "on" : "off"}">${visible ? "已上架" : "已下架"}</span>
+      <label class="switch"><input type="checkbox" ${visible ? "checked" : ""} data-key="${esc(k)}"><span class="sl"></span></label>
+    </div>`;
+  }).join("");
+
+  document.querySelectorAll("#gameRows input[type=checkbox]").forEach(cb => {
+    cb.onchange = async () => {
+      const k = cb.dataset.key;
+      const visible = cb.checked;
+      try {
+        const exists = Object.prototype.hasOwnProperty.call(DATA.gameSettings, k);
+        if (exists) await API.patch("game_settings", "game_key=eq." + encodeURIComponent(k), { visible, updated_at: new Date().toISOString() });
+        else await API.post("game_settings", { game_key: k, visible, sort: 99, updated_at: new Date().toISOString() });
+        DATA.gameSettings[k] = visible;
+        cb.closest(".g-row").querySelector(".pill").className = "pill " + (visible ? "on" : "off");
+        cb.closest(".g-row").querySelector(".pill").textContent = visible ? "已上架" : "已下架";
+        toast(visible ? "已上架：" + (GAME_META[k] || { title: k }).title : "已下架：" + (GAME_META[k] || { title: k }).title);
+      } catch (e) {
+        cb.checked = !cb.checked;
+        toast("操作失败：" + esc(e.message));
+      }
+    };
+  });
+}
+
+async function loadNotice() {
+  try {
+    const rows = await API.get("site_settings", "key=eq.notice&select=value");
+    if (rows.length) document.getElementById("setNotice").value = rows[0].value || "";
+  } catch (e) {}
+}
+document.getElementById("saveNotice").onclick = async () => {
+  const v = document.getElementById("setNotice").value.trim();
+  try {
+    const rows = await API.get("site_settings", "key=eq.notice&select=key");
+    if (rows.length) await API.patch("site_settings", "key=eq.notice", { value: v, updated_at: new Date().toISOString() });
+    else await API.post("site_settings", { key: "notice", value: v, updated_at: new Date().toISOString() });
+    toast("公告已保存");
+  } catch (e) { toast("保存失败：" + esc(e.message)); }
+};
+
+document.getElementById("savePass").onclick = async () => {
+  const p1 = document.getElementById("np1").value, p2 = document.getElementById("np2").value;
+  if (p1.length < 6 || p1.length > 32) { toast("新密码需 6-32 位"); return; }
+  if (p1 !== p2) { toast("两次输入不一致"); return; }
+  try {
+    const h = await hashPass(admin.username, p1);
+    await API.patch("users", "username=eq." + encodeURIComponent(admin.username), { pass_hash: h });
+    document.getElementById("np1").value = ""; document.getElementById("np2").value = "";
+    toast("管理员密码已修改");
+  } catch (e) { toast("修改失败：" + esc(e.message)); }
+};
+
+/* 已有管理员会话则直接进入 */
+if (admin && API_ON) enterApp();
+</script>
+</body>
+</html>
