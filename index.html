@@ -8,105 +8,271 @@
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%233c4bd8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 11h4M8 9v4'/%3E%3Cpath d='M15.5 10.5h.01M18 13h.01'/%3E%3Crect x='2' y='6' width='20' height='12' rx='3'/%3E%3C/svg%3E" />
 <style>
   :root {
-    --bg: #f6f7f9;
+    --bg: #f7f8fb;
+    --bg-deep: #eef1f7;
     --card: #ffffff;
-    --ink: #1c2230;
-    --ink-2: #5b6472;
-    --line: #e6e9f0;
-    --primary: #3c4bd8;
-    --primary-soft: #eef0fe;
-    --accent: #e8890c;
-    --radius: 16px;
-    --shadow: 0 1px 2px rgba(28,34,48,.05), 0 8px 24px -12px rgba(28,34,48,.14);
+    --ink: #171d29;
+    --ink-2: #5a6473;
+    --ink-3: #9aa3b2;
+    --line: #e7eaf1;
+    --primary: #3346d9;
+    --primary-deep: #2a3ab8;
+    --primary-soft: #edf0fe;
+    --accent: #f08c1e;
+    --radius: 20px;
   }
   * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
   body {
     font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
     background: var(--bg); color: var(--ink);
     -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
   }
-  .wrap { max-width: 1080px; margin: 0 auto; padding: 0 24px; }
+  .wrap { max-width: 1120px; margin: 0 auto; padding: 0 28px; }
 
   /* ---------- 顶栏 ---------- */
   header {
-    position: sticky; top: 0; z-index: 10;
-    background: rgba(246,247,249,.86); backdrop-filter: blur(10px);
+    position: sticky; top: 0; z-index: 50;
+    background: rgba(247,248,251,.82); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
     border-bottom: 1px solid var(--line);
   }
-  .nav { display: flex; align-items: center; justify-content: space-between; height: 64px; }
-  .brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
-  .brand svg { color: var(--primary); }
-  .brand b { font-size: 17px; letter-spacing: .02em; }
-  .brand span { font-size: 12px; color: var(--ink-2); margin-left: 2px; }
-  .nav a.link {
-    font-size: 13px; color: var(--ink-2); text-decoration: none;
-    border: 1px solid var(--line); background: var(--card);
-    padding: 7px 14px; border-radius: 999px; transition: all .18s;
+  .nav { display: flex; align-items: center; justify-content: space-between; height: 66px; gap: 12px; }
+  .brand { display: flex; align-items: center; gap: 11px; text-decoration: none; color: var(--ink); }
+  .brand-mark {
+    width: 38px; height: 38px; border-radius: 12px;
+    background: linear-gradient(135deg, #4a5be8, #2a3ab8);
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    box-shadow: 0 6px 14px -6px rgba(51,70,217,.5);
   }
-  .nav a.link:hover { color: var(--primary); border-color: var(--primary); }
+  .brand b { font-size: 17px; letter-spacing: .02em; display: block; line-height: 1.2; }
+  .brand span { font-size: 11px; color: var(--ink-3); letter-spacing: .14em; text-transform: uppercase; }
+
+  .auth-area { display: flex; align-items: center; gap: 10px; }
+  .user-chip {
+    display: inline-flex; align-items: center; gap: 7px;
+    font-size: 13px; color: var(--ink); background: var(--card);
+    border: 1px solid var(--line); padding: 7px 14px; border-radius: 999px;
+  }
+  .user-chip .u-dot { width: 8px; height: 8px; border-radius: 50%; background: #3cb371; }
+  .user-chip.is-guest .u-dot { background: var(--accent); }
+  .user-chip.is-guest { color: var(--ink-2); }
+  .auth-area a.link {
+    font-size: 13px; color: var(--ink-2); text-decoration: none; cursor: pointer;
+    border: 1px solid var(--line); background: var(--card);
+    padding: 7px 14px; border-radius: 999px; transition: all .18s ease;
+  }
+  .auth-area a.link:hover { color: var(--primary); border-color: var(--primary); transform: translateY(-1px); }
+  .auth-area a.link.primary {
+    background: var(--primary); border-color: var(--primary); color: #fff; font-weight: 600;
+    box-shadow: 0 8px 18px -8px rgba(51,70,217,.55);
+  }
+  .auth-area a.link.primary:hover { background: var(--primary-deep); }
+
+  /* ---------- 公告条 ---------- */
+  .notice-bar {
+    display: none; align-items: center; gap: 10px;
+    background: #fdf6e9; border-bottom: 1px solid #f3e3c4;
+    padding: 10px 0; font-size: 13px; color: #9a6a1a;
+  }
+  .notice-bar.show { display: flex; }
+  .notice-bar svg { flex: none; }
 
   /* ---------- 首屏 ---------- */
-  .hero { padding: 64px 0 44px; text-align: center; }
-  .hero h1 { font-size: 40px; font-weight: 700; letter-spacing: .01em; }
-  .hero h1 em { font-style: normal; color: var(--primary); }
-  .hero p { margin: 16px auto 0; max-width: 560px; color: var(--ink-2); font-size: 15px; line-height: 1.8; }
-  .hero .meta { margin-top: 18px; display: inline-flex; gap: 8px; flex-wrap: wrap; justify-content: center; }
-  .hero .chip {
-    font-size: 12px; color: var(--ink-2); background: var(--card);
-    border: 1px solid var(--line); padding: 5px 12px; border-radius: 999px;
+  .hero { position: relative; padding: 88px 0 60px; text-align: center; }
+  .hero::before, .hero::after {
+    content: ""; position: absolute; border-radius: 50%; filter: blur(70px); pointer-events: none;
   }
+  .hero::before { width: 420px; height: 420px; background: rgba(72,90,235,.10); top: -120px; left: -140px; }
+  .hero::after { width: 360px; height: 360px; background: rgba(240,140,30,.09); bottom: -160px; right: -100px; }
+
+  .hero .eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    font-size: 12.5px; font-weight: 500; letter-spacing: .06em;
+    color: var(--primary); background: var(--primary-soft);
+    border: 1px solid #dbe1fd; padding: 7px 16px; border-radius: 999px;
+  }
+  .hero .eyebrow .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+  .hero h1 {
+    margin-top: 24px; font-size: 52px; font-weight: 800; letter-spacing: .01em; line-height: 1.15;
+  }
+  .hero h1 em { font-style: normal; background: linear-gradient(120deg, #4a5be8 20%, #7a63e8 60%, #f08c1e 110%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; }
+  .hero p { margin: 18px auto 0; max-width: 520px; color: var(--ink-2); font-size: 15.5px; line-height: 1.85; }
+
+  .hero .stats { margin-top: 34px; display: inline-flex; align-items: center; background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 6px 8px; box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 12px 32px -16px rgba(23,29,41,.12); }
+  .hero .stat { padding: 10px 26px; position: relative; }
+  .hero .stat + .stat::before { content: ""; position: absolute; left: 0; top: 22%; height: 56%; width: 1px; background: var(--line); }
+  .hero .stat b { display: block; font-size: 22px; font-weight: 700; color: var(--ink); }
+  .hero .stat b i { font-style: normal; color: var(--accent); }
+  .hero .stat span { display: block; margin-top: 2px; font-size: 12px; color: var(--ink-3); letter-spacing: .04em; }
+
+  /* 首屏漂浮装饰 */
+  .float { position: absolute; pointer-events: none; opacity: .9; }
+  .float svg { display: block; }
+  .f1 { top: 96px; left: 12%; animation: floaty 6s ease-in-out infinite; }
+  .f2 { top: 210px; right: 14%; animation: floaty 7s ease-in-out infinite 1.2s; }
+  .f3 { bottom: 88px; left: 20%; animation: floaty 8s ease-in-out infinite .6s; }
+  .f4 { bottom: 120px; right: 21%; animation: floaty 6.5s ease-in-out infinite 2s; }
+  @keyframes floaty { 0%,100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-14px) rotate(3deg); } }
+  @media (max-width: 900px) { .float { display: none; } }
+
+  /* ---------- 游戏区标题 ---------- */
+  .section-head { display: flex; align-items: flex-end; justify-content: space-between; padding-bottom: 26px; }
+  .section-head h2 { font-size: 26px; font-weight: 700; letter-spacing: .01em; }
+  .section-head h2 small { display: block; margin-top: 6px; font-size: 13px; font-weight: 400; color: var(--ink-3); letter-spacing: .05em; }
+  .section-head .count { font-size: 13px; color: var(--ink-2); background: var(--card); border: 1px solid var(--line); padding: 7px 14px; border-radius: 999px; }
 
   /* ---------- 游戏卡片 ---------- */
-  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 22px; padding-bottom: 72px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(330px, 1fr)); gap: 26px; padding-bottom: 84px; }
   .game {
     position: relative; background: var(--card); border: 1px solid var(--line);
-    border-radius: var(--radius); box-shadow: var(--shadow);
+    border-radius: var(--radius);
+    box-shadow: 0 1px 2px rgba(23,29,41,.04), 0 10px 28px -18px rgba(23,29,41,.14);
     overflow: hidden; display: flex; flex-direction: column;
-    transition: transform .22s ease, box-shadow .22s ease;
+    transition: transform .26s cubic-bezier(.22,.68,.32,1), box-shadow .26s ease;
+    text-decoration: none; color: var(--ink);
   }
-  .game:hover { transform: translateY(-4px); box-shadow: 0 2px 4px rgba(28,34,48,.06), 0 20px 40px -18px rgba(28,34,48,.22); }
+  .game:hover {
+    transform: translateY(-6px);
+    box-shadow: 0 2px 6px rgba(23,29,41,.05), 0 28px 52px -22px rgba(23,29,41,.28);
+  }
   .cover {
-    height: 150px; display: flex; align-items: center; justify-content: center;
-    background: linear-gradient(135deg, var(--c1), var(--c2));
+    position: relative; height: 200px; overflow: hidden;
+    background: linear-gradient(140deg, var(--c1), var(--c2));
+    display: flex; align-items: center; justify-content: center;
   }
-  .cover svg { color: #fff; opacity: .95; filter: drop-shadow(0 6px 12px rgba(0,0,0,.18)); }
-  .body { padding: 18px 20px 20px; display: flex; flex-direction: column; flex: 1; }
-  .tag-row { display: flex; gap: 8px; margin-bottom: 10px; }
+  .cover .scene { transition: transform .45s cubic-bezier(.22,.68,.32,1); }
+  .game:hover .cover .scene { transform: scale(1.07) translateY(-2px); }
+  .cover::after {
+    content: ""; position: absolute; inset: 0;
+    background: radial-gradient(120% 90% at 50% -10%, rgba(255,255,255,.28), transparent 55%);
+    pointer-events: none;
+  }
+  .cover .corner {
+    position: absolute; top: 14px; right: 14px; z-index: 2;
+    font-size: 11px; font-weight: 600; letter-spacing: .08em;
+    color: #fff; background: rgba(255,255,255,.18);
+    border: 1px solid rgba(255,255,255,.35); backdrop-filter: blur(4px);
+    padding: 4px 12px; border-radius: 999px;
+  }
+  .body { padding: 20px 22px 22px; display: flex; flex-direction: column; flex: 1; }
+  .tag-row { display: flex; gap: 8px; margin-bottom: 12px; }
   .tag {
-    font-size: 11px; padding: 3px 10px; border-radius: 999px;
+    font-size: 11px; padding: 4px 11px; border-radius: 999px;
     background: var(--primary-soft); color: var(--primary); font-weight: 500;
   }
-  .tag.alt { background: #fdf3e4; color: var(--accent); }
-  .game h3 { font-size: 19px; font-weight: 650; }
-  .game .desc { margin-top: 8px; font-size: 13.5px; color: var(--ink-2); line-height: 1.7; flex: 1; }
+  .tag.alt { background: #fdf2e2; color: #c96f0a; }
+  .game h3 { font-size: 20px; font-weight: 700; letter-spacing: .01em; }
+  .game .desc { margin-top: 9px; font-size: 13.5px; color: var(--ink-2); line-height: 1.75; flex: 1; }
+  .game .foot { margin-top: 20px; display: flex; align-items: center; justify-content: space-between; }
   .game .btn {
-    margin-top: 18px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-    background: var(--primary); color: #fff; text-decoration: none;
-    padding: 11px 0; border-radius: 12px; font-size: 14px; font-weight: 600;
-    transition: opacity .18s, transform .18s;
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--primary); color: #fff;
+    padding: 11px 22px; border-radius: 12px; font-size: 14px; font-weight: 600;
+    transition: background .18s ease, transform .18s ease, box-shadow .18s ease;
+    box-shadow: 0 8px 18px -8px rgba(51,70,217,.55);
   }
-  .game .btn:hover { opacity: .92; transform: translateY(-1px); }
-  .game .btn svg { transition: transform .18s; }
-  .game .btn:hover svg { transform: translateX(3px); }
+  .game:hover .btn { background: var(--primary-deep); transform: translateY(-1px); box-shadow: 0 10px 22px -8px rgba(51,70,217,.65); }
+  .game .btn svg { transition: transform .18s ease; }
+  .game:hover .btn svg { transform: translateX(3px); }
+  .game .arrow-link { font-size: 12.5px; color: var(--ink-3); transition: color .18s; }
+  .game:hover .arrow-link { color: var(--primary); }
 
-  /* ---------- 预留卡片（未来游戏占位） ---------- */
-  .game.soon { border-style: dashed; box-shadow: none; align-items: center; justify-content: center; min-height: 280px; text-align: center; }
-  .game.soon .plus {
-    width: 54px; height: 54px; border-radius: 50%; border: 1.5px dashed var(--line);
-    display: flex; align-items: center; justify-content: center; color: var(--ink-2); margin-bottom: 14px;
+  /* ---------- 预留卡片 ---------- */
+  .game.soon {
+    border: 1.5px dashed #d4d9e4; box-shadow: none; background: transparent;
+    align-items: center; justify-content: center; min-height: 320px; text-align: center;
   }
-  .game.soon b { font-size: 15px; font-weight: 600; }
-  .game.soon p { margin-top: 6px; font-size: 12.5px; color: var(--ink-2); }
+  .game.soon:hover { transform: none; box-shadow: none; }
+  .game.soon .plus {
+    width: 58px; height: 58px; border-radius: 50%; border: 1.5px dashed #c9d0dd;
+    display: flex; align-items: center; justify-content: center; color: var(--ink-3); margin-bottom: 16px;
+    background: var(--card);
+  }
+  .game.soon b { font-size: 15px; font-weight: 600; color: var(--ink-2); }
+  .game.soon p { margin-top: 7px; font-size: 12.5px; color: var(--ink-3); }
+
+  /* ---------- 登录弹窗 ---------- */
+  .mask {
+    display: none; position: fixed; inset: 0; z-index: 100;
+    background: rgba(23,29,41,.45); backdrop-filter: blur(4px);
+    align-items: center; justify-content: center; padding: 20px;
+  }
+  .mask.show { display: flex; }
+  .modal {
+    width: 400px; max-width: 100%; background: var(--card);
+    border-radius: 22px; box-shadow: 0 30px 80px -20px rgba(23,29,41,.4);
+    padding: 28px; animation: pop .28s cubic-bezier(.22,.68,.32,1);
+  }
+  @keyframes pop { from { opacity: 0; transform: translateY(16px) scale(.97); } }
+  .modal h3 { font-size: 20px; font-weight: 700; }
+  .modal .m-sub { margin-top: 6px; font-size: 13px; color: var(--ink-2); line-height: 1.6; }
+  .tabs { display: flex; gap: 6px; margin: 20px 0 18px; background: var(--bg-deep); border-radius: 12px; padding: 5px; }
+  .tabs button {
+    flex: 1; border: none; background: transparent; cursor: pointer;
+    font-size: 14px; font-weight: 600; color: var(--ink-2);
+    padding: 9px 0; border-radius: 9px; transition: all .18s;
+    font-family: inherit;
+  }
+  .tabs button.on { background: var(--card); color: var(--primary); box-shadow: 0 2px 8px rgba(23,29,41,.1); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12.5px; color: var(--ink-2); margin-bottom: 6px; font-weight: 500; }
+  .field input {
+    width: 100%; font-size: 14.5px; font-family: inherit;
+    border: 1.5px solid var(--line); border-radius: 12px;
+    padding: 11px 14px; outline: none; transition: border .18s, box-shadow .18s;
+    background: var(--bg);
+  }
+  .field input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(51,70,217,.12); background: #fff; }
+  .m-btn {
+    width: 100%; border: none; cursor: pointer; font-family: inherit;
+    background: var(--primary); color: #fff; font-size: 15px; font-weight: 600;
+    padding: 12px 0; border-radius: 12px; margin-top: 4px;
+    box-shadow: 0 10px 20px -8px rgba(51,70,217,.55);
+    transition: background .18s, transform .18s;
+  }
+  .m-btn:hover { background: var(--primary-deep); transform: translateY(-1px); }
+  .m-btn:disabled { opacity: .6; cursor: default; transform: none; }
+  .m-close {
+    float: right; width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+    background: var(--bg-deep); color: var(--ink-2); font-size: 15px; line-height: 1;
+    display: flex; align-items: center; justify-content: center; transition: all .18s;
+  }
+  .m-close:hover { background: #e3e7ef; color: var(--ink); }
+  .m-msg { display: none; margin-top: 12px; font-size: 13px; padding: 10px 12px; border-radius: 10px; line-height: 1.5; }
+  .m-msg.err { display: block; background: #fdeceb; color: #c0392b; }
+  .m-msg.ok { display: block; background: #e9f7ef; color: #1e8e4e; }
+  .guest-tip { margin-top: 14px; padding-top: 14px; border-top: 1px dashed var(--line); font-size: 12.5px; color: var(--ink-3); line-height: 1.7; }
+
+  /* ---------- 轻提示 ---------- */
+  #toast {
+    position: fixed; left: 50%; bottom: 34px; transform: translateX(-50%) translateY(20px);
+    background: #232a3a; color: #fff; font-size: 13.5px;
+    padding: 11px 20px; border-radius: 12px; z-index: 200;
+    opacity: 0; pointer-events: none; transition: all .3s cubic-bezier(.22,.68,.32,1);
+    box-shadow: 0 14px 34px -10px rgba(23,29,41,.5); max-width: 86vw;
+  }
+  #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   /* ---------- 页脚 ---------- */
-  footer { border-top: 1px solid var(--line); padding: 28px 0 34px; text-align: center; }
-  footer p { font-size: 12.5px; color: var(--ink-2); line-height: 1.9; }
-  footer a { color: var(--primary); text-decoration: none; }
+  footer { border-top: 1px solid var(--line); padding: 30px 0 38px; text-align: center; background: var(--bg-deep); }
+  footer p { font-size: 12.5px; color: var(--ink-2); line-height: 2; }
+  footer a { color: var(--ink-3); text-decoration: none; transition: color .18s; }
+  footer a:hover { color: var(--primary); }
 
   @media (max-width: 560px) {
-    .hero h1 { font-size: 30px; }
+    .hero { padding: 60px 0 44px; }
+    .hero h1 { font-size: 34px; }
+    .hero .stat { padding: 8px 16px; }
+    .hero .stat b { font-size: 18px; }
     .grid { grid-template-columns: 1fr; }
+    .section-head { flex-direction: column; align-items: flex-start; gap: 10px; }
+    .brand span.en { display: none; }
   }
+
+  /* 入场动效 */
+  .reveal { opacity: 0; transform: translateY(18px); animation: reveal .7s cubic-bezier(.22,.68,.32,1) forwards; }
+  @keyframes reveal { to { opacity: 1; transform: none; } }
 </style>
 </head>
 <body>
@@ -114,22 +280,54 @@
 <header>
   <div class="wrap nav">
     <a class="brand" href="./">
-      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4"/><path d="M15.5 10.5h.01M18 13h.01"/><rect x="2" y="6" width="20" height="12" rx="3"/></svg>
-      <b>妙豆游戏屋</b><span>Miaodou Games</span>
+      <span class="brand-mark">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 11h4M8 9v4"/><path d="M15.5 10.5h.01M18 13h.01"/><rect x="2" y="6" width="20" height="12" rx="3"/></svg>
+      </span>
+      <span>
+        <b>妙豆游戏屋</b>
+        <span class="en">MIAODOU GAMES</span>
+      </span>
     </a>
-    <a class="link" href="https://pyeiqiq.github.io/pro/" target="_blank" rel="noopener">工具箱主页</a>
+    <div class="auth-area" id="authArea"></div>
   </div>
 </header>
 
+<div class="notice-bar" id="noticeBar">
+  <div class="wrap" style="display:flex;align-items:center;gap:10px;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"/></svg>
+    <span id="noticeText"></span>
+  </div>
+</div>
+
 <section class="wrap">
   <div class="hero">
-    <h1>妙豆<em>游戏屋</em></h1>
-    <p>收录独立开发的趣味小游戏，覆盖合成、配对、迷宫等玩法。每款都是一份小作品，持续上新中。</p>
-    <div class="meta">
-      <span class="chip">已收录 3 款</span>
-      <span class="chip">免安装 · 即点即玩</span>
-      <span class="chip">持续上新</span>
+    <!-- 漂浮装饰：三款游戏的主题元素 -->
+    <span class="float f1">
+      <svg width="54" height="54" viewBox="0 0 64 64"><circle cx="32" cy="32" r="26" fill="#ff8a4c" opacity=".16"/><circle cx="32" cy="32" r="17" fill="#ff8a4c" opacity=".28"/></svg>
+    </span>
+    <span class="float f2">
+      <svg width="46" height="46" viewBox="0 0 64 64"><rect x="14" y="14" width="36" height="36" rx="8" fill="#4a5be8" opacity=".14"/><rect x="22" y="22" width="20" height="20" rx="4" fill="#4a5be8" opacity=".3"/></svg>
+    </span>
+    <span class="float f3">
+      <svg width="40" height="40" viewBox="0 0 64 64"><circle cx="32" cy="32" r="22" fill="none" stroke="#f08c1e" stroke-width="5" stroke-dasharray="10 8" opacity=".4"/></svg>
+    </span>
+    <span class="float f4">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="#f0b23e"><path d="M12 2l2.6 6.6L21 9l-5 4.4L17.5 21 12 17.3 6.5 21 8 13.4 3 9l6.4-.4L12 2z"/></svg>
+    </span>
+
+    <div class="eyebrow reveal" style="animation-delay:.05s"><span class="dot"></span>独立开发 · 持续上新</div>
+    <h1 class="reveal" style="animation-delay:.15s">妙豆<em>游戏屋</em></h1>
+    <p class="reveal" style="animation-delay:.25s">收录独立开发的趣味小游戏，覆盖合成、配对、迷宫等玩法。免安装，即点即玩，每款都是一份小作品。</p>
+    <div class="stats reveal" style="animation-delay:.35s">
+      <div class="stat"><b id="statGames">3<i>+</i></b><span>已收录游戏</span></div>
+      <div class="stat"><b>¥0</b><span>免费畅玩</span></div>
+      <div class="stat"><b>∞</b><span>持续上新</span></div>
     </div>
+  </div>
+
+  <div class="section-head reveal" style="animation-delay:.45s">
+    <h2>全部游戏<small>ALL GAMES</small></h2>
+    <span class="count" id="gameCount">共 3 款</span>
   </div>
 
   <div class="grid" id="games"></div>
@@ -137,24 +335,55 @@
 
 <footer>
   <div class="wrap">
-    <p>妙豆游戏屋 · <a href="https://miaoddou.com/" target="_blank" rel="noopener">miaoddou.com</a> 出品</p>
-    <p>© 2026 Miaodou Games. All rights reserved.</p>
+    <p>© 2026 妙豆游戏屋 Miaodou Games</p>
+    <p><a href="./admin.html">后台管理</a></p>
   </div>
 </footer>
 
+<!-- 登录 / 注册弹窗 -->
+<div class="mask" id="authMask">
+  <div class="modal">
+    <button class="m-close" id="authClose" title="关闭">✕</button>
+    <h3>账号</h3>
+    <p class="m-sub">注册账号可以保存你的身份和战绩；不注册也可以直接以游客身份游玩。</p>
+    <div class="tabs">
+      <button id="tabLogin" class="on" type="button">登录</button>
+      <button id="tabReg" type="button">注册</button>
+    </div>
+    <div class="field">
+      <label>用户名</label>
+      <input id="fUser" maxlength="16" placeholder="2-16 位，中英文、数字、下划线" autocomplete="username" />
+    </div>
+    <div class="field">
+      <label>密码</label>
+      <input id="fPass" type="password" maxlength="32" placeholder="6-32 位" autocomplete="current-password" />
+    </div>
+    <div class="field" id="fPass2Wrap" style="display:none">
+      <label>确认密码</label>
+      <input id="fPass2" type="password" maxlength="32" placeholder="再输入一次密码" />
+    </div>
+    <button class="m-btn" id="authSubmit" type="button">登 录</button>
+    <div class="m-msg" id="authMsg"></div>
+    <div class="guest-tip">不注册？关闭本窗口即可继续以游客身份游玩，系统已为你生成临时用户名。游客也可随时注册，正式账号便于上榜排行榜。</div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script src="./config.js"></script>
 <script>
 /* =========================================================
- * 游戏清单：以后出新游戏，只需在这里加一个对象，
- * 卡片会自动生成，无需改动页面结构。
+ * 游戏清单：以后出新游戏，只需在这里加一个对象 + 一段封面插画。
  * ========================================================= */
 const GAMES = [
   {
     key: "suika-re0",
     title: "RE:0 合成大西瓜",
-    desc: "经典合成玩法：相同的果实相遇会进阶融合，从樱桃一路合到西瓜。策略落子，挑战最高分。",
-    tags: ["休闲合成", "经典玩法"],
+    desc: "经典合成玩法：相同的人物相遇会进阶整合，从昂一路合成到强欲魔女。你的魔女炸了吗？挑战最高分！",
+    tags: ["Re:0 主题", "合成进阶"],
     url: "./suika-re0/",
-    colors: ["#f2a33c", "#e2703a"],
+    colors: ["#ffb84d", "#f0782e"],
+    badge: "HOT",
     icon: "melon"
   },
   {
@@ -163,7 +392,8 @@ const GAMES = [
     desc: "实心 3D 立方体英雄配对消除：旋转立方、寻找同源英灵，通关后黄金核心在中央显现。",
     tags: ["3D 配对", "英灵主题"],
     url: "./fate-cube/",
-    colors: ["#3c4bd8", "#6d5bd0"],
+    colors: ["#4453d8", "#6d5bd0"],
+    badge: "3D",
     icon: "cube"
   },
   {
@@ -172,50 +402,291 @@ const GAMES = [
     desc: "3D 迷宫追捕：扮演警长穿梭立体迷宫，追踪坏蛋，在转角与追逐中完成抓捕。",
     tags: ["3D 迷宫", "追捕对决"],
     url: "./police-maze-3d/",
-    colors: ["#1e6fd9", "#16a3b5"],
+    colors: ["#2a74d8", "#18a8a8"],
+    badge: "NEW",
     icon: "badge"
   }
 ];
 
-/* 统一的描边 SVG 图标（风格一致） */
-const ICONS = {
-  melon: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3c-4 3.5-6 7.2-6 11a6 6 0 0 0 12 0c0-3.8-2-7.5-6-11Z"/><path d="M9.5 12.5h.01M14 14.5h.01M11 16h.01"/></svg>',
-  cube: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.8 20 7v10l-8 4.2L4 17V7l8-4.2Z"/><path d="m4 7 8 4.2L20 7M12 11.2V21"/></svg>',
-  badge: '<svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M9 12 11 14l4-4"/><path d="M12 3l2.1 1.7 2.7-.2 1 2.5 2.3 1.4-.8 2.6.8 2.6-2.3 1.4-1 2.5-2.7-.2L12 21l-2.1-1.7-2.7.2-1-2.5L3.9 15.6l.8-2.6L3.9 10.4l2.3-1.4 1-2.5 2.7.2L12 3Z"/></svg>'
+/* ---------- 每款游戏的专属封面插画（统一扁平插画风） ---------- */
+const SCENES = {
+  melon: `
+  <svg class="scene" width="200" height="140" viewBox="0 0 200 140" fill="none">
+    <ellipse cx="100" cy="122" rx="72" ry="10" fill="rgba(255,255,255,.22)"/>
+    <circle cx="34" cy="44" r="13" fill="#e8543f"/>
+    <path d="M34 31c2-6 7-8 12-8-1 6-6 9-12 8Z" fill="#3e9e4f"/>
+    <circle cx="168" cy="60" r="11" fill="#7eb6e8"/>
+    <path d="M168 49c2-5 6-7 10-7-1 5-5 8-10 7Z" fill="#3e9e4f"/>
+    <circle cx="152" cy="30" r="8" fill="#f5c33b"/>
+    <circle cx="100" cy="78" r="46" fill="#2f8f47"/>
+    <circle cx="100" cy="78" r="39" fill="#e8552e"/>
+    <circle cx="100" cy="78" r="33" fill="#f2603a"/>
+    <path d="M68 52c14-12 50-12 64 0" stroke="#fff" stroke-opacity=".35" stroke-width="4" stroke-linecap="round"/>
+    <circle cx="86" cy="66" r="3" fill="#3b1f14"/><circle cx="106" cy="62" r="3" fill="#3b1f14"/>
+    <circle cx="98" cy="84" r="3" fill="#3b1f14"/><circle cx="114" cy="80" r="3" fill="#3b1f14"/>
+    <circle cx="80" cy="88" r="3" fill="#3b1f14"/><circle cx="92" cy="98" r="3" fill="#3b1f14"/>
+    <circle cx="110" cy="96" r="3" fill="#3b1f14"/>
+    <ellipse cx="84" cy="52" rx="10" ry="6" fill="#fff" opacity=".28" transform="rotate(-28 84 52)"/>
+  </svg>`,
+  cube: `
+  <svg class="scene" width="190" height="150" viewBox="0 0 200 160" fill="none">
+    <circle cx="26" cy="36" r="2.5" fill="#fff" opacity=".5"/>
+    <circle cx="176" cy="28" r="2" fill="#fff" opacity=".4"/>
+    <circle cx="186" cy="92" r="2.5" fill="#fff" opacity=".35"/>
+    <circle cx="18" cy="108" r="2" fill="#fff" opacity=".4"/>
+    <g>
+      <path d="M100 22 168 58 100 94 32 58Z" fill="#7a89ef"/>
+      <path d="M32 58 100 94v62l-68-36V58Z" fill="#4453d8"/>
+      <path d="M168 58 100 94v62l68-36V58Z" fill="#5a49c4"/>
+      <path d="M54.7 45.7v-8M77.3 33.3v-8M122.7 33.3v-8M145.3 45.7v-8" stroke="#fff" stroke-opacity=".35" stroke-width="2"/>
+      <path d="M32 70.7 100 106.7 168 70.7M32 83.3 100 119.3 168 83.3" stroke="#fff" stroke-opacity=".16" stroke-width="1.6"/>
+      <path d="M66 100v40M134 100v40M66 100 100 118 134 100" stroke="#fff" stroke-opacity=".14" stroke-width="1.6"/>
+      <circle cx="100" cy="128" r="5" fill="#f5c33b"/>
+      <circle cx="100" cy="128" r="9" fill="#f5c33b" opacity=".35"/>
+    </g>
+  </svg>`,
+  badge: `
+  <svg class="scene" width="200" height="150" viewBox="0 0 200 160" fill="none">
+    <g stroke="#fff" stroke-opacity=".5" stroke-width="7" stroke-linecap="round">
+      <path d="M30 34h58M112 34h58"/>
+      <path d="M30 34v52M170 34v52"/>
+      <path d="M30 98h30M74 98h32M132 98h38"/>
+      <path d="M56 60v14M100 48v22M144 60v14"/>
+      <path d="M30 128h44M96 128h74"/>
+      <path d="M88 98v30M152 60v38"/>
+    </g>
+    <circle cx="62" cy="118" r="12" fill="#2a74d8" stroke="#fff" stroke-width="3"/>
+    <path d="M62 112l1.8 3.8 4.2.4-3.2 2.8.9 4-3.7-2.1-3.7 2.1.9-4-3.2-2.8 4.2-.4Z" fill="#f5c33b"/>
+    <circle cx="150" cy="118" r="10" fill="#e8552e" stroke="#fff" stroke-width="3"/>
+    <circle cx="146.5" cy="115.5" r="1.6" fill="#3b1f14"/><circle cx="153.5" cy="115.5" r="1.6" fill="#3b1f14"/>
+    <path d="M146 121.5c2.5 2 5.5 2 8 0" stroke="#3b1f14" stroke-width="1.6" stroke-linecap="round"/>
+    <path d="M74 118c14 0 22-10 34-10s22 6 30 10" stroke="#f5c33b" stroke-width="2.5" stroke-dasharray="5 6" stroke-linecap="round" fill="none"/>
+  </svg>`
 };
 
+/* =========================================================
+ * 后端连接（CloudBase PostgreSQL / PostgREST）
+ * ========================================================= */
+const CFG = window.MD_CONFIG || {};
+const API_ON = !!(CFG.envId && CFG.apiKey);
+const API = {
+  base: `https://${CFG.envId}.api.tcloudbasegateway.com/v1/rdb/rest`,
+  h() {
+    return { "apikey": CFG.apiKey, "Authorization": "Bearer " + CFG.apiKey, "Content-Type": "application/json", "Accept": "application/json" };
+  },
+  async get(t, q) {
+    const r = await fetch(`${this.base}/${t}${q ? "?" + q : ""}`, { headers: this.h() });
+    if (!r.ok) throw new Error("GET " + t + " " + r.status);
+    return r.json();
+  },
+  async post(t, body) {
+    const r = await fetch(`${this.base}/${t}`, { method: "POST", headers: this.h(), body: JSON.stringify(body) });
+    if (!r.ok && r.status !== 201) throw new Error("POST " + t + " " + r.status);
+    return true;
+  }
+};
+
+const SALT = "miaodou-games-v1";
+async function sha256(s) {
+  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
+}
+const hashPass = (u, p) => sha256(u + ":" + p + ":" + SALT);
+
+/* ---------- 会话 ---------- */
+let session = null;
+try { session = JSON.parse(localStorage.getItem("md_session") || "null"); } catch (e) { session = null; }
+function saveSession(s) { session = s; localStorage.setItem("md_session", JSON.stringify(s)); renderAuth(); }
+function clearSession() { session = null; localStorage.removeItem("md_session"); renderAuth(); }
+
+/* ---------- 轻提示 ---------- */
+let toastTimer = null;
+function toast(msg) {
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* ---------- 顶栏账号区 ---------- */
+function renderAuth() {
+  const area = document.getElementById("authArea");
+  if (!API_ON) { area.innerHTML = ""; return; }
+  if (session) {
+    area.innerHTML = `
+      <span class="user-chip ${session.is_guest ? "is-guest" : ""}"><span class="u-dot"></span>${esc(session.username)}</span>
+      ${session.is_guest ? '<a class="link primary" id="btnAuth">注册 / 登录</a>' : ""}
+      <a class="link" id="btnLogout">退出</a>`;
+    const bA = document.getElementById("btnAuth");
+    if (bA) bA.onclick = openAuth;
+    document.getElementById("btnLogout").onclick = async () => {
+      clearSession();
+      toast("已退出，重新生成了游客身份");
+      await createGuest();
+    };
+  } else {
+    area.innerHTML = '<a class="link primary" id="btnAuth">登录 / 注册</a>';
+    document.getElementById("btnAuth").onclick = openAuth;
+  }
+}
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+
+/* ---------- 游客身份 ---------- */
+async function createGuest() {
+  if (!API_ON) return;
+  const n = "游客" + String(Math.floor(1000 + Math.random() * 9000));
+  try {
+    const exists = await API.get("users", "username=eq." + encodeURIComponent(n) + "&select=username");
+    if (exists.length) return createGuest();
+    await API.post("users", { username: n, pass_hash: null, role: "user", is_guest: true });
+    saveSession({ username: n, role: "user", is_guest: true });
+    await API.post("login_logs", { username: n, is_guest: true });
+  } catch (e) { /* 后端异常时静默降级为无账号模式 */ }
+}
+
+/* ---------- 登录 / 注册弹窗 ---------- */
+const mask = document.getElementById("authMask");
+let authMode = "login";
+function openAuth() { mask.classList.add("show"); setMode("login"); }
+function closeAuth() { mask.classList.remove("show"); }
+function setMode(m) {
+  authMode = m;
+  document.getElementById("tabLogin").classList.toggle("on", m === "login");
+  document.getElementById("tabReg").classList.toggle("on", m === "reg");
+  document.getElementById("fPass2Wrap").style.display = m === "reg" ? "" : "none";
+  document.getElementById("authSubmit").textContent = m === "login" ? "登 录" : "注 册";
+  document.getElementById("authMsg").className = "m-msg";
+}
+document.getElementById("tabLogin").onclick = () => setMode("login");
+document.getElementById("tabReg").onclick = () => setMode("reg");
+document.getElementById("authClose").onclick = closeAuth;
+mask.addEventListener("click", e => { if (e.target === mask) closeAuth(); });
+
+document.getElementById("authSubmit").onclick = async () => {
+  const btn = document.getElementById("authSubmit");
+  const msg = document.getElementById("authMsg");
+  const u = document.getElementById("fUser").value.trim();
+  const p = document.getElementById("fPass").value;
+  const p2 = document.getElementById("fPass2").value;
+  const show = (t, cls) => { msg.textContent = t; msg.className = "m-msg " + cls; };
+
+  if (!API_ON) { show("后端未配置：请在 config.js 中填入 anon key", "err"); return; }
+  if (!/^[\w\u4e00-\u9fa5]{2,16}$/.test(u)) { show("用户名需 2-16 位，仅中英文、数字、下划线", "err"); return; }
+  if (p.length < 6 || p.length > 32) { show("密码需 6-32 位", "err"); return; }
+  if (authMode === "reg" && p !== p2) { show("两次输入的密码不一致", "err"); return; }
+
+  btn.disabled = true;
+  try {
+    const h = await hashPass(u, p);
+    if (authMode === "reg") {
+      const dup = await API.get("users", "username=eq." + encodeURIComponent(u) + "&select=username");
+      if (dup.length) { show("该用户名已被注册", "err"); return; }
+      await API.post("users", { username: u, pass_hash: h, role: "user", is_guest: false });
+      await API.post("login_logs", { username: u, is_guest: false });
+      saveSession({ username: u, role: "user", is_guest: false });
+      show("注册成功，欢迎加入！", "ok");
+    } else {
+      const rows = await API.get("users", "username=eq." + encodeURIComponent(u) + "&pass_hash=eq." + h + "&select=username,role,is_guest");
+      if (!rows.length) { show("用户名或密码不正确", "err"); return; }
+      await API.post("login_logs", { username: u, is_guest: false });
+      saveSession({ username: u, role: rows[0].role, is_guest: false });
+      show("登录成功，欢迎回来！", "ok");
+    }
+    setTimeout(closeAuth, 700);
+    document.getElementById("fPass").value = "";
+    document.getElementById("fPass2").value = "";
+  } catch (e) {
+    show("网络异常，请稍后再试（" + e.message + "）", "err");
+  } finally {
+    btn.disabled = false;
+  }
+};
+
+/* =========================================================
+ * 页面渲染
+ * ========================================================= */
 const grid = document.getElementById("games");
 
-GAMES.forEach(g => {
-  const card = document.createElement("a");
-  card.className = "game";
-  card.href = g.url;
-  const tags = g.tags.map(t => `<span class="tag">${t}</span>`).join("");
-  card.innerHTML = `
-    <div class="cover" style="--c1:${g.colors[0]};--c2:${g.colors[1]}">${ICONS[g.icon]}</div>
-    <div class="body">
-      <div class="tag-row">${tags}</div>
-      <h3>${g.title}</h3>
-      <p class="desc">${g.desc}</p>
-      <span class="btn">开始游戏
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
-      </span>
-    </div>`;
-  grid.appendChild(card);
-});
+function renderGames(shown) {
+  grid.innerHTML = "";
+  document.getElementById("gameCount").textContent = "共 " + shown.length + " 款";
+  document.getElementById("statGames").innerHTML = shown.length + '<i>+</i>';
+  shown.forEach((g, i) => {
+    const card = document.createElement("a");
+    card.className = "game reveal";
+    card.href = g.url;
+    card.style.animationDelay = (0.5 + i * 0.1) + "s";
+    const tags = g.tags.map((t, j) => `<span class="tag${j === 1 ? " alt" : ""}">${t}</span>`).join("");
+    card.innerHTML = `
+      <div class="cover" style="--c1:${g.colors[0]};--c2:${g.colors[1]}">
+        <span class="corner">${g.badge}</span>
+        ${SCENES[g.icon]}
+      </div>
+      <div class="body">
+        <div class="tag-row">${tags}</div>
+        <h3>${g.title}</h3>
+        <p class="desc">${g.desc}</p>
+        <div class="foot">
+          <span class="btn">开始游戏
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+          </span>
+          <span class="arrow-link">免安装 · 即点即玩</span>
+        </div>
+      </div>`;
+    card.addEventListener("click", e => {
+      if (API_ON && session) {
+        try {
+          fetch(`${API.base}/play_logs`, {
+            method: "POST", headers: API.h(), keepalive: true,
+            body: JSON.stringify({ username: session.username, game_key: g.key })
+          }).catch(() => {});
+        } catch (err) {}
+      }
+    });
+    grid.appendChild(card);
+  });
 
-/* 未来游戏占位卡片 */
-const soon = document.createElement("div");
-soon.className = "game soon";
-soon.innerHTML = `
-  <div>
-    <div class="plus">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
-    </div>
-    <b>更多游戏开发中</b>
-    <p>新作品将在这里陆续上架，敬请期待</p>
-  </div>`;
-grid.appendChild(soon);
+  const soon = document.createElement("div");
+  soon.className = "game soon reveal";
+  soon.style.animationDelay = (0.5 + shown.length * 0.1) + "s";
+  soon.innerHTML = `
+    <div>
+      <div class="plus">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>
+      </div>
+      <b>更多游戏开发中</b>
+      <p>新作品将在这里陆续上架，敬请期待</p>
+    </div>`;
+  grid.appendChild(soon);
+}
+
+/* ---------- 启动 ---------- */
+(async function init() {
+  renderAuth();
+
+  // 预览模式：全部显示
+  if (!API_ON) { renderGames(GAMES); return; }
+
+  // 无会话 → 自动生成游客身份
+  if (!session) await createGuest();
+
+  // 读取游戏开关与公告
+  let shown = GAMES;
+  try {
+    const rows = await API.get("game_settings", "select=game_key,visible&order=sort.asc");
+    const map = {}; rows.forEach(r => map[r.game_key] = r.visible);
+    shown = GAMES.filter(g => map[g.key] !== false);
+  } catch (e) {}
+  try {
+    const n = await API.get("site_settings", "key=eq.notice&select=value");
+    if (n.length && n[0].value && n[0].value.trim()) {
+      document.getElementById("noticeText").textContent = n[0].value.trim();
+      document.getElementById("noticeBar").classList.add("show");
+    }
+  } catch (e) {}
+
+  renderGames(shown);
+})();
 </script>
 </body>
 </html>
