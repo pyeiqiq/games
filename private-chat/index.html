@@ -203,6 +203,24 @@
   .modal input:focus{border-color:var(--accent);}
   .modal .m-actions{display:flex;gap:10px;margin-top:16px;}
   .modal .m-actions .btn{flex:1;text-align:center;}
+
+  /* 房间销毁倒计时遮罩 */
+  .destroy-mask{
+    position:fixed;inset:0;background:rgba(5,8,18,.88);backdrop-filter:blur(6px);
+    display:none;flex-direction:column;align-items:center;justify-content:center;
+    z-index:200;padding:20px;
+  }
+  .destroy-mask.show{display:flex;}
+  .destroy-mask .d-title{font-size:17px;color:var(--text);font-weight:600;margin-bottom:6px;}
+  .destroy-mask .d-sub{font-size:13px;color:var(--muted);margin-bottom:26px;}
+  .destroy-mask .d-num{
+    font-size:110px;font-weight:800;line-height:1;
+    background:linear-gradient(135deg,#ff8a5c,#ff4d4d);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:pulse 1s ease infinite;
+  }
+  .destroy-mask .d-tip{font-size:12px;color:var(--muted);margin-top:26px;}
+  @keyframes pulse{0%,100%{transform:scale(1);opacity:1;}50%{transform:scale(1.08);opacity:.85;}}
   @media (max-width:560px){.members-side{width:96px;}}
 </style>
 </head>
@@ -299,6 +317,14 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- 房间销毁倒计时 -->
+  <div class="destroy-mask" id="destroyMask">
+    <div class="d-title">🏠 房主已退出</div>
+    <div class="d-sub">房间将在倒计时结束后销毁</div>
+    <div class="d-num" id="destroyNum">5</div>
+    <div class="d-tip">倒计时结束将自动返回游戏屋</div>
+  </div>
+
 <script src="../config.js"></script>
 <script>
 (function(){
@@ -374,6 +400,9 @@
   function goLobby(msg) {
     clearInterval(pollTimer); pollTimer = null;
     clearInterval(heartbeatTimer); heartbeatTimer = null;
+    clearInterval(destroyTimer); destroyTimer = null;
+    destroying = false;
+    $("destroyMask").classList.remove("show");
     roomId = null;
     messages.innerHTML = "";
     renderedClientIds.clear();
@@ -437,6 +466,11 @@
   /* ---------- 进入房间 ---------- */
   async function enterRoom(rid, owner, title) {
     roomId = rid; roomOwner = owner || ""; roomTitle = title || "";
+    destroying = false;
+    clearInterval(destroyTimer);
+    $("destroyMask").classList.remove("show");
+    membersReady = false;
+    membersCache = [];
     myNick = randomNick();   // 每次进房重新随机昵称
     $("roomBadge").textContent = rid;
     $("roomTitle").textContent = roomTitle || ("悄悄话 · " + rid);
@@ -460,24 +494,34 @@
 
     poll();
     pollTimer = setInterval(poll, 2000);
-    heartbeatTimer = setInterval(heartbeat, 10000);
+    heartbeatTimer = setInterval(heartbeat, 5000);
     input.focus();
   }
 
-  /* 心跳：刷新自己在线状态 + 更新成员列表 */
+  /* 心跳：刷新自己在线状态 */
   async function heartbeat() {
     if (!roomId) return;
     try { await API.patch("chat_presence", "room_id=eq." + roomId + "&username=eq." + encodeURIComponent(myNick), { last_seen: new Date().toISOString() }); } catch(e) {}
-    try { await refreshMembers(); } catch(e) {}
   }
 
-  /* 在线成员列表（最近 30 秒活跃） */
+  /* 在线成员列表（最近 15 秒活跃，跟随 2 秒轮询刷新） */
   let membersCache = [];
+  let membersReady = false;   // 首次建立基线，不产生"进入"提醒
   async function refreshMembers() {
     if (!roomId) return;
-    const since = new Date(Date.now() - 30000).toISOString();
+    const since = new Date(Date.now() - 15000).toISOString();
     const rows = await API.get("chat_presence", "room_id=eq." + roomId + "&last_seen=gt." + since + "&select=username");
-    membersCache = rows.map(r => r.username);
+    const nowList = rows.map(r => r.username);
+    if (membersReady) {
+      // diff：新出现的人 → 进入提醒；消失的人 → 退出提醒（排除自己）
+      const entered = nowList.filter(n => n !== myNick && !membersCache.includes(n));
+      const left = membersCache.filter(n => n !== myNick && !nowList.includes(n));
+      for (const n of entered) addSystem("👋 " + n + " 已进入房间");
+      for (const n of left) addSystem("👋 " + n + " 已退出房间");
+    } else {
+      membersReady = true;
+    }
+    membersCache = nowList;
     renderMembers();
   }
 
@@ -512,29 +556,62 @@
     try {
       const q = "room_id=eq." + roomId + "&id=gt." + lastMsgId + "&order=id.asc&limit=50&select=id,room_id,sender,content,ttl,client_id,created_at";
       const rows = await API.get("chat_messages", q);
-      let changed = false;
       for (const m of rows) {
         if (m.client_id && renderedClientIds.has(m.client_id)) continue;  // 去重
         lastMsgId = Math.max(lastMsgId, m.id);
         if (m.client_id) renderedClientIds.add(m.client_id);
         addMessage(m);
-        changed = true;
       }
-      if (changed) refreshMembers();
-    } catch(e) { /* 房间可能被解散，检查一下 */ checkRoomAlive(); }
+    } catch(e) { /* 房间可能被销毁，下一轮检查 */ }
+    // 每次轮询都同步成员列表（秒刷进出）
+    try { await refreshMembers(); } catch(e) {}
+    // 检查房间存活状态（房主销毁等）
+    try { await checkRoomAlive(); } catch(e) {}
   }
 
-  /* 检查房间是否还存在（房主解散后踢出） */
+  /* 检查房间状态：destroying → 全员倒计时销毁；不存在 → 返回首页 */
+  let destroying = false;
+  let destroyTimer = null;
   async function checkRoomAlive() {
-    if (!roomId) return;
-    try {
-      const rows = await API.get("chat_rooms", "room_id=eq." + roomId + "&select=room_id,status");
-      if (!rows.length || rows[0].status !== "active") {
-        toast("房间已被解散");
-        addSystem("房主已解散房间，你已被移出");
-        setTimeout(() => goLobby("房间已解散，返回大厅"), 1500);
+    if (!roomId || destroying) return;
+    const rows = await API.get("chat_rooms", "room_id=eq." + roomId + "&select=room_id,status,destroy_at");
+    if (!rows.length || rows[0].status === "closed") {
+      // 房间已删/关闭：直接回大厅
+      toast("房间已被销毁");
+      goLobby("房间已被销毁，返回大厅");
+      return;
+    }
+    if (rows[0].status === "destroying") {
+      // 房主已退出，开始 5 秒销毁倒计时（destroy_at 由房主写入）
+      const destroyAt = rows[0].destroy_at ? new Date(rows[0].destroy_at).getTime() : Date.now() + 5000;
+      startDestroyCountdown(destroyAt);
+    }
+  }
+
+  /* 全员销毁倒计时 */
+  function startDestroyCountdown(destroyAt) {
+    if (destroying) return;
+    destroying = true;
+    const mask = $("destroyMask"), numEl = $("destroyNum");
+    mask.classList.add("show");
+    clearInterval(destroyTimer);
+    const tick = () => {
+      const remain = Math.max(0, Math.ceil((destroyAt - Date.now()) / 1000));
+      numEl.textContent = remain;
+      if (remain <= 0) {
+        clearInterval(destroyTimer);
+        setTimeout(() => {
+          // 强制销毁：删除房间（房主身份或任何成员都尝试），级联清消息/presence
+          API.del("chat_rooms", "room_id=eq." + roomId).then(() => {
+            goLobby("房间已销毁");
+          }).catch(() => {
+            goLobby("房间已销毁");
+          });
+        }, 600);
       }
-    } catch(e) {}
+    };
+    tick();
+    destroyTimer = setInterval(tick, 200);
   }
 
   /* ================= 消息渲染 ================= */
@@ -653,16 +730,17 @@
     } catch (e) { toast("保存失败：" + e.message); }
   });
 
-  /* ================= 退出 / 解散 ================= */
+  /* ================= 退出 / 销毁 ================= */
   $("leaveBtn").addEventListener("click", async () => {
     const isOwner = roomOwner === accountName;
     if (isOwner) {
-      if (!confirm("你是房主，退出将解散房间，所有消息将被清除。确定吗？")) return;
+      if (!confirm("你是房主，退出将销毁房间，所有消息将被清除。确定吗？")) return;
+      const destroyAt = Date.now() + 5000;
       try {
-        await API.del("chat_rooms", "room_id=eq." + roomId);   // 级联删除消息 + presence
-        toast("房间已解散");
-        goLobby("房间已解散");
-      } catch (e) { toast("解散失败：" + e.message); }
+        // 置销毁状态 + 写销毁时刻 → 全员（含自己）进入倒计时
+        await API.patch("chat_rooms", "room_id=eq." + roomId, { status: "destroying", destroy_at: new Date(destroyAt).toISOString() });
+        startDestroyCountdown(destroyAt);
+      } catch (e) { toast("操作失败：" + e.message); }
     } else {
       goLobby("已退出房间");
     }
