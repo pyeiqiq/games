@@ -371,6 +371,7 @@
 <div id="toast"></div>
 
 <script src="./config.js"></script>
+<script src="./sha256.js"></script>
 <script>
 /* =========================================================
  * 游戏清单：以后出新游戏，只需在这里加一个对象 + 一段封面插画。
@@ -476,21 +477,18 @@ const API = {
   },
   async get(t, q) {
     const r = await fetch(`${this.base}/${t}${q ? "?" + q : ""}`, { headers: this.h() });
-    if (!r.ok) throw new Error("GET " + t + " " + r.status);
+    if (!r.ok) throw new Error("读取失败 " + r.status + " " + (await r.text()).slice(0, 120));
     return r.json();
   },
   async post(t, body) {
     const r = await fetch(`${this.base}/${t}`, { method: "POST", headers: this.h(), body: JSON.stringify(body) });
-    if (!r.ok && r.status !== 201) throw new Error("POST " + t + " " + r.status);
+    if (!r.ok && r.status !== 201) throw new Error("写入失败 " + r.status + " " + (await r.text()).slice(0, 120));
     return true;
   }
 };
 
 const SALT = "miaodou-games-v1";
-async function sha256(s) {
-  const buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
-  return [...new Uint8Array(buf)].map(b => b.toString(16).padStart(2, "0")).join("");
-}
+const sha256 = s => window.sha256Hex(s);   // 非安全上下文自动回退纯 JS 实现
 const hashPass = (u, p) => sha256(u + ":" + p + ":" + SALT);
 
 /* ---------- 会话 ---------- */
@@ -596,7 +594,7 @@ document.getElementById("authSubmit").onclick = async () => {
     document.getElementById("fPass").value = "";
     document.getElementById("fPass2").value = "";
   } catch (e) {
-    show("网络异常，请稍后再试（" + e.message + "）", "err");
+    show("操作失败：" + e.message, "err");
   } finally {
     btn.disabled = false;
   }
