@@ -234,7 +234,7 @@
       </div>
       <div class="head-right">
         <span id="whoami">…</span>
-        <a class="back-btn" href="../">← 返回游戏屋</a>
+        <a class="back-btn" href="../" id="backBtn">← 返回游戏屋</a>
       </div>
     </header>
 
@@ -740,20 +740,34 @@
   });
 
   /* ================= 退出 / 销毁 ================= */
+  // 房主销毁流程（退出按钮 / 返回链接共用）
+  async function ownerDestroy() {
+    if (!roomId) return;
+    if (!confirm("你是房主，退出将销毁房间，所有消息将被清除。确定吗？")) return false;
+    const destroyAt = Date.now() + 5000;
+    try {
+      await API.patch("chat_rooms", "room_id=eq." + roomId, { status: "destroying", destroy_at: new Date(destroyAt).toISOString() });
+      goLobby("已退出房间，房间即将销毁");
+      // 兜底：若房主页面仍开着，6 秒后由房主补删（防止无人执行 DELETE 残留）
+      setTimeout(() => { API.del("chat_rooms", "room_id=eq." + roomId).catch(() => {}); }, 6000);
+      return true;
+    } catch (e) { toast("操作失败：" + e.message); return false; }
+  }
+
   $("leaveBtn").addEventListener("click", async () => {
-    const isOwner = roomOwner === accountName;
-    if (isOwner) {
-      if (!confirm("你是房主，退出将销毁房间，所有消息将被清除。确定吗？")) return;
-      const destroyAt = Date.now() + 5000;
-      try {
-        // 置销毁状态 + 写销毁时刻 → 其他成员进入倒计时；房主本人直接离开
-        await API.patch("chat_rooms", "room_id=eq." + roomId, { status: "destroying", destroy_at: new Date(destroyAt).toISOString() });
-        goLobby("已退出房间，房间即将销毁");
-        // 兜底：若房主页面仍开着，6 秒后由房主补删（防止无人执行 DELETE 残留）
-        setTimeout(() => { API.del("chat_rooms", "room_id=eq." + roomId).catch(() => {}); }, 6000);
-      } catch (e) { toast("操作失败：" + e.message); }
+    if (roomOwner === accountName) {
+      await ownerDestroy();
     } else {
       goLobby("已退出房间");
+    }
+  });
+
+  // 返回游戏屋：房主先销毁房间再跳转，其他人直接走
+  $("backBtn").addEventListener("click", async (e) => {
+    if (roomId && roomOwner === accountName) {
+      e.preventDefault();
+      const ok = await ownerDestroy();
+      if (ok) location.href = "../";
     }
   });
 
