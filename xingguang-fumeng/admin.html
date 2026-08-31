@@ -712,10 +712,9 @@ function initAuth(){
   $('#btnCForgot').addEventListener('click', () => {
     confirmDlg('忘记云账号密码？', '需要重置密码请联系管理员协助处理（本地数据不受影响）。', '知道了', null);
   });
-  /* 登录页返回 */
+  /* 登录页返回：始终回到游戏页（同目录 index.html），手机端更可靠 */
   $('#btnAuthBack').addEventListener('click', () => {
-    if(window.history && window.history.length > 1){ window.history.back(); }
-    else { window.location.href = 'index.html'; }
+    window.location.href = 'index.html';
   });
   /* 本地模式 */
   $('#btnSetPwd').addEventListener('click', async () => {
