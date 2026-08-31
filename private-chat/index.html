@@ -146,6 +146,10 @@
   }
   .row.mine .bubble{background:var(--mine);color:#fff;}
   .row.mine .name{text-align:right;}
+  .msg-img{
+    max-width:260px;max-height:200px;border-radius:10px;display:block;margin:-2px;
+  }
+  .img-cap{font-size:12px;opacity:.9;margin-top:6px;white-space:pre-wrap;word-break:break-word;}
   .sys{
     align-self:center;font-size:12px;color:var(--muted);
     background:rgba(255,255,255,.05);padding:4px 12px;border-radius:999px;
@@ -164,6 +168,20 @@
 
   footer{padding:12px;border-top:1px solid rgba(255,255,255,.06);}
   .inputbar{display:flex;gap:8px;}
+  .emoji-btn{
+    flex:none;width:44px;border:none;border-radius:12px;font-size:18px;cursor:pointer;
+    background:var(--bubble);border:1px solid rgba(255,255,255,.08);color:#fff;
+  }
+  .emoji-btn:hover{border-color:var(--accent);}
+  .emoji-bar{
+    display:flex;flex-wrap:wrap;gap:4px;padding:8px 10px;margin-bottom:8px;
+    background:var(--bubble);border:1px solid rgba(255,255,255,.08);border-radius:12px;
+  }
+  .emoji-bar .em{
+    width:34px;height:34px;border:none;background:transparent;font-size:20px;
+    cursor:pointer;border-radius:8px;line-height:1;padding:0;
+  }
+  .emoji-bar .em:hover{background:rgba(255,255,255,.12);transform:scale(1.15);}
   #ttl{
     width:auto;flex:none;background:var(--bubble);border:1px solid rgba(255,255,255,.08);
     color:#fff;border-radius:12px;padding:0 6px;font-size:13px;outline:none;cursor:pointer;
@@ -287,7 +305,9 @@
         </aside>
       </div>
       <footer>
+        <div class="emoji-bar" id="emojiBar" style="display:none"></div>
         <div class="inputbar">
+          <button class="emoji-btn" id="emojiBtn" type="button" title="表情">😊</button>
           <select id="ttl" title="消息销毁时间">
             <option value="3000">3 秒</option>
             <option value="10000">10 秒</option>
@@ -563,7 +583,7 @@
   async function poll() {
     if (!roomId) return;
     try {
-      const q = "room_id=eq." + roomId + "&id=gt." + lastMsgId + "&order=id.asc&limit=50&select=id,room_id,sender,content,ttl,client_id,created_at";
+      const q = "room_id=eq." + roomId + "&id=gt." + lastMsgId + "&order=id.asc&limit=50&select=id,room_id,sender,content,ttl,client_id,content_type,created_at";
       const rows = await API.get("chat_messages", q);
       for (const m of rows) {
         if (m.client_id && renderedClientIds.has(m.client_id)) continue;  // 去重
@@ -574,21 +594,29 @@
     } catch(e) { /* 房间可能被销毁，下一轮检查 */ }
     // 每次轮询都同步成员列表（秒刷进出）
     try { await refreshMembers(); } catch(e) {}
-    // 检查房间存活状态（房主销毁等）
+    // 检查房间存活状态 + 同步房间名（改完立即全员可见）
     try { await checkRoomAlive(); } catch(e) {}
   }
 
-  /* 检查房间状态：destroying → 全员倒计时销毁；不存在 → 返回首页 */
+  /* 检查房间状态：destroying → 全员倒计时销毁；不存在 → 返回首页；房间名变化 → 全员实时更新 */
   let destroying = false;
   let destroyTimer = null;
   async function checkRoomAlive() {
     if (!roomId || destroying) return;
-    const rows = await API.get("chat_rooms", "room_id=eq." + roomId + "&select=room_id,status,destroy_at");
+    const rows = await API.get("chat_rooms", "room_id=eq." + roomId + "&select=room_id,status,destroy_at,title");
     if (!rows.length || rows[0].status === "closed") {
       // 房间已删/关闭：直接回大厅
       toast("房间已被销毁");
       goLobby("房间已被销毁，返回大厅");
       return;
+    }
+    // 房间名实时同步：房主改名后全员立即看到
+    const newTitle = rows[0].title || "";
+    if (newTitle && newTitle !== roomTitle) {
+      const oldTitle = roomTitle;
+      roomTitle = newTitle;
+      $("roomTitle").textContent = newTitle;
+      if (oldTitle) addSystem("房主将房间名改为「" + newTitle + "」");
     }
     if (rows[0].status === "destroying") {
       // 房主已退出，开始 5 秒销毁倒计时（destroy_at 由房主写入）
@@ -650,7 +678,23 @@
 
     const bubble = document.createElement("div");
     bubble.className = "bubble";
-    bubble.textContent = msg.content;
+    if (msg.content_type === "image") {
+      // 图片消息：显示图片 + 可选文字说明
+      const img = document.createElement("img");
+      img.className = "msg-img";
+      img.src = msg.content;
+      img.alt = "图片";
+      img.loading = "lazy";
+      bubble.appendChild(img);
+      if (msg.text) {
+        const cap = document.createElement("div");
+        cap.className = "img-cap";
+        cap.textContent = msg.text;
+        bubble.appendChild(cap);
+      }
+    } else {
+      bubble.textContent = msg.content;
+    }
     if (!perm) {
       const bar = document.createElement("div");
       bar.className = "bar";
@@ -676,6 +720,29 @@
   }
   function scroll() { messages.scrollTop = messages.scrollHeight; }
 
+  /* ================= 表情面板 ================= */
+  const EMOJIS = ["😀","😄","😂","🤣","😊","😍","🥰","😘","😜","🤪","😎","🥳","😢","😭","😡","🤯","🥺","😴","🤔","😏","🙄","😅","👍","👎","👏","🙏","🤝","💪","✌️","👌","🤙","❤️","💔","💯","🔥","✨","🎉","🎂","🍺","☕","🌹","😺","🐶","🦊","🐼","🚀","⚡","💰","✅","❌","❓","❗"];
+  const emojiBtn = $("emojiBtn"), emojiBar = $("emojiBar");
+  emojiBtn.addEventListener("click", () => {
+    emojiBar.style.display = emojiBar.style.display === "none" ? "flex" : "none";
+    if (emojiBar.style.display === "flex" && !emojiBar.children.length) {
+      for (const e of EMOJIS) {
+        const b = document.createElement("button");
+        b.type = "button"; b.className = "em"; b.textContent = e;
+        b.addEventListener("click", () => { insertEmoji(e); });
+        emojiBar.appendChild(b);
+      }
+    }
+  });
+  function insertEmoji(e) {
+    const cur = input.value;
+    input.value = cur + e;
+    input.focus();
+    const len = input.value.length;
+    input.setSelectionRange(len, len);
+    emojiBar.style.display = "none";
+  }
+
   /* ================= 发送 ================= */
   function send() {
     const text = input.value.trim();
@@ -684,14 +751,75 @@
     const clientId = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
     // 乐观渲染自己的消息（带 client_id，轮询去重）
     renderedClientIds.add(clientId);
-    addMessage({ id: 0, sender: myNick, content: text, ttl, client_id: clientId, created_at: new Date().toISOString() });
-    const body = { room_id: roomId, sender: myNick, content: text, ttl, client_id: clientId };
+    addMessage({ id: 0, sender: myNick, content: text, ttl, client_id: clientId, content_type: "text", created_at: new Date().toISOString() });
+    const body = { room_id: roomId, sender: myNick, content: text, ttl, client_id: clientId, content_type: "text" };
     API.post("chat_messages", body).then(() => {}).catch(() => toast("发送失败，请重试"));
     input.value = "";
     input.focus();
   }
   sendBtn.addEventListener("click", send);
   input.addEventListener("keydown", e => { if (e.key === "Enter") send(); });
+
+  /* ================= 图片粘贴发送 ================= */
+  function sendImage(dataUrl, text) {
+    if (!roomId) return;
+    const ttl = parseInt(ttlSel.value, 10) || 0;
+    const clientId = Date.now() + "-" + Math.random().toString(36).slice(2, 8);
+    renderedClientIds.add(clientId);
+    addMessage({ id: 0, sender: myNick, content: dataUrl, text: text || "", ttl, client_id: clientId, content_type: "image", created_at: new Date().toISOString() });
+    const body = { room_id: roomId, sender: myNick, content: dataUrl, text: text || "", ttl, client_id: clientId, content_type: "image" };
+    API.post("chat_messages", body).then(() => {}).catch(() => toast("图片发送失败，请重试"));
+    toast("📷 图片已发送");
+  }
+
+  // 压缩图片：限制最长边 1280px、JPEG 质量 0.8，避免超数据库字段大小
+  function compressImage(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        try {
+          const MAX = 1280;
+          let { width, height } = img;
+          if (width > MAX || height > MAX) {
+            const ratio = Math.min(MAX / width, MAX / height);
+            width = Math.round(width * ratio);
+            height = Math.round(height * ratio);
+          }
+          const canvas = document.createElement("canvas");
+          canvas.width = width; canvas.height = height;
+          const ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
+          resolve(dataUrl);
+        } catch (e) { reject(e); }
+        finally { URL.revokeObjectURL(url); }
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("图片加载失败")); };
+      img.src = url;
+    });
+  }
+
+  // 输入框监听粘贴：截图（剪贴板图片）直接发送
+  input.addEventListener("paste", async (e) => {
+    const items = (e.clipboardData && e.clipboardData.items) || [];
+    let file = null;
+    for (const it of items) {
+      if (it.type && it.type.startsWith("image/")) { file = it.getAsFile(); break; }
+    }
+    if (!file) return;   // 不是图片粘贴，走默认（文字）
+    e.preventDefault();
+    if (!roomId) { toast("请先进入房间"); return; }
+    const text = input.value.trim();
+    input.value = "";
+    try {
+      const dataUrl = await compressImage(file);
+      sendImage(dataUrl, text);
+    } catch (err) {
+      toast("图片处理失败：" + err.message);
+      input.value = text;
+    }
+  });
 
   /* ================= 清屏（仅本地） ================= */
   $("clearBtn").addEventListener("click", () => {
