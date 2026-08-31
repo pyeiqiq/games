@@ -45,7 +45,10 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
   background:linear-gradient(160deg,#EAF1F7 0%,#F3EEF7 55%,#FBF3DC 100%)}
 [data-theme="dark"] #loginView{background:linear-gradient(160deg,#1B2430,#242B3A 60%,#2E2A35)}
 .login-card{background:var(--card);border-radius:24px;padding:34px 30px;width:100%;max-width:420px;
-  box-shadow:var(--shadow);border:1px solid var(--line)}
+  box-shadow:var(--shadow);border:1px solid var(--line);position:relative}
+.login-card .back-btn{position:absolute;top:14px;left:16px;font-size:13px;color:var(--ink-soft);
+  padding:6px 12px;border-radius:10px;transition:.2s;cursor:pointer}
+.login-card .back-btn:hover{background:var(--bg2);color:var(--ink-strong)}
 .login-card .logo{font-size:23px;font-weight:800;color:var(--ink-strong);text-align:center;letter-spacing:2px}
 .login-card .sub{text-align:center;color:var(--ink-soft);font-size:13px;margin:6px 0 18px}
 .auth-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg2);border-radius:99px;padding:4px}
@@ -233,6 +236,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 <!-- 登录 -->
 <div id="loginView">
   <div class="login-card">
+    <button class="back-btn" id="btnAuthBack">‹ 返回</button>
     <div class="logo">🌙 星光赴梦</div>
     <div class="sub">家长专属后台 · 为孩子定制专属星光</div>
     <div class="auth-tabs">
@@ -708,6 +712,11 @@ function initAuth(){
   $('#btnCForgot').addEventListener('click', () => {
     confirmDlg('忘记云账号密码？', '需要重置密码请联系管理员协助处理（本地数据不受影响）。', '知道了', null);
   });
+  /* 登录页返回 */
+  $('#btnAuthBack').addEventListener('click', () => {
+    if(window.history && window.history.length > 1){ window.history.back(); }
+    else { window.location.href = 'index.html'; }
+  });
   /* 本地模式 */
   $('#btnSetPwd').addEventListener('click', async () => {
     const p1 = $('#np1').value, p2 = $('#np2').value;
@@ -1010,10 +1019,14 @@ function refreshTpl(){
   const grid = $('#tplGrid'); grid.innerHTML = '';
   Object.keys(TEMPLATES).forEach(cat => {
     TEMPLATES[cat].forEach((txt, i) => {
+      const got = isCollected(txt);
       const card = document.createElement('div');
       card.className = 'tpl-card';
       card.innerHTML = `<span class="cat">${cat}</span><p>${txt}</p>
-        <button class="apply" data-cat="${cat}" data-i="${i}">套用 ›</button>`;
+        <div style="display:flex;align-items:center;gap:10px">
+          ${got ? '<span style="font-size:11px;color:var(--green);font-weight:600">✓ 孩子已获取</span>' : '<span style="font-size:11px;color:var(--ink-soft)">未获取</span>'}
+          <button class="apply" data-cat="${cat}" data-i="${i}" style="margin-left:auto">套用 ›</button>
+        </div>`;
       card.querySelector('.apply').addEventListener('click', () => {
         const list = DEFAULT_LEVELS.map((d,idx) => `<option value="${d.id}">第 ${idx+1} 关 · ${d.title}</option>`).join('');
         modal(`<h4>把这条模板套用到哪一关？</h4>
