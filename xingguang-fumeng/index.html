@@ -311,7 +311,7 @@ input,textarea{font-family:inherit}
 .env-hint{position:absolute;bottom:34px;left:0;right:0;text-align:center;color:rgba(255,255,255,.75);
   font-size:13px;letter-spacing:2px;animation:twinkle 2.2s infinite alternate}
 /* 信纸内容（信封展开后） */
-.paper{width:320px;max-height:70vh;overflow-y:auto;text-align:center;padding:34px 26px;border-radius:8px;
+.paper{width:320px;max-height:58vh;overflow-y:auto;text-align:center;padding:34px 26px 30px;border-radius:8px;
   background:linear-gradient(180deg,#FDF6E9,#FBF1DD);color:#5A4632;
   box-shadow:inset 0 0 40px rgba(180,140,90,.12)}
 .paper::-webkit-scrollbar{width:0}
@@ -321,6 +321,9 @@ input,textarea{font-family:inherit}
 .paper .p-nick{margin-top:14px;font-size:13px;opacity:.75}
 .paper .p-text{font-size:15px;line-height:2;margin-top:8px;text-align:left;text-indent:0}
 .paper .p-sign{margin-top:14px;font-size:12px;opacity:.65}
+.paper .p-sep{margin:16px 0 10px;color:#C9A87A;font-size:11px;letter-spacing:6px;opacity:.75}
+.paper .p-score{margin-top:12px;font-size:12.5px;color:#A5714A;font-weight:700}
+.paper .m-ach{margin:0 0 4px;padding:7px 22px;font-size:13px}
 .paper .p-bonus{margin-top:16px;padding:12px 14px;border:1.5px dashed #D8B48E;border-radius:12px;
   background:rgba(255,255,255,.5);text-align:left;font-size:13px;line-height:1.9}
 .paper .p-bonus b{color:#A5714A}
@@ -334,7 +337,7 @@ input,textarea{font-family:inherit}
 .paper-actions .ps-home:hover{background:rgba(255,255,255,.3)}
 .paper-fade{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,rgba(255,255,255,0) 40%,rgba(0,0,0,.4) 100%);pointer-events:none;z-index:1}
 #view-message .env-scene .paper-wrap{position:absolute;z-index:7;display:flex;flex-direction:column;align-items:center;
-  opacity:0;pointer-events:none;transition:opacity .5s}
+  opacity:0;pointer-events:none;transition:opacity .5s;max-height:88vh;overflow-y:auto;padding:12px 8px}
 #view-message .env-scene.show-paper .paper-wrap{opacity:1;pointer-events:auto}
 #view-message .env-scene.show-paper .env-hint{display:none}
 
@@ -598,10 +601,12 @@ XGF.TEMPLATES = {
   ]
 };
 
-/* ---------------- [M4] storage 本地/云端存储 ---------------- */
-const CFG_KEY = 'xgfumeng_config_v1';
-const PROG_KEY = 'xgfumeng_progress_v1';
-const CODE_KEY = 'xgfumeng_code_v1';
+/* ---------------- [M4] storage 本地/云端存储（按模式隔离） ---------------- */
+const CFG_KEY = 'xgfumeng_config_v1';       /* admin 本地模式（后台） */
+const PROG_KEY = 'xgfumeng_progress_v1';    /* admin 本地模式（后台） */
+const CODE_KEY = 'xgfumeng_code_v1';        /* 云端游戏码 */
+const GUEST_CFG_KEY = 'xgfumeng_guest_config_v1';   /* 游客模式配置（独立，看不到家长内容） */
+const GUEST_PROG_KEY = 'xgfumeng_guest_progress_v1'; /* 游客模式进度（独立） */
 
 /* ---- 云端（CloudBase PostgreSQL REST，与妙豆游戏屋同环境） ---- */
 XGF.CLOUD = {
@@ -683,10 +688,12 @@ XGF.migrateConfig = function(c){
 
 XGF._cfgCache = null;
 XGF._progCache = null;
+/* 云端模式：配置/进度只存云端（localStorage 仅存游戏码）；游客模式：独立 GUEST key */
 XGF.loadConfig = function(){
   if(XGF._cfgCache) return XGF._cfgCache;
+  if(XGF.CLOUD.enabled) return null;
   try{
-    const raw = localStorage.getItem(CFG_KEY);
+    const raw = localStorage.getItem(GUEST_CFG_KEY);
     if(raw) return XGF.migrateConfig(JSON.parse(raw));
   }catch(e){}
   return null;
@@ -700,26 +707,29 @@ XGF.getConfig = function(){
 };
 XGF.saveConfig = function(cfg){
   XGF._cfgCache = XGF.migrateConfig(cfg);
-  try{ localStorage.setItem(CFG_KEY, JSON.stringify(XGF._cfgCache)); }catch(e){}
   if(XGF.CLOUD.enabled && XGF.CLOUD.code){
     XGF.CLOUD.saveGameConfig(XGF._cfgCache).catch(() => XGF.toast('云端保存失败，请检查网络'));
+    return true;
   }
+  try{ localStorage.setItem(GUEST_CFG_KEY, JSON.stringify(XGF._cfgCache)); }catch(e){}
   return true;
 };
 XGF.loadProgress = function(){
   if(XGF._progCache) return XGF._progCache;
+  if(XGF.CLOUD.enabled) return null;
   try{
-    const raw = localStorage.getItem(PROG_KEY);
+    const raw = localStorage.getItem(GUEST_PROG_KEY);
     if(raw) return JSON.parse(raw);
   }catch(e){}
   return { unlocked:[1], letters:[], achievement:false };
 };
 XGF.saveProgress = function(p){
   XGF._progCache = p;
-  try{ localStorage.setItem(PROG_KEY, JSON.stringify(p)); }catch(e){}
   if(XGF.CLOUD.enabled && XGF.CLOUD.code){
     XGF.CLOUD.saveProgress(p).catch(() => {});
+    return true;
   }
+  try{ localStorage.setItem(GUEST_PROG_KEY, JSON.stringify(p)); }catch(e){}
   return true;
 };
 
@@ -740,12 +750,12 @@ XGF.getLevelCandidates = function(id){
   return list;
 };
 XGF.pickLevelMsg = function(id, letters){
-  /* 推送规则：有套用→优先用套用的（未获取优先）；自定义全部被获取→补充系统模板
-     中未获取的；全部用完→推送任意套用寄语。无套用→用内置寄语。
-     本地模式直接读磁盘最新；云端模式用云端缓存 */
+  /* 推送规则：
+     有套用 → 只用套用寄语（未获取优先）；自定义全部被获取 → 补充系统模板中未获取的；全用完 → 任意。
+     无套用 → 从「内置寄语 + 系统模板」池随机（未获取优先），保证重复游玩不单调。 */
   let cfg = XGF._cfgCache;
   if(!XGF.CLOUD.enabled){
-    try{ const raw = localStorage.getItem(CFG_KEY); if(raw) cfg = XGF.migrateConfig(JSON.parse(raw)); }catch(e){}
+    try{ const raw = localStorage.getItem(GUEST_CFG_KEY); if(raw) cfg = XGF.migrateConfig(JSON.parse(raw)); }catch(e){}
   }
   if(!cfg) cfg = XGF.getConfig();
   const lv = cfg.levels.find(l => l.id === id);
@@ -754,14 +764,19 @@ XGF.pickLevelMsg = function(id, letters){
   let base = (lv && lv.message && lv.message.trim()) ? lv.message : '';
   if(!base){ const d = XGF.DEFAULT_LEVELS.find(l => l.id === id); if(d) base = d.message; }
   const collected = m => (letters || []).some(l => l.levelId === id && l.message === m);
-  /* 候选池：套用优先 */
-  let pool = customTexts.length ? customTexts.slice() : [];
-  /* 套用的自定义寄语全部被获取 → 补充系统模板（同样优先未获取） */
-  if(pool.length && pool.every(collected)){
-    const tpl = Object.values(XGF.TEMPLATES).flat();
+  const tpl = Object.values(XGF.TEMPLATES).flat();
+  let pool;
+  if(customTexts.length){
+    /* 有套用：只用套用的；全部被获取则补充系统模板 */
+    pool = customTexts.slice();
+    if(pool.every(collected)){
+      tpl.forEach(t => { if(!pool.includes(t)) pool.push(t); });
+    }
+  } else {
+    /* 无套用：内置 + 系统模板（去重） */
+    pool = [base];
     tpl.forEach(t => { if(!pool.includes(t)) pool.push(t); });
   }
-  if(!pool.length) pool = [base];
   const uncollected = pool.filter(m => !collected(m));
   return XGF.pick(uncollected.length ? uncollected : pool);
 };
@@ -779,14 +794,19 @@ XGF.cloud = {
     try{
       const cfg = await XGF.CLOUD.loadGame(code);
       if(!cfg) return 'notfound';
+      /* 切换/进入游戏码：完全重置缓存，杜绝上一个游戏码的数据残留 */
       XGF._cfgCache = XGF.migrateConfig(cfg);
+      XGF._progCache = null;
       XGF.CLOUD.enabled = true;
       XGF.CLOUD.code = code;
       try{ localStorage.setItem(CODE_KEY, code); }catch(e){}
+      /* 云端进度：有则加载，无则全新默认（绝不复用本地残留） */
       try{
         const p = await XGF.CLOUD.loadProgress();
-        if(p) XGF._progCache = p;
-      }catch(e){}
+        XGF._progCache = p || { unlocked:[1], letters:[], achievement:false };
+      }catch(e){
+        XGF._progCache = { unlocked:[1], letters:[], achievement:false };
+      }
       return 'ok';
     }catch(e){ return 'network'; }
   },
@@ -944,18 +964,7 @@ XGF.audio = {
 XGF.codePage = {
   init(){
     XGF.home.makeStars(XGF.$('#codeSky'));
-    let saved = null;
-    try{ saved = localStorage.getItem(CODE_KEY); }catch(e){}
-    if(saved){
-      XGF.cloud.init(saved).then(r => {
-        if(r === 'ok'){ XGF.home.render(); XGF.theme.apply(); XGF.router.show('home'); }
-        else {
-          XGF.cloud.reset();
-          XGF.$('#codeErr').textContent = r === 'network' ? '网络开小差了，再试一次' : '这个游戏码已失效，请重新输入';
-        }
-      });
-      return;
-    }
+    /* 事件绑定必须始终执行（即使有已存码，失效后也需能手动输入新码） */
     const input = XGF.$('#codeInput');
     input.addEventListener('input', () => {
       input.value = input.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
@@ -979,11 +988,27 @@ XGF.codePage = {
     });
     XGF.$('#btnGuest').addEventListener('click', () => {
       XGF.cloud.reset();
-      if(!XGF.loadConfig()) XGF.saveConfig(XGF.defaultConfig());
+      /* 游客：全新默认模板 + 独立游客进度（看不到任何家长内容） */
+      XGF._cfgCache = XGF.defaultConfig();
+      XGF._progCache = { unlocked:[1], letters:[], achievement:false };
+      XGF.saveConfig(XGF._cfgCache);
+      XGF.saveProgress(XGF._progCache);
       XGF.home.render();
       XGF.router.show('home');
-      XGF.toast('游客模式：使用默认模板，数据保存在本机');
+      XGF.toast('游客模式：使用默认模板，只看到自己的内容');
     });
+    /* 自动登录（已存码） */
+    let saved = null;
+    try{ saved = localStorage.getItem(CODE_KEY); }catch(e){}
+    if(saved){
+      XGF.cloud.init(saved).then(r => {
+        if(r === 'ok'){ XGF.home.render(); XGF.theme.apply(); XGF.router.show('home'); }
+        else {
+          XGF.cloud.reset();
+          XGF.$('#codeErr').textContent = r === 'network' ? '网络开小差了，再试一次' : '这个游戏码已失效，请重新输入';
+        }
+      });
+    }
   }
 };
 
@@ -1976,9 +2001,11 @@ XGF.message = {
     const scoreHtml = `<div class="m-score">⭐ 本段收获 ${score || 0} 分</div>`;
     const bonusHtml = bonus
       ? `<div class="m-bonus" style="margin-top:16px;padding:12px 16px;border:1.5px dashed rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.08);text-align:left;font-size:13.5px;line-height:1.9"><b style="color:#FFE9B8">💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
+    const bonusPaperHtml = bonus
+      ? `<div class="p-bonus"><b>💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
     const achHtml = isFinal ? `<div class="m-ach">🏆 ${XGF.ACHIEVEMENT.title}</div>` : '';
     const roundHtml = isFinal
-      ? `<div class="p-round" style="margin-top:14px;font-size:12.5px;color:#FFE9B8;letter-spacing:1px">🌱 第 ${XGF.loadProgress().rounds || 1} 轮星光旅程完成！关卡已重新点亮，和爸爸妈妈再走一遍吧</div>` : '';
+      ? `<div class="p-round" style="margin-top:8px;font-size:12.5px;color:#A5714A;letter-spacing:1px;opacity:.85">🌱 第 ${XGF.loadProgress().rounds || 1} 轮星光旅程完成！关卡已重新点亮，和爸爸妈妈再走一遍吧</div>` : '';
     const actionsHtml = `
       <div class="msg-actions">
         <button class="msg-save" id="psSave">🖼️ 保存图片</button>
@@ -2024,11 +2051,12 @@ XGF.message = {
             <div class="p-title">终章 · 奔赴山海</div>
             <div class="p-nick">亲爱的${nick}：</div>
             <div class="p-text">${msg}</div>
-            ${bonusHtml}
+            ${bonusPaperHtml}
             <div class="p-sign">— ${sign} · ${XGF.fmtDate(new Date()).slice(0,10)}</div>
+            <div class="p-sep">✦ ✦ ✦</div>
             ${achHtml}
             ${roundHtml}
-            <div class="p-score" style="margin-top:12px;font-size:12px;color:#C9A87A;font-weight:700">⭐ 本段收获 ${score || 0} 分</div>
+            <div class="p-score">⭐ 本段收获 ${score || 0} 分</div>
           </div>
           ${actionsHtml.replace('msg-actions', 'paper-actions')}
         </div>
