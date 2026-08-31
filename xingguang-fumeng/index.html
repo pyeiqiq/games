@@ -1905,6 +1905,9 @@ XGF.game = {
         prog.letters.push({ levelId:'ach', title:XGF.ACHIEVEMENT.title,
           message:XGF.ACHIEVEMENT.desc, date:XGF.fmtDate(new Date()), icon:XGF.ACHIEVEMENT.icon, ach:true, loved:false });
       }
+      /* 新一轮旅程：重置关卡解锁（仅保留第 1 关），收藏馆与成就保留 */
+      prog.rounds = (prog.rounds || 0) + 1;
+      prog.unlocked = [1];
     }
     XGF.saveProgress(prog);
     XGF.engine.stop();
@@ -1974,6 +1977,8 @@ XGF.message = {
     const bonusHtml = bonus
       ? `<div class="m-bonus" style="margin-top:16px;padding:12px 16px;border:1.5px dashed rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.08);text-align:left;font-size:13.5px;line-height:1.9"><b style="color:#FFE9B8">💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
     const achHtml = isFinal ? `<div class="m-ach">🏆 ${XGF.ACHIEVEMENT.title}</div>` : '';
+    const roundHtml = isFinal
+      ? `<div class="p-round" style="margin-top:14px;font-size:12.5px;color:#FFE9B8;letter-spacing:1px">🌱 第 ${XGF.loadProgress().rounds || 1} 轮星光旅程完成！关卡已重新点亮，和爸爸妈妈再走一遍吧</div>` : '';
     const actionsHtml = `
       <div class="msg-actions">
         <button class="msg-save" id="psSave">🖼️ 保存图片</button>
@@ -2022,6 +2027,7 @@ XGF.message = {
             ${bonusHtml}
             <div class="p-sign">— ${sign} · ${XGF.fmtDate(new Date()).slice(0,10)}</div>
             ${achHtml}
+            ${roundHtml}
             <div class="p-score" style="margin-top:12px;font-size:12px;color:#C9A87A;font-weight:700">⭐ 本段收获 ${score || 0} 分</div>
           </div>
           ${actionsHtml.replace('msg-actions', 'paper-actions')}
