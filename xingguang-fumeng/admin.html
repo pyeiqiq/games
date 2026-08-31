@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#FBF8F3">
+<title>星光赴梦 · 家长后台</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🌙</text></svg>">
+<style>
+:root{
+  --bg:#FBF8F3; --bg2:#F2EDE4; --card:#FFFFFF;
+  --ink:#4A4A52; --ink-soft:#8F8F99; --ink-strong:#37373F;
+  --blue:#7FA8C9; --blue-deep:#5B87AD; --blue-soft:#EAF1F7;
+  --yellow:#E9C46A; --yellow-deep:#C99A3F; --yellow-soft:#FBF3DC;
+  --purple:#B8A7CE; --purple-deep:#9279B8; --purple-soft:#F1ECF7;
+  --green:#8FB59A; --green-soft:#EAF3EC;
+  --red:#C97B7B; --red-soft:#F9ECEC;
+  --line:#E9E3D9;
+  --shadow:0 4px 14px rgba(96,84,60,.07), 0 12px 40px rgba(96,84,60,.06);
+  --radius:18px;
+  --font:"PingFang SC","Microsoft YaHei","Hiragino Sans GB","Noto Sans SC",system-ui,sans-serif;
+}
+[data-theme="dark"]{
+  --bg:#222A34; --bg2:#1C232C; --card:#2C3541;
+  --ink:#C6CDD7; --ink-soft:#8B95A3; --ink-strong:#EEF1F5;
+  --blue:#8FB4D4; --blue-deep:#A9C8E0; --blue-soft:#2B3947;
+  --yellow:#DDBB6F; --yellow-deep:#E6CC8F; --yellow-soft:#3A3322;
+  --purple:#C6B5DC; --purple-deep:#D0C1E4; --purple-soft:#373040;
+  --green:#A5C5AF; --green-soft:#2C3B32;
+  --red:#D49A9A; --red-soft:#3E2D2D;
+  --line:#3B4552;
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{font-family:var(--font);background:var(--bg);color:var(--ink);font-size:14.5px;line-height:1.7;
+  transition:background .4s,color .4s;min-height:100vh}
+button{font-family:inherit;border:none;background:none;cursor:pointer;color:inherit}
+input,textarea,select{font-family:inherit;font-size:14px;color:var(--ink);
+  background:var(--card);border:1px solid var(--line);border-radius:12px;padding:11px 14px;width:100%;outline:none;transition:.2s}
+input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+textarea{resize:vertical;min-height:90px;line-height:1.8}
+label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
+
+/* 登录 */
+#loginView{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;
+  background:linear-gradient(160deg,#EAF1F7 0%,#F3EEF7 55%,#FBF3DC 100%)}
+[data-theme="dark"] #loginView{background:linear-gradient(160deg,#1B2430,#242B3A 60%,#2E2A35)}
+.login-card{background:var(--card);border-radius:24px;padding:34px 30px;width:100%;max-width:420px;
+  box-shadow:var(--shadow);border:1px solid var(--line)}
+.login-card .logo{font-size:23px;font-weight:800;color:var(--ink-strong);text-align:center;letter-spacing:2px}
+.login-card .sub{text-align:center;color:var(--ink-soft);font-size:13px;margin:6px 0 18px}
+.auth-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg2);border-radius:99px;padding:4px}
+.auth-tabs button{flex:1;padding:9px 0;border-radius:99px;font-size:13.5px;font-weight:600;color:var(--ink-soft);transition:.2s}
+.auth-tabs button.on{background:var(--card);color:var(--blue-deep);box-shadow:var(--shadow)}
+.field{margin-bottom:14px}
+.btn{display:block;width:100%;padding:13px 0;border-radius:99px;font-size:15px;font-weight:700;letter-spacing:2px;
+  background:linear-gradient(135deg,#8FB4D4,#5B87AD);color:#fff;box-shadow:0 8px 20px rgba(91,135,173,.3);transition:.2s;margin-top:6px}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:scale(.98)}
+.btn.gray{background:var(--bg2);color:var(--ink-soft);box-shadow:none}
+.link{text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft);cursor:pointer;text-decoration:underline}
+.hint{font-size:12px;color:var(--ink-soft);text-align:center;margin-top:12px}
+.err{color:var(--red);font-size:12.5px;text-align:center;margin-top:8px;min-height:18px}
+
+/* 我的游戏 */
+#gamesView{display:none}
+.games-head{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:14px 20px;display:flex;align-items:center;gap:12px}
+.games-head .t{font-size:18px;font-weight:800;color:var(--ink-strong)}
+.games-head .t small{font-size:11px;color:var(--ink-soft);font-weight:400;margin-left:6px}
+.games-head .right{margin-left:auto;display:flex;gap:8px}
+.games-head button{padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:600;
+  background:var(--card);border:1px solid var(--line);transition:.2s}
+.games-head button:hover{border-color:var(--blue);color:var(--blue-deep)}
+.games-main{max-width:760px;margin:0 auto;padding:24px 20px 80px}
+.game-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow);display:flex;gap:16px;align-items:center;flex-wrap:wrap}
+.game-card .gc-body{flex:1;min-width:220px}
+.game-card .gc-name{font-size:16px;font-weight:800;color:var(--ink-strong)}
+.game-card .gc-code{display:inline-flex;align-items:center;gap:10px;margin-top:8px;
+  background:var(--purple-soft);border-radius:12px;padding:8px 16px;font-size:22px;font-weight:800;
+  letter-spacing:6px;color:var(--purple-deep);font-variant-numeric:tabular-nums}
+.game-card .gc-code button{font-size:11px;color:var(--purple-deep);border:1px solid var(--purple);
+  border-radius:99px;padding:2px 10px;margin-left:6px;letter-spacing:0;font-weight:600}
+.game-card .gc-meta{font-size:12px;color:var(--ink-soft);margin-top:8px}
+.game-card .gc-ops{display:flex;flex-direction:column;gap:8px}
+.game-card .gc-ops button{padding:9px 22px;border-radius:99px;font-size:13px;font-weight:600;transition:.2s}
+.gc-edit{background:linear-gradient(135deg,#8FB4D4,#5B87AD);color:#fff}
+.gc-del{background:var(--red-soft);color:var(--red)}
+.gc-edit:hover{transform:translateY(-1px)}
+.gc-del:hover{background:var(--red);color:#fff}
+.games-empty{text-align:center;padding:60px 20px;color:var(--ink-soft)}
+.games-empty .e-icon{font-size:48px;margin-bottom:12px}
+
+/* 主面板 */
+#panelView{display:none}
+.app-head{position:sticky;top:0;z-index:20;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:12px 20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.app-head .t{font-size:17px;font-weight:800;color:var(--ink-strong)}
+.app-head .t small{font-size:11px;color:var(--ink-soft);font-weight:400;margin-left:6px}
+.app-head .code-chip{font-size:13px;font-weight:700;color:var(--purple-deep);background:var(--purple-soft);
+  border-radius:99px;padding:3px 14px;letter-spacing:3px}
+.app-head .right{margin-left:auto;display:flex;gap:8px}
+.app-head button{padding:8px 16px;border-radius:99px;font-size:12.5px;font-weight:600;
+  background:var(--card);border:1px solid var(--line);transition:.2s}
+.app-head button:hover{border-color:var(--blue);color:var(--blue-deep)}
+.app-head button.danger:hover{border-color:var(--red);color:var(--red)}
+.tabs{display:flex;gap:6px;padding:12px 20px 0;overflow-x:auto;flex-wrap:wrap}
+.tab{white-space:nowrap;padding:9px 18px;border-radius:99px;font-size:13.5px;font-weight:600;color:var(--ink-soft);
+  border:1px solid transparent;transition:.2s}
+.tab:hover{color:var(--ink-strong)}
+.tab.active{background:var(--card);border-color:var(--line);color:var(--blue-deep);box-shadow:var(--shadow)}
+.main{max-width:880px;margin:0 auto;padding:22px 20px 80px}
+.tab-page{display:none}
+.tab-page.active{display:block;animation:in .3s ease both}
+@keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.card h3{font-size:15.5px;font-weight:700;color:var(--ink-strong);margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.card .desc{font-size:12.5px;color:var(--ink-soft);margin-bottom:16px}
+.card .field{margin-bottom:14px}
+.card .row2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.seg{display:flex;gap:8px;flex-wrap:wrap}
+.seg button{flex:1;min-width:86px;padding:10px 0;border-radius:12px;border:1px solid var(--line);
+  background:var(--bg);font-size:13px;font-weight:600;transition:.2s}
+.seg button.on{background:var(--purple-soft);border-color:var(--purple);color:var(--purple-deep)}
+.btn-sm{padding:9px 20px;border-radius:99px;font-size:13px;font-weight:600;
+  background:linear-gradient(135deg,#8FB4D4,#5B87AD);color:#fff;transition:.2s;display:inline-block}
+.btn-sm:hover{transform:translateY(-1px)}
+.btn-sm.ghost{background:var(--bg2);color:var(--ink-soft)}
+.btn-sm.warn{background:var(--red-soft);color:var(--red)}
+.btn-sm.warn:hover{background:var(--red);color:#fff}
+.btn-sm.gold{background:linear-gradient(135deg,#E9C46A,#C99A3F);color:#4A3A12}
+.actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* 关卡寄语编辑 */
+.lv-edit{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px 20px;margin-bottom:14px;box-shadow:var(--shadow)}
+.lv-edit .lv-head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.lv-edit .lv-icon{font-size:24px}
+.lv-edit .lv-name{font-weight:700;color:var(--ink-strong);font-size:14.5px}
+.lv-edit .lv-tag{font-size:11px;color:var(--ink-soft);background:var(--bg2);border-radius:99px;padding:2px 10px}
+.lv-edit .count{font-size:11.5px;color:var(--ink-soft);margin-top:6px}
+.lv-edit .lv-ops{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.lv-edit .lv-ops button{padding:6px 14px;border-radius:99px;font-size:12px;font-weight:600;
+  border:1px solid var(--line);background:var(--bg);color:var(--ink-soft);transition:.2s}
+.lv-edit .lv-ops button:hover{color:var(--red);border-color:var(--red)}
+.cand-list{margin-top:12px;border-top:1px dashed var(--line);padding-top:12px}
+.cand-list .cl-title{font-size:12px;color:var(--ink-soft);margin-bottom:8px}
+.cand-item{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--ink);
+  background:var(--bg2);border-radius:10px;padding:6px 12px;margin-bottom:6px}
+.cand-item .got{color:var(--green);font-size:11px;white-space:nowrap}
+.cand-item .src{color:var(--purple-deep);font-size:11px;white-space:nowrap;background:var(--purple-soft);border-radius:99px;padding:1px 8px}
+.cand-item .txt{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* 彩蛋 */
+.egg-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
+.egg-box .cnt{font-size:12px;color:var(--ink-soft);margin-top:8px}
+.egg-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.egg-chips span{background:var(--purple-soft);color:var(--purple-deep);border-radius:99px;
+  padding:4px 14px;font-size:12.5px}
+
+/* 模板库 & 我的寄语 & 信件 */
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.tpl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:.2s}
+.tpl-card:hover{transform:translateY(-2px)}
+.tpl-card .cat{font-size:11.5px;font-weight:700;color:var(--purple-deep);background:var(--purple-soft);
+  align-self:flex-start;border-radius:99px;padding:2px 12px}
+.tpl-card p{font-size:13px;color:var(--ink);line-height:1.8;flex:1}
+.tpl-card .apply{align-self:flex-end;font-size:12px;font-weight:600;color:#fff;
+  background:linear-gradient(135deg,#8FB4D4,#5B87AD);padding:6px 16px;border-radius:99px;transition:.2s}
+.tpl-card .apply:hover{transform:translateY(-1px)}
+/* 我的寄语（自定义） */
+.my-msg-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px;box-shadow:var(--shadow)}
+.my-msg-item .mm-body{flex:1;min-width:0}
+.my-msg-item .mm-text{font-size:13.5px;color:var(--ink);line-height:1.8}
+.my-msg-item .mm-meta{font-size:11px;color:var(--ink-soft);margin-top:6px;display:flex;gap:10px;flex-wrap:wrap}
+.my-msg-item .mm-meta .tag{color:var(--purple-deep);background:var(--purple-soft);border-radius:99px;padding:1px 10px;font-weight:600}
+.my-msg-item .mm-ops{display:flex;flex-direction:column;gap:6px}
+.my-msg-item .mm-ops button{font-size:12px;padding:5px 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);transition:.2s}
+.my-msg-item .mm-ops button:hover{color:var(--purple-deep);border-color:var(--purple)}
+.my-msg-item .mm-ops button.del:hover{color:var(--red);border-color:var(--red)}
+/* 信件 */
+.bonus-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);
+  border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px;box-shadow:var(--shadow)}
+.bonus-item .bb-body{flex:1;min-width:0}
+.bonus-item .bb-title{font-weight:700;color:var(--ink-strong);font-size:14px}
+.bonus-item .bb-text{font-size:13px;color:var(--ink-soft);margin-top:4px;line-height:1.8}
+.bonus-item .bb-meta{font-size:11px;margin-top:6px;color:var(--ink-soft)}
+.bonus-item .bb-meta .got{color:var(--green);font-weight:600}
+.bonus-item .bb-ops{display:flex;flex-direction:column;gap:6px}
+.bonus-item .bb-ops button{font-size:12px;padding:5px 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);transition:.2s}
+.bonus-item .bb-ops button:hover{color:var(--purple-deep);border-color:var(--purple)}
+.bonus-item .bb-ops button.del:hover{color:var(--red);border-color:var(--red)}
+
+/* 数据管理 */
+.data-item{display:flex;align-items:center;gap:14px;background:var(--card);border:1px solid var(--line);
+  border-radius:var(--radius);padding:16px 20px;margin-bottom:12px;box-shadow:var(--shadow)}
+.data-item .di-icon{font-size:24px}
+.data-item .di-body{flex:1}
+.data-item .di-title{font-weight:700;color:var(--ink-strong);font-size:14px}
+.data-item .di-desc{font-size:12px;color:var(--ink-soft)}
+.data-item .di-btn{flex:0 0 auto}
+
+/* 弹窗 */
+.modal-mask{position:fixed;inset:0;background:rgba(40,45,55,.5);backdrop-filter:blur(6px);
+  display:none;align-items:center;justify-content:center;z-index:60;padding:22px}
+.modal-mask.show{display:flex;animation:in .25s ease both}
+.modal{background:var(--card);border-radius:22px;max-width:460px;width:100%;padding:28px 26px;
+  box-shadow:0 20px 60px rgba(0,0,0,.25);color:var(--ink);max-height:84vh;overflow-y:auto}
+.modal h4{font-size:17px;font-weight:800;color:var(--ink-strong);margin-bottom:12px}
+.modal .m-body{font-size:13.5px;color:var(--ink);margin-bottom:16px;line-height:1.9}
+.modal .m-actions{display:flex;gap:10px;justify-content:flex-end;margin-top:16px;flex-wrap:wrap}
+.modal .m-actions button{padding:10px 22px;border-radius:99px;font-size:13.5px;font-weight:600;transition:.2s}
+.m-ok{background:linear-gradient(135deg,#8FB4D4,#5B87AD);color:#fff}
+.m-cancel{background:var(--bg2);color:var(--ink-soft)}
+.m-danger{background:var(--red-soft);color:var(--red)}
+.lv-check{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:10px;background:var(--bg2);margin-bottom:6px;font-size:13px;cursor:pointer}
+.lv-check input{width:auto}
+
+#toast{position:fixed;left:50%;bottom:50px;transform:translateX(-50%) translateY(20px);
+  background:rgba(50,55,66,.92);color:#fff;padding:11px 26px;border-radius:99px;font-size:13.5px;
+  opacity:0;pointer-events:none;transition:.35s;z-index:90;letter-spacing:1px}
+#toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+@media (max-width:600px){ .card .row2{grid-template-columns:1fr} .tpl-grid{grid-template-columns:1fr} }
+</style>
+</head>
+<body data-theme="auto">
+
+<!-- 登录 -->
+<div id="loginView">
+  <div class="login-card">
+    <div class="logo">🌙 星光赴梦</div>
+    <div class="sub">家长专属后台 · 为孩子定制专属星光</div>
+    <div class="auth-tabs">
+      <button class="on" data-a="cloud" id="tabCloud">☁️ 云账号</button>
+      <button data-a="local" id="tabLocal">💻 本地模式</button>
+    </div>
+    <div id="authCloud">
+      <div class="sub" style="margin-bottom:14px">登录后配置存云端，孩子用 6 位游戏码游玩（可跨设备）</div>
+      <div class="field"><label>用户名</label><input id="cUser" placeholder="设置用户名" autocomplete="username"></div>
+      <div class="field"><label>密码</label><input type="password" id="cPass" placeholder="密码" autocomplete="current-password"></div>
+      <button class="btn" id="btnCLogin">登录</button>
+      <button class="btn gray" id="btnCReg" style="margin-top:10px">注册新账号</button>
+      <div class="link" id="btnCForgot">忘记密码？</div>
+      <div class="err" id="cErr"></div>
+    </div>
+    <div id="authLocal" style="display:none">
+      <div class="sub" style="margin-bottom:14px">本地模式：配置只保存在这台设备（孩子须在同一设备游玩）</div>
+      <div id="setPwdBox" style="display:none">
+        <div class="field"><label>设置家长密码（防孩子误入）</label>
+          <input type="password" id="np1" placeholder="至少 4 位" autocomplete="new-password"></div>
+        <div class="field"><label>再次输入确认</label>
+          <input type="password" id="np2" placeholder="再次输入" autocomplete="new-password"></div>
+        <button class="btn" id="btnSetPwd">创建本地密码</button>
+      </div>
+      <div id="pwdBox">
+        <div class="field"><label>输入本地密码</label>
+          <input type="password" id="pin" placeholder="请输入密码" autocomplete="current-password"></div>
+        <button class="btn" id="btnLogin">进入本地后台</button>
+        <div class="link" id="btnForgot">忘记密码？</div>
+      </div>
+      <div class="hint">本地密码仅保存在本机浏览器</div>
+    </div>
+  </div>
+</div>
+
+<!-- 我的游戏（云） -->
+<div id="gamesView">
+  <div class="games-head">
+    <div class="t">🌙 我的游戏 <small>云账号</small></div>
+    <div class="right">
+      <button id="btnNewGame">＋ 新建游戏</button>
+      <button id="btnLogout">退出登录</button>
+    </div>
+  </div>
+  <div class="games-main" id="gamesMain"></div>
+</div>
+
+<!-- 主面板 -->
+<div id="panelView">
+  <div class="app-head">
+    <div class="t">🌙 星光赴梦 <small id="headMode">配置中心</small></div>
+    <div class="code-chip" id="headCode"></div>
+    <div class="right">
+      <button id="btnPreview">👁 预览游戏</button>
+      <button id="btnBack">‹ 返回</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="tab active" data-tab="basic">🏠 基础信息</button>
+    <button class="tab" data-tab="levels">💌 关卡寄语</button>
+    <button class="tab" data-tab="eggs">✨ 彩蛋文案</button>
+    <button class="tab" data-tab="tpl">📚 模板库</button>
+    <button class="tab" data-tab="letters">💝 爸妈信件</button>
+    <button class="tab" data-tab="data">⚙️ 数据管理</button>
+  </div>
+  <div class="main">
+    <!-- 基础信息 -->
+    <div class="tab-page active" id="pg-basic">
+      <div class="card">
+        <h3>🏠 基础信息</h3>
+        <div class="desc">展示在游戏首页、关卡、寄语和信封上</div>
+        <div class="field"><label>孩子专属称呼</label>
+          <input type="text" id="inNick" maxlength="12" placeholder="宝贝"></div>
+        <div class="field"><label>孩子性别（影响角色形象）</label>
+          <div class="seg" id="segGender">
+            <button data-g="neutral">🧑 通用</button><button data-g="boy">👦 男孩</button><button data-g="girl">👧 女孩</button>
+          </div></div>
+        <div class="field"><label>首页欢迎语</label>
+          <input type="text" id="inWelcome" maxlength="30" placeholder="欢迎回家，今天也辛苦啦"></div>
+        <div class="field"><label>寄语落款（显示在每一封信的结尾）</label>
+          <input type="text" id="inSign" maxlength="20" placeholder="爱你的爸爸妈妈"></div>
+        <button class="btn-sm" id="btnSaveBasic">保存基础信息</button>
+      </div>
+      <div class="card">
+        <h3>🎨 界面模式</h3>
+        <div class="desc">游戏与后台的深色 / 浅色显示</div>
+        <div class="seg" id="segTheme">
+          <button data-m="auto">跟随系统</button><button data-m="light">日间</button><button data-m="dark">夜间</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 关卡寄语 -->
+    <div class="tab-page" id="pg-levels">
+      <div class="card">
+        <h3>💌 关卡寄语</h3>
+        <div class="desc">孩子通关后看到的寄语。套用了「我的寄语」的关卡会优先推送未读的；孩子已收藏的寄语会标注「已获取」，不再优先推送。</div>
+        <div id="lvList"></div>
+        <div class="actions" style="margin-top:6px">
+          <button class="btn-sm" id="btnSaveLevels">保存全部寄语</button>
+          <button class="btn-sm ghost" id="btnRestoreLevels">恢复默认寄语</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 彩蛋 -->
+    <div class="tab-page" id="pg-eggs">
+      <div class="egg-box">
+        <h3>✨ 暖心气泡彩蛋</h3>
+        <div class="desc">游戏行进中随机飘过的暖心小字，一行一条；点击气泡可得分。彩蛋会自动平均分配到 6 关（同关不重复、各关尽量不重复）。</div>
+        <textarea id="inEggs" placeholder="今天也辛苦啦&#10;累了就歇歇"></textarea>
+        <div class="cnt" id="eggCnt"></div>
+        <div class="actions" style="margin-top:12px">
+          <button class="btn-sm" id="btnSaveEggs">保存彩蛋文案</button>
+          <button class="btn-sm ghost" id="btnRestoreEggs">恢复默认彩蛋</button>
+        </div>
+        <div class="egg-chips" id="eggChips"></div>
+      </div>
+    </div>
+
+    <!-- 模板库 + 我的寄语 -->
+    <div class="tab-page" id="pg-tpl">
+      <div class="card">
+        <h3>📚 暖心模板库</h3>
+        <div class="desc">内置全学段通用模板。点击「套用」可应用到某一关。</div>
+      </div>
+      <div class="tpl-grid" id="tplGrid"></div>
+      <div class="card" style="margin-top:22px">
+        <h3>✍️ 我的寄语 <span class="badge" style="font-size:11px;background:var(--purple-soft);color:var(--purple-deep);border-radius:99px;padding:2px 10px">自定义寄语库</span></h3>
+        <div class="desc">写过的寄语都会存在这里。可套用到关卡（孩子优先收到没读过的）；套用后在本模块或关卡寄语里编辑都会同步。</div>
+        <button class="btn-sm gold" id="btnAddCustom">＋ 写一条新寄语</button>
+        <div id="customList" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- 爸妈信件（奖励信） -->
+    <div class="tab-page" id="pg-letters">
+      <div class="card">
+        <h3>💝 写给孩子的信</h3>
+        <div class="desc">可以写很多封。孩子每次通关会<b>随机收到一封</b>作为惊喜奖励；孩子已收藏的信会标注「已被获取」，不再优先推送；信不够时也会补发，但孩子收藏馆里已有的不会重复收藏。</div>
+        <button class="btn-sm gold" id="btnAddBonus">✉️ 写一封信</button>
+        <div id="bonusList" style="margin-top:14px"></div>
+      </div>
+    </div>
+
+    <!-- 数据管理 -->
+    <div class="tab-page" id="pg-data">
+      <div class="data-item">
+        <div class="di-icon">🖼️</div>
+        <div class="di-body"><div class="di-title">导出配置备份</div>
+          <div class="di-desc">把全部自定义内容保存为 JSON 文件</div></div>
+        <button class="btn-sm di-btn" id="btnExport">导出</button>
+      </div>
+      <div class="data-item">
+        <div class="di-icon">📥</div>
+        <div class="di-body"><div class="di-title">导入配置</div>
+          <div class="di-desc">从备份 JSON 恢复配置</div></div>
+        <button class="btn-sm di-btn" id="btnImport">导入</button>
+      </div>
+      <div class="data-item">
+        <div class="di-icon">🎮</div>
+        <div class="di-body"><div class="di-title">重置关卡通关进度</div>
+          <div class="di-desc">清空孩子的通关记录与收藏馆（不会动您的自定义内容）</div></div>
+        <button class="btn-sm warn di-btn" id="btnResetProg">重置</button>
+      </div>
+      <div class="data-item">
+        <div class="di-icon">🗑️</div>
+        <div class="di-body"><div class="di-title">恢复系统默认模板</div>
+          <div class="di-desc">清空全部自定义内容，恢复内置默认（密码保留）</div></div>
+        <button class="btn-sm warn di-btn" id="btnResetAll">恢复默认</button>
+      </div>
+      <div class="data-item" id="pwdItem">
+        <div class="di-icon">🔑</div>
+        <div class="di-body"><div class="di-title" id="pwdTitle">修改密码</div>
+          <div class="di-desc" id="pwdDesc">更换后台登录密码</div></div>
+        <button class="btn-sm di-btn" id="btnChangePwd">修改</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 弹窗 -->
+<div class="modal-mask" id="modalMask"><div class="modal" id="modalBox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+/* ============================================================
+   星光赴梦 · 家长后台 v3（云账号 + 本地双模式）
+   ============================================================ */
+const $ = s => document.querySelector(s);
+const $$ = s => Array.from(document.querySelectorAll(s));
+
+/* ---------- SHA-256 ---------- */
+const sha256 = (function(){
+  function rotR(n,x){return (x>>>n)|(x<<(32-n))}
+  const K=[0x428a2f98,0x71374491,0xb5c0fbcf,0xe9b5dba5,0x3956c25b,0x59f111f1,0x923f82a4,0xab1c5ed5,
+    0xd807aa98,0x12835b01,0x243185be,0x550c7dc3,0x72be5d74,0x80deb1fe,0x9bdc06a7,0xc19bf174,
+    0xe49b69c1,0xefbe4786,0x0fc19dc6,0x240ca1cc,0x2de92c6f,0x4a7484aa,0x5cb0a9dc,0x76f988da,
+    0x983e5152,0xa831c66d,0xb00327c8,0xbf597fc7,0xc6e00bf3,0xd5a79147,0x06ca6351,0x14292967,
+    0x27b70a85,0x2e1b2138,0x4d2c6dfc,0x53380d13,0x650a7354,0x766a0abb,0x81c2c92e,0x92722c85,
+    0xa2bfe8a1,0xa81a664b,0xc24b8b70,0xc76c51a3,0xd192e819,0xd6990624,0xf40e3585,0x106aa070,
+    0x19a4c116,0x1e376c08,0x2748774c,0x34b0bcb5,0x391c0cb3,0x4ed8aa4a,0x5b9cca4f,0x682e6ff3,
+    0x748f82ee,0x78a5636f,0x84c87814,0x8cc70208,0x90befffa,0xa4506ceb,0xbef9a3f7,0xc67178f2];
+  const H0=[0x6a09e667,0xbb67ae85,0x3c6ef372,0xa54ff53a,0x510e527f,0x9b05688c,0x1f83d9ab,0x5be0cd19];
+  function strToBytes(s){
+    const out=[];for(let i=0;i<s.length;i++){let c=s.codePointAt(i);
+      if(c>0xffff){out.push(0xf0|(c>>18),0x80|((c>>12)&63),0x80|((c>>6)&63),0x80|(c&63));i++}
+      else if(c>0x7ff){out.push(0xe0|(c>>12),0x80|((c>>6)&63),0x80|(c&63))}
+      else if(c>0x7f){out.push(0xc0|(c>>6),0x80|(c&63))}
+      else out.push(c)}
+    return out;
+  }
+  return function sha256(str){
+    const bytes=strToBytes(str), len=bytes.length, bitLen=len*8;
+    const ml=((bitLen/0x20000000)|0)>>>0, mr=(bitLen>>>0);
+    const msg=new Uint8Array(((len+9+63)>>6)<<6);
+    msg.set(bytes);msg[len]=0x80;
+    const dv=new DataView(msg.buffer);
+    dv.setUint32(msg.length-8,ml);dv.setUint32(msg.length-4,mr);
+    const h=H0.slice(), w=new Uint32Array(64);
+    for(let i=0;i<msg.length;i+=64){
+      for(let t=0;t<16;t++)w[t]=dv.getUint32(i+t*4);
+      for(let t=16;t<64;t++){
+        const s0=rotR(7,w[t-15])^rotR(18,w[t-15])^(w[t-15]>>>3);
+        const s1=rotR(17,w[t-2])^rotR(19,w[t-2])^(w[t-2]>>>10);
+        w[t]=(w[t-16]+s0+w[t-7]+s1)>>>0;
+      }
+      let a=h[0],b=h[1],c=h[2],d=h[3],e=h[4],f=h[5],g=h[6],hh=h[7];
+      for(let t=0;t<64;t++){
+        const S1=rotR(6,e)^rotR(11,e)^rotR(25,e);
+        const ch=(e&f)^(~e&g);
+        const t1=(hh+S1+ch+K[t]+w[t])>>>0;
+        const S0=rotR(2,a)^rotR(13,a)^rotR(22,a);
+        const maj=(a&b)^(a&c)^(b&c);
+        const t2=(S0+maj)>>>0;
+        hh=g;g=f;f=e;e=(d+t1)>>>0;d=c;c=b;b=a;a=(t1+t2)>>>0;
+      }
+      h[0]=(h[0]+a)>>>0;h[1]=(h[1]+b)>>>0;h[2]=(h[2]+c)>>>0;h[3]=(h[3]+d)>>>0;
+      h[4]=(h[4]+e)>>>0;h[5]=(h[5]+f)>>>0;h[6]=(h[6]+g)>>>0;h[7]=(h[7]+hh)>>>0;
+    }
+    let out='';
+    for(let i=0;i<8;i++)out += h[i].toString(16).padStart(8,'0');
+    return out;
+  };
+})();
+async function sha256Hex(str){
+  try{
+    if(window.crypto && crypto.subtle){
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
+      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  return sha256(str);
+}
+function genSalt(){ let s=''; const c='abcdefghijklmnopqrstuvwxyz0123456789'; for(let i=0;i<16;i++) s += c[Math.floor(Math.random()*c.length)]; return s; }
+/* 妙豆游戏屋密码规则：SHA-256(username:password:miaodou-games-v1) */
+const gamesPassHash = str => sha256(str);
+
+/* ---------- 云端 API ---------- */
+const CLOUD = {
+  apiKey: 'eyJhbGciOiJSUzI1NiIsImtpZCI6IjI2ZjNkMDNmLTUyZmUtNDQ2My1hZjU4LTY2N2EwYTVmM2EzZCJ9.eyJpc3MiOiJodHRwczovL21pYW9kZG91LWQzZ25pNWMwNGJkNzU3MWEwLmFwLXNoYW5naGFpLnRjYi1hcGkudGVuY2VudGNsb3VkYXBpLmNvbSIsInN1YiI6ImFub24iLCJhdWQiOiJtaWFvZGRvdS1kM2duaTVjMDRiZDc1NzFhMCIsImV4cCI6NDA5MTc1NDEwNCwiaWF0IjoxNzg4MDcwOTA0LCJub25jZSI6ImEzeFZQSnVHUkR5LUZWb0lnV0JtSHciLCJhdF9oYXNoIjoiYTN4VlBKdUdSRHktRlZvSWdXQm1IdyIsIm5hbWUiOiJBbm9ueW1vdXMiLCJzY29wZSI6ImFub255bW91cyIsInByb2plY3RfaWQiOiJtaWFvZGRvdS1kM2duaTVjMDRiZDc1NzFhMCIsIm1ldGEiOnsicGxhdGZvcm0iOiJQdWJsaXNoYWJsZUtleSJ9LCJyb2xlIjoiYW5vbiIsImlzX2Fub255bW91cyI6dHJ1ZSwiYXBwX21ldGFkYXRhIjp7InByb3ZpZGVyIjoiYW5vbnltb3VzIiwicHJvdmlkZXJzIjpbImFub255bW91cyJdfSwidXNlcl9tZXRhZGF0YSI6eyJuYW1lIjoiQW5vbnltb3VzIn0sInVzZXJfdHlwZSI6IiIsImNsaWVudF90eXBlIjoiY2xpZW50X3VzZXIiLCJpc19zeXN0ZW1fYWRtaW4iOmZhbHNlfQ.Wu3IgT3sVchmI13fxdaSxEnhKQbScezSf9c1PbjpbpDEgdQoMRl3t0jJOoJwXSu87Q6NxyvisPLIXBhVJ_76W4GfzDVlN5CvU02BB_ga0DIq0q21pwq9MqP-6SopzJjCCk0nK0w6w5ekNRr-YlG8_FR3IHSLWwoOXu8vcoUBDQeqL3Jlq7JGASdTaFyZtvoRpo5lAVBvryovgsNks44BOABRmg5cFLh3EeCN2KBMCc5KADbnQcnqQJ8N33BoJhDfM_3v84p5ETzB69R2Ca08MiurZ9UGfPfCSd9z5RsORcBGETdjvnKrssrC86gL2KOx4-ZFcyVdxMEZwUgHwfZp6A',
+  base: 'https://miaoddou-d3gni5c04bd7571a0.api.tcloudbasegateway.com/v1/rdb/rest/',
+  headers(){
+    return { 'apikey': this.apiKey, 'Authorization': 'Bearer ' + this.apiKey, 'Content-Type': 'application/json' };
+  },
+  async req(method, path, body){
+    const res = await fetch(this.base + path, { method, headers: this.headers(),
+      body: body ? JSON.stringify(body) : undefined, cache: 'no-store' });
+    if(!res.ok && res.status !== 204){
+      const t = await res.text();
+      throw new Error('HTTP ' + res.status + ' ' + t.slice(0, 90));
+    }
+    if(res.status === 204) return null;
+    const t = await res.text();
+    return t ? JSON.parse(t) : null;
+  },
+  async register(username, passHash){
+    await this.req('POST', 'users', { username, pass_hash: passHash, role: 'parent', is_guest: false });
+  },
+  async login(username, passHash){
+    const rows = await this.req('GET', 'users?username=eq.' + encodeURIComponent(username) + '&pass_hash=eq.' + passHash + '&select=username');
+    return !!(rows && rows.length);
+  },
+  async changePwd(username, newHash){
+    await this.req('PATCH', 'users?username=eq.' + encodeURIComponent(username), { pass_hash: newHash });
+  },
+  async listGames(username){
+    return this.req('GET', 'xg_games?parent=eq.' + encodeURIComponent(username) + '&order=created_at.desc&select=code,config,created_at');
+  },
+  async createGame(code, parent, config){
+    await this.req('POST', 'xg_games', { code, parent, config });
+  },
+  async loadGame(code){
+    const rows = await this.req('GET', 'xg_games?code=eq.' + encodeURIComponent(code) + '&select=config,parent');
+    return rows && rows.length ? rows[0] : null;
+  },
+  async saveGameConfig(code, config){
+    await this.req('PATCH', 'xg_games?code=eq.' + encodeURIComponent(code), { config });
+  },
+  async deleteGame(code){
+    await this.req('DELETE', 'xg_games?code=eq.' + encodeURIComponent(code));
+  },
+  async checkCode(code){
+    const rows = await this.req('GET', 'xg_games?code=eq.' + encodeURIComponent(code) + '&select=code');
+    return !!(rows && rows.length);
+  },
+  async loadProgress(code){
+    const rows = await this.req('GET', 'xg_progress?game_code=eq.' + encodeURIComponent(code) + '&select=data');
+    return rows && rows.length ? rows[0].data : null;
+  }
+};
+
+/* ---------- 默认数据 ---------- */
+const CFG_KEY = 'xgfumeng_config_v1';
+const PROG_KEY = 'xgfumeng_progress_v1';
+const DEFAULT_LEVELS = [
+  { id:1, title:'重新出发', sub:'告别懈怠 · 重拾初心',
+    message:'宝贝，过去的懈怠和遗憾都已经翻篇了，敢于下定决心努力、愿意重新出发的你，真的特别勇敢。不用纠结过去，从现在开始往前走，就是最好的开始。' },
+  { id:2, title:'接纳不完美', sub:'接纳波动 · 允许犯错',
+    message:'孩子，没有人是完美的，做题失误、成绩波动、偶尔偷懒都是成长的常态。不用逼自己事事优秀，接纳普通的自己，慢慢来，稳稳走，就是最大的进步。' },
+  { id:3, title:'对抗疲惫焦虑', sub:'累了就休息 · 健康第一',
+    message:'学习从来都不轻松，你会累、会烦躁、会不想坚持，这些都太正常了。不用一直紧绷着自己，累了就休息，你的开心和健康，永远比成绩更重要。' },
+  { id:4, title:'点滴成长', sub:'日积月累 · 悄悄发光',
+    message:'成长从不是突然的高光，而是日复一日的坚持。你多学的一个知识点、多坚持的一分钟、多改正的一道错题，都在悄悄让你变得更优秀，爸爸妈妈都看在眼里。' },
+  { id:5, title:'无畏前路', sub:'勇敢向前 · 尽力就好',
+    message:'不用害怕考试，不用焦虑结果。认真努力、尽力而为，就是对自己最好的交代。无论结果如何，努力坚持的你，永远是我们的骄傲。' },
+  { id:6, title:'奔赴山海', sub:'终章 · 家的港湾',
+    message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
+];
+const DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'];
+const TEMPLATES = {
+  '解压安慰': ['累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。','今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。','你不是机器，不用每一分钟都高效运转，慢一点也没关系。','烦躁的时候深呼吸三次，爸爸妈妈就在你身后。','那些让你烦心的事，先放一放，你的开心比什么都重要。'],
+  '成长鼓励': ['每一次小小的努力，都在为未来的你铺路，加油，宝贝。','你不需要和别人比，你只需要比昨天的自己进步一点点。','坚持很难，但你已经在路上了，这本身就很了不起。','做错的题是宝藏，改正它，你就离优秀更近一步。','不要怕慢，怕的是停下，只要还在走，就一定会到达。'],
+  '心态疏导': ['一次考试说明不了什么，你的人生还很长很长。','焦虑的时候，想想爸爸妈妈无条件爱你的样子。','结果只是旅程的一部分，过程中的你已经很棒了。','允许自己偶尔做不好，允许自己偶尔想休息，这不丢人。','把压力放下来，你背着的，不是全世界，只是一个小小的书包。'],
+  '亲子告白': ['宝贝，无论你考多少分，你都是爸爸妈妈最爱的孩子。','我们爱的是你这个人，不是你的成绩单。','你的笑容，是爸爸妈妈一天里最亮的星星。','无论走多远，家永远是你最温暖的港湾。','谢谢你来到我们身边，你是我们生命里最好的礼物。']
+};
+function defaultConfig(){
+  return { version:2,
+    profile:{ nickname:'宝贝', gender:'neutral', welcome:'欢迎回家，今天也辛苦啦' },
+    signature:'爱你的爸爸妈妈',
+    levels: DEFAULT_LEVELS.map(l => ({ id:l.id, title:l.title, message:l.message, custom_ids: [] })),
+    custom_messages:[], bonus_letters:[],
+    eggs: DEFAULT_EGGS.slice(),
+    settings:{ sound:true, darkMode:'auto' },
+    security:{ hash:'', salt:'' } };
+}
+function migrateConfig(c){
+  if(!c || typeof c !== 'object') return defaultConfig();
+  if(!Array.isArray(c.levels) || !c.levels.length) c.levels = defaultConfig().levels;
+  c.levels.forEach(l => { if(!Array.isArray(l.custom_ids)) l.custom_ids = []; });
+  if(!Array.isArray(c.custom_messages)) c.custom_messages = [];
+  if(!Array.isArray(c.bonus_letters)) c.bonus_letters = [];
+  if(!c.profile) c.profile = defaultConfig().profile;
+  if(!c.signature) c.signature = '爱你的爸爸妈妈';
+  if(!Array.isArray(c.eggs) || !c.eggs.length) c.eggs = DEFAULT_EGGS.slice();
+  if(!c.settings) c.settings = { sound:true, darkMode:'auto' };
+  if(!c.security) c.security = { hash:'', salt:'' };
+  c.version = 2;
+  return c;
+}
+
+/* ---------- 状态 ---------- */
+let mode = 'cloud';            /* cloud | local */
+let cloudUser = null;          /* 云用户名 */
+let currentCode = null;        /* 正在编辑的游戏码 */
+let currentConfig = null;      /* 当前编辑的配置 */
+let localLogged = false;
+
+/* ---------- 工具 ---------- */
+function toast(msg){
+  const t = $('#toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(()=>t.classList.remove('show'), 2400);
+}
+function modal(html, opts){
+  const box = $('#modalBox'); box.innerHTML = html;
+  $('#modalMask').classList.add('show');
+  if(opts && opts.onShow) opts.onShow(box);
+}
+function modalHide(){ $('#modalMask').classList.remove('show'); }
+$('#modalMask').addEventListener('click', e => { if(e.target === $('#modalMask')) modalHide(); });
+function confirmDlg(title, body, okText, fn, danger){
+  modal(`<h4>${title}</h4><div class="m-body">${body}</div>
+    <div class="m-actions"><button class="m-cancel" id="dlgNo">取消</button>
+    <button class="${danger ? 'm-danger' : 'm-ok'}" id="dlgYes">${okText}</button></div>`,
+    { onShow(){
+      $('#dlgNo').addEventListener('click', modalHide);
+      $('#dlgYes').addEventListener('click', () => { modalHide(); fn && fn(); });
+    }});
+}
+function genCode(){
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789'; /* 去掉易混 0/O/1/I */
+  let c = '';
+  for(let i=0;i<6;i++) c += chars[Math.floor(Math.random()*chars.length)];
+  return c;
+}
+async function uniqueCode(){
+  for(let i=0;i<20;i++){
+    const c = genCode();
+    try{ const hit = await CLOUD.checkCode(c); if(!hit) return c; }catch(e){}
+  }
+  return genCode() + 'X';
+}
+function applyTheme(){
+  const m = currentConfig ? (currentConfig.settings.darkMode || 'auto') : 'auto';
+  const dark = m === 'dark' || (m === 'auto' && matchMedia('(prefers-color-scheme: dark)').matches);
+  document.body.dataset.theme = dark ? 'dark' : 'light';
+  $$('#segTheme button').forEach(b => b.classList.toggle('on', b.dataset.m === m));
+}
+
+/* ---------- 登录 ---------- */
+function showLogin(){
+  $('#loginView').style.display = 'flex';
+  $('#gamesView').style.display = 'none';
+  $('#panelView').style.display = 'none';
+  $('#cErr').textContent = '';
+  if(mode === 'local') showLocalAuth();
+}
+function showLocalAuth(){
+  const cfg = loadLocalConfig();
+  if(cfg && cfg.security && cfg.security.hash){
+    $('#setPwdBox').style.display = 'none'; $('#pwdBox').style.display = 'block'; $('#pin').value=''; $('#pin').focus();
+  } else {
+    $('#pwdBox').style.display = 'none'; $('#setPwdBox').style.display = 'block'; $('#np1').value=''; $('#np2').value=''; $('#np1').focus();
+  }
+}
+function loadLocalConfig(){
+  try{ const r = localStorage.getItem(CFG_KEY); if(r) return migrateConfig(JSON.parse(r)); }catch(e){}
+  return null;
+}
+function saveLocalConfig(c){
+  try{ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }catch(e){}
+}
+function initAuth(){
+  $$('.auth-tabs button').forEach(b => b.addEventListener('click', () => {
+    $$('.auth-tabs button').forEach(x => x.classList.toggle('on', x === b));
+    mode = b.dataset.a;
+    $('#authCloud').style.display = mode === 'cloud' ? 'block' : 'none';
+    $('#authLocal').style.display = mode === 'local' ? 'block' : 'none';
+    $('#cErr').textContent = '';
+    if(mode === 'local') showLocalAuth();
+  }));
+  /* 云登录 */
+  $('#btnCLogin').addEventListener('click', async () => {
+    const u = $('#cUser').value.trim(), p = $('#cPass').value;
+    if(!u || !p){ $('#cErr').textContent = '请输入用户名和密码'; return; }
+    $('#cErr').textContent = '登录中…';
+    try{
+      const h = gamesPassHash(u + ':' + p + ':' + 'miaodou-games-v1');
+      const ok = await CLOUD.login(u, h);
+      if(ok){ cloudUser = u; sessionStorage.setItem('xgf_admin_user', u); enterGames(); }
+      else $('#cErr').textContent = '用户名或密码不对';
+    }catch(e){ $('#cErr').textContent = '网络异常，请重试（' + e.message.slice(0,40) + '）'; }
+  });
+  $('#cPass').addEventListener('keydown', e => { if(e.key === 'Enter') $('#btnCLogin').click(); });
+  /* 云注册 */
+  $('#btnCReg').addEventListener('click', async () => {
+    const u = $('#cUser').value.trim(), p = $('#cPass').value;
+    if(u.length < 3){ $('#cErr').textContent = '用户名至少 3 位'; return; }
+    if(p.length < 4){ $('#cErr').textContent = '密码至少 4 位'; return; }
+    $('#cErr').textContent = '注册中…';
+    try{
+      const h = gamesPassHash(u + ':' + p + ':' + 'miaodou-games-v1');
+      await CLOUD.register(u, h);
+      cloudUser = u;
+      sessionStorage.setItem('xgf_admin_user', u);
+      toast('注册成功，欢迎使用星光赴梦 ✦');
+      enterGames();
+    }catch(e){
+      $('#cErr').textContent = e.message.includes('409') ? '用户名已被注册，换一个试试' : '注册失败（' + e.message.slice(0,40) + '）';
+    }
+  });
+  $('#btnCForgot').addEventListener('click', () => {
+    confirmDlg('忘记云账号密码？', '需要重置密码请联系管理员协助处理（本地数据不受影响）。', '知道了', null);
+  });
+  /* 本地模式 */
+  $('#btnSetPwd').addEventListener('click', async () => {
+    const p1 = $('#np1').value, p2 = $('#np2').value;
+    if(p1.length < 4){ toast('密码至少 4 位'); return; }
+    if(p1 !== p2){ toast('两次输入不一致'); return; }
+    let cfg = loadLocalConfig() || defaultConfig();
+    const salt = genSalt();
+    cfg.security = { salt, hash: await sha256Hex(salt + '::' + p1) };
+    saveLocalConfig(cfg);
+    toast('本地密码创建成功');
+    enterPanel();
+  });
+  $('#btnLogin').addEventListener('click', async () => {
+    const cfg = loadLocalConfig();
+    if(!cfg || !cfg.security || !cfg.security.hash){ showLocalAuth(); return; }
+    const h = await sha256Hex(cfg.security.salt + '::' + $('#pin').value);
+    if(h === cfg.security.hash){ enterPanel(); }
+    else { toast('密码不对哦，再想想～'); $('#pin').value=''; $('#pin').focus(); }
+  });
+  $('#pin').addEventListener('keydown', e => { if(e.key==='Enter') $('#btnLogin').click(); });
+  $('#np2').addEventListener('keydown', e => { if(e.key==='Enter') $('#btnSetPwd').click(); });
+  $('#btnForgot').addEventListener('click', () => {
+    confirmDlg('忘记本地密码了？', '将清空本机全部自定义配置并恢复默认，之后可重新设置密码。通关进度不受影响。', '确认清空', () => {
+      localStorage.removeItem(CFG_KEY); toast('已恢复默认'); showLocalAuth();
+    }, true);
+  });
+  /* 恢复云会话 */
+  try{
+    const u = sessionStorage.getItem('xgf_admin_user');
+    if(u){ cloudUser = u; enterGames(); return; }
+  }catch(e){}
+  showLogin();
+}
+
+/* ---------- 我的游戏 ---------- */
+async function enterGames(){
+  $('#loginView').style.display = 'none';
+  $('#panelView').style.display = 'none';
+  $('#gamesView').style.display = 'block';
+  await renderGames();
+}
+async function renderGames(){
+  const main = $('#gamesMain');
+  main.innerHTML = '<div class="games-empty"><div class="e-icon">🌙</div><p>加载中…</p></div>';
+  try{
+    const games = await CLOUD.listGames(cloudUser);
+    if(!games.length){
+      main.innerHTML = `<div class="games-empty">
+        <div class="e-icon">💌</div><p>还没有创建游戏</p>
+        <p style="font-size:12.5px;margin-top:6px">创建一个游戏，会生成专属 6 位游戏码，孩子输入即可游玩</p>
+        <button class="btn-sm gold" style="margin-top:20px;padding:12px 30px" id="goNew">＋ 创建第一个游戏</button></div>`;
+      $('#goNew').addEventListener('click', createGameFlow);
+      return;
+    }
+    main.innerHTML = '';
+    games.forEach(g => {
+      const cfg = migrateConfig(g.config || {});
+      const nick = (cfg.profile && cfg.profile.nickname) || '宝贝';
+      const card = document.createElement('div');
+      card.className = 'game-card';
+      card.innerHTML = `
+        <div class="gc-body">
+          <div class="gc-name">${nick} 的星光旅程</div>
+          <div class="gc-code">${g.code}<button data-copy="${g.code}">复制</button></div>
+          <div class="gc-meta">创建于 ${(g.created_at||'').slice(0,10)} · 孩子输入上面的游戏码即可游玩</div>
+        </div>
+        <div class="gc-ops">
+          <button class="gc-edit" data-edit="${g.code}">✏️ 编辑配置</button>
+          <button class="gc-del" data-del="${g.code}">删除</button>
+        </div>`;
+      card.querySelector('[data-copy]').addEventListener('click', e => {
+        e.stopPropagation();
+        const code = e.target.dataset.copy;
+        if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(code).then(()=>toast('游戏码已复制：' + code)); }
+        else { const ta = document.createElement('textarea'); ta.value = code; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove(); toast('游戏码已复制：' + code); }
+      });
+      card.querySelector('[data-edit]').addEventListener('click', async () => {
+        toast('加载中…');
+        const g2 = await CLOUD.loadGame(g.code);
+        if(!g2){ toast('加载失败'); return; }
+        currentCode = g.code;
+        currentConfig = migrateConfig(g2.config || {});
+        enterPanel();
+      });
+      card.querySelector('[data-del]').addEventListener('click', () => {
+        confirmDlg('删除这个游戏？', '游戏码「' + g.code + '」将失效，孩子无法再进入。孩子进度数据也会一并删除。', '确认删除', async () => {
+          try{
+            await CLOUD.deleteGame(g.code);
+            toast('游戏已删除');
+            renderGames();
+          }catch(e){ toast('删除失败：' + e.message.slice(0,40)); }
+        }, true);
+      });
+      main.appendChild(card);
+    });
+  }catch(e){
+    main.innerHTML = `<div class="games-empty"><div class="e-icon">⚠️</div><p>加载失败：${e.message.slice(0,60)}</p>
+      <button class="btn-sm" style="margin-top:16px" onclick="renderGames()">重试</button></div>`;
+  }
+}
+async function createGameFlow(){
+  modal(`<h4>创建一个新游戏</h4>
+    <div class="m-body">会为您的孩子生成一个专属 6 位游戏码。可以创建多个（如：大宝 / 二宝，或不同年级版本）。</div>
+    <div class="m-actions"><button class="m-cancel" id="cgNo">取消</button>
+    <button class="m-ok" id="cgYes">创建</button></div>`,
+    { onShow(){
+      $('#cgNo').addEventListener('click', modalHide);
+      $('#cgYes').addEventListener('click', async () => {
+        modalHide();
+        toast('正在生成游戏码…');
+        try{
+          const code = await uniqueCode();
+          await CLOUD.createGame(code, cloudUser, defaultConfig());
+          currentCode = code;
+          currentConfig = defaultConfig();
+          toast('创建成功！游戏码：' + code);
+          enterPanel();
+        }catch(e){ toast('创建失败：' + e.message.slice(0,50)); }
+      });
+    }});
+}
+
+/* ---------- 主面板 ---------- */
+function enterPanel(){
+  $('#loginView').style.display = 'none';
+  $('#gamesView').style.display = 'none';
+  $('#panelView').style.display = 'block';
+  if(mode === 'local'){
+    currentCode = null;
+    currentConfig = loadLocalConfig() || defaultConfig();
+  }
+  $('#headMode').textContent = mode === 'cloud' ? ('云账号 · ' + cloudUser) : '本地模式';
+  $('#headCode').textContent = mode === 'cloud' ? ('码 ' + currentCode) : '本地';
+  $('#pwdItem').style.display = mode === 'cloud' ? 'none' : 'flex';
+  refreshAll();
+}
+async function saveConfig(){
+  currentConfig = migrateConfig(currentConfig);
+  if(mode === 'cloud' && currentCode){
+    try{
+      await CLOUD.saveGameConfig(currentCode, currentConfig);
+      return true;
+    }catch(e){ toast('云端保存失败：' + e.message.slice(0,40)); return false; }
+  }
+  saveLocalConfig(currentConfig);
+  return true;
+}
+/* 读取孩子进度（标注已获取用） */
+let childProgress = null;
+async function refreshChildProgress(){
+  childProgress = null;
+  if(mode === 'cloud' && currentCode){
+    try{ childProgress = await CLOUD.loadProgress(currentCode); }catch(e){}
+  } else {
+    try{ const r = localStorage.getItem(PROG_KEY); if(r) childProgress = JSON.parse(r); }catch(e){}
+  }
+}
+function isCollected(text){
+  if(!childProgress || !childProgress.letters) return false;
+  return childProgress.letters.some(l => l.message === text);
+}
+
+/* ---------- 基础信息 ---------- */
+function refreshBasic(){
+  const c = currentConfig;
+  $('#inNick').value = c.profile.nickname || '宝贝';
+  $('#inWelcome').value = c.profile.welcome || '';
+  $('#inSign').value = c.signature || '爱你的爸爸妈妈';
+  $$('#segGender button').forEach(b => b.classList.toggle('on', b.dataset.g === (c.profile.gender || 'neutral')));
+}
+function bindBasic(){
+  $('#btnSaveBasic').addEventListener('click', async () => {
+    currentConfig.profile.nickname = ($('#inNick').value.trim() || '宝贝').slice(0,12);
+    currentConfig.profile.welcome = $('#inWelcome').value.trim().slice(0,30);
+    currentConfig.signature = ($('#inSign').value.trim() || '爱你的爸爸妈妈').slice(0,20);
+    if(await saveConfig()) toast('已保存，游戏端刷新即生效 ✦');
+  });
+  $('#segGender').addEventListener('click', e => {
+    const b = e.target.closest('button[data-g]'); if(!b) return;
+    currentConfig.profile.gender = b.dataset.g;
+    $$('#segGender button').forEach(x => x.classList.toggle('on', x===b));
+    saveConfig(); toast('角色形象已切换：' + ({neutral:'通用',boy:'男孩',girl:'女孩'}[b.dataset.g]));
+  });
+  $('#segTheme').addEventListener('click', e => {
+    const b = e.target.closest('button[data-m]'); if(!b) return;
+    currentConfig.settings.darkMode = b.dataset.m;
+    applyTheme(); saveConfig(); toast('界面模式已更新');
+  });
+}
+
+/* ---------- 关卡寄语 ---------- */
+function refreshLevels(){
+  const c = currentConfig;
+  const list = $('#lvList'); list.innerHTML = '';
+  DEFAULT_LEVELS.forEach((d, i) => {
+    const lv = c.levels.find(l => l.id === d.id) || { id:d.id, title:d.title, message:d.message, custom_ids:[] };
+    const customs = (lv.custom_ids || []).map(id => c.custom_messages.find(m => m.id === id)).filter(Boolean);
+    const cands = [];
+    if(lv.message && lv.message.trim()) cands.push({ text: lv.message, src: '内置' });
+    customs.forEach(cm => cands.push({ text: cm.text, src: '我的寄语' }));
+    const box = document.createElement('div');
+    box.className = 'lv-edit';
+    box.innerHTML = `
+      <div class="lv-head"><span class="lv-icon">${['🌅','🌤️','🌙','✨','🌌','🏠'][i]}</span>
+        <span class="lv-name">第 ${i+1} 关 · ${d.title}</span>
+        ${i===5?'<span class="lv-tag">终章</span>':''}
+        <span class="lv-tag" style="color:var(--purple-deep);background:var(--purple-soft)">已套用 ${customs.length} 条</span></div>
+      <textarea data-lv="${d.id}" placeholder="写给孩子的话…（未套用我的寄语时，从这里随机推送）">${lv.message||''}</textarea>
+      <div class="count">${(lv.message||'').length} 字 · <span style="color:var(--purple-deep)">套用我的寄语：${customs.map(x=>x.text.slice(0,12)+'…').join('、') || '未套用'}</span></div>
+      <div class="lv-ops">
+        <button data-app="${d.id}">📌 套用我的寄语</button>
+        <button data-clr="${d.id}">清空</button>
+        <button data-prev="${d.id}">预览效果</button>
+      </div>
+      <div class="cand-list"><div class="cl-title">候选寄语（孩子按：套用优先 → 未获取优先 → 随机 推送）</div>
+        ${cands.length ? cands.map(ca => `
+          <div class="cand-item"><span class="src">${ca.src}</span>
+            <span class="txt">${ca.text}</span>
+            ${isCollected(ca.text) ? '<span class="got">✓ 孩子已获取</span>' : ''}</div>`).join('')
+          : '<div class="cand-item" style="opacity:.6">（暂未设置，将使用系统默认寄语）</div>'}
+      </div>`;
+    const ta = box.querySelector('textarea');
+    ta.addEventListener('input', () => { box.querySelector('.count').innerHTML = ta.value.length + ' 字'; });
+    box.querySelector('[data-clr]').addEventListener('click', () => { ta.value=''; box.querySelector('.count').textContent='0 字'; });
+    box.querySelector('[data-prev]').addEventListener('click', () => {
+      modal(`<h4>第 ${i+1} 关 · ${d.title} 预览</h4>
+        <div class="m-body" style="max-height:46vh;overflow-y:auto;text-align:left;font-size:15px;line-height:2.1">
+        <b style="color:var(--purple-deep)">亲爱的${currentConfig.profile.nickname||'宝贝'}：</b><br>${(ta.value.trim()||customs[0]?.text||'（暂未填写，将显示默认寄语）')}</div>
+        <div class="m-actions"><button class="m-ok" id="prevOk">好的</button></div>`,
+        { onShow(){ $('#prevOk').addEventListener('click', modalHide); }});
+    });
+    box.querySelector('[data-app]').addEventListener('click', () => applyCustomToLevel(d.id));
+    list.appendChild(box);
+  });
+}
+function applyCustomToLevel(levelId){
+  const c = currentConfig;
+  const lv = c.levels.find(l => l.id === levelId);
+  const current = lv ? lv.custom_ids : [];
+  const opts = c.custom_messages.length
+    ? c.custom_messages.map(m => `<label class="lv-check"><input type="checkbox" value="${m.id}" ${current.includes(m.id)?'checked':''}> ${m.text.slice(0,26)}${m.text.length>26?'…':''}</label>`).join('')
+    : '<div style="color:var(--ink-soft);font-size:13px;padding:8px 0">还没有自定义寄语，先去「模板库 → 我的寄语」写一条吧</div>';
+  modal(`<h4>📌 套用我的寄语到「第 ${levelId} 关」</h4>
+    <div class="m-body">勾选后可多条，孩子优先收到未获取的；已获取的会标注，不优先推送。</div>
+    ${opts}
+    <div class="m-actions">
+      <button class="m-cancel" id="apNo">取消</button>
+      <button class="m-ok" id="apYes">保存套用</button></div>`,
+    { onShow(){
+      $('#apNo').addEventListener('click', modalHide);
+      $('#apYes').addEventListener('click', async () => {
+        const ids = Array.from(document.querySelectorAll('#modalBox .lv-check input:checked')).map(x => x.value);
+        if(lv) lv.custom_ids = ids;
+        if(await saveConfig()){ modalHide(); refreshLevels(); toast('套用已保存 ✦'); }
+      });
+    }});
+}
+function bindLevels(){
+  $('#btnSaveLevels').addEventListener('click', async () => {
+    $$('#lvList textarea').forEach(ta => {
+      const id = +ta.dataset.lv;
+      const lv = currentConfig.levels.find(l => l.id === id);
+      if(lv) lv.message = ta.value.trim();
+    });
+    if(await saveConfig()) toast('全部寄语已保存 ✦');
+  });
+  $('#btnRestoreLevels').addEventListener('click', () => {
+    confirmDlg('恢复默认寄语？', '六段旅程的内置寄语将恢复默认（已套用的「我的寄语」保留）。', '恢复默认', async () => {
+      currentConfig.levels.forEach(l => {
+        const d = DEFAULT_LEVELS.find(x => x.id === l.id);
+        if(d) l.message = d.message;
+      });
+      if(await saveConfig()){ refreshLevels(); toast('已恢复默认寄语'); }
+    });
+  });
+}
+
+/* ---------- 彩蛋 ---------- */
+function refreshEggs(){
+  const eggs = (currentConfig.eggs && currentConfig.eggs.length) ? currentConfig.eggs : DEFAULT_EGGS;
+  $('#inEggs').value = eggs.join('\n');
+  $('#eggCnt').textContent = '共 ' + eggs.length + ' 条 · 自动平均分配到 6 关';
+  $('#eggChips').innerHTML = eggs.map(e => `<span>${e}</span>`).join('');
+}
+function bindEggs(){
+  $('#btnSaveEggs').addEventListener('click', async () => {
+    const list = $('#inEggs').value.split('\n').map(s=>s.trim()).filter(Boolean);
+    if(!list.length){ toast('至少保留一条彩蛋文案'); return; }
+    currentConfig.eggs = list;
+    if(await saveConfig()){ refreshEggs(); toast('彩蛋已保存（共 ' + list.length + ' 条）✨'); }
+  });
+  $('#btnRestoreEggs').addEventListener('click', async () => {
+    currentConfig.eggs = DEFAULT_EGGS.slice();
+    if(await saveConfig()){ refreshEggs(); toast('已恢复默认彩蛋'); }
+  });
+}
+
+/* ---------- 模板库 & 我的寄语 ---------- */
+function refreshTpl(){
+  const grid = $('#tplGrid'); grid.innerHTML = '';
+  Object.keys(TEMPLATES).forEach(cat => {
+    TEMPLATES[cat].forEach((txt, i) => {
+      const card = document.createElement('div');
+      card.className = 'tpl-card';
+      card.innerHTML = `<span class="cat">${cat}</span><p>${txt}</p>
+        <button class="apply" data-cat="${cat}" data-i="${i}">套用 ›</button>`;
+      card.querySelector('.apply').addEventListener('click', () => {
+        const list = DEFAULT_LEVELS.map((d,idx) => `<option value="${d.id}">第 ${idx+1} 关 · ${d.title}</option>`).join('');
+        modal(`<h4>把这条模板套用到哪一关？</h4>
+          <div class="m-body" style="background:var(--bg2);border-radius:12px;padding:12px 14px;font-size:13.5px">${txt}</div>
+          <select id="tplTarget">${list}</select>
+          <div class="m-actions" style="margin-top:14px">
+            <button class="m-cancel" id="tplNo">取消</button>
+            <button class="m-ok" id="tplYes">套用</button></div>`,
+          { onShow(){
+            $('#tplNo').addEventListener('click', modalHide);
+            $('#tplYes').addEventListener('click', async () => {
+              const id = +$('#tplTarget').value;
+              const lv = currentConfig.levels.find(l => l.id === id);
+              if(lv) lv.message = txt;
+              if(await saveConfig()){ modalHide(); refreshLevels(); toast('已套用到第 ' + id + ' 关 ✦ 记得在寄语页保存'); }
+            });
+          }});
+      });
+      grid.appendChild(card);
+    });
+  });
+  renderCustomList();
+}
+function renderCustomList(){
+  const c = currentConfig;
+  const wrap = $('#customList');
+  wrap.innerHTML = '';
+  if(!c.custom_messages.length){
+    wrap.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:10px 0">还没有写过的寄语，点「写一条新寄语」开始吧</div>';
+    return;
+  }
+  c.custom_messages.forEach(cm => {
+    const applied = c.levels.filter(l => (l.custom_ids||[]).includes(cm.id));
+    const item = document.createElement('div');
+    item.className = 'my-msg-item';
+    item.innerHTML = `
+      <div class="mm-body">
+        <div class="mm-text">${cm.text}</div>
+        <div class="mm-meta">
+          ${applied.length ? applied.map(l => `<span class="tag">套用于第 ${l.id} 关</span>`).join('') : '<span>未套用</span>'}
+          ${isCollected(cm.text) ? '<span class="tag" style="background:var(--green-soft);color:#5E8A68">✓ 孩子已获取</span>' : ''}
+        </div>
+      </div>
+      <div class="mm-ops">
+        <button data-e="${cm.id}">编辑</button>
+        <button data-d="${cm.id}">删除</button>
+      </div>`;
+    item.querySelector('[data-e]').addEventListener('click', () => editCustom(cm));
+    item.querySelector('[data-d]').addEventListener('click', () => {
+      confirmDlg('删除这条寄语？', '套用了这条寄语的关卡将不再推送它。', '确认删除', async () => {
+        c.custom_messages = c.custom_messages.filter(x => x.id !== cm.id);
+        c.levels.forEach(l => { l.custom_ids = (l.custom_ids||[]).filter(id => id !== cm.id); });
+        if(await saveConfig()){ refreshLevels(); renderCustomList(); toast('已删除'); }
+      }, true);
+    });
+    wrap.appendChild(item);
+  });
+}
+function editCustom(cm){
+  modal(`<h4>${cm ? '编辑寄语' : '写一条新寄语'}</h4>
+    <div class="m-body" style="padding:0">
+      <textarea id="cmText" style="min-height:120px" placeholder="写想对孩子说的话…">${cm ? cm.text : ''}</textarea>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:6px">写好后可到「关卡寄语」里套用到某一关；编辑后会同步更新所有已套用的关卡。</div>
+    </div>
+    <div class="m-actions"><button class="m-cancel" id="cmNo">取消</button>
+    <button class="m-ok" id="cmYes">${cm ? '保存修改' : '保存'}</button></div>`,
+    { onShow(){
+      $('#cmNo').addEventListener('click', modalHide);
+      $('#cmYes').addEventListener('click', async () => {
+        const txt = $('#cmText').value.trim();
+        if(!txt){ toast('写点内容再保存哦'); return; }
+        if(cm){ cm.text = txt; }
+        else{
+          currentConfig.custom_messages.push({ id:'c' + Date.now().toString(36) + Math.floor(Math.random()*999), text: txt, created: new Date().toISOString() });
+        }
+        if(await saveConfig()){ modalHide(); refreshLevels(); renderCustomList(); toast('已保存 ✦'); }
+      });
+    }});
+}
+function bindTpl(){
+  $('#btnAddCustom').addEventListener('click', () => editCustom(null));
+}
+
+/* ---------- 爸妈信件（奖励信） ---------- */
+function refreshBonus(){
+  const c = currentConfig;
+  const wrap = $('#bonusList');
+  wrap.innerHTML = '';
+  if(!c.bonus_letters.length){
+    wrap.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:10px 0">还没有信，点「写一封信」开始吧。孩子通关后会随机收到一封。</div>';
+    return;
+  }
+  c.bonus_letters.forEach(b => {
+    const item = document.createElement('div');
+    item.className = 'bonus-item';
+    item.innerHTML = `
+      <div class="bb-body">
+        <div class="bb-title">💌 ${b.title || '（无标题）'}</div>
+        <div class="bb-text">${b.text}</div>
+        <div class="bb-meta">${isCollected(b.text) ? '<span class="got">✓ 已被孩子获取</span>' : '尚未被孩子获取'}</div>
+      </div>
+      <div class="bb-ops">
+        <button data-e="${b.id}">编辑</button>
+        <button class="del" data-d="${b.id}">删除</button>
+      </div>`;
+    item.querySelector('[data-e]').addEventListener('click', () => editBonus(b));
+    item.querySelector('[data-d]').addEventListener('click', () => {
+      confirmDlg('删除这封信？', '孩子通关后将不再收到这封信。', '确认删除', async () => {
+        currentConfig.bonus_letters = currentConfig.bonus_letters.filter(x => x.id !== b.id);
+        if(await saveConfig()){ refreshBonus(); toast('已删除'); }
+      }, true);
+    });
+    wrap.appendChild(item);
+  });
+}
+function editBonus(b){
+  modal(`<h4>${b ? '编辑信件' : '✉️ 写一封信'}</h4>
+    <div class="m-body" style="padding:0">
+      <div style="margin-bottom:10px"><input id="bTitle" placeholder="信的主题（如：宝贝的晚安信）" value="${b ? b.title : ''}"></div>
+      <textarea id="bText" style="min-height:130px" placeholder="写下想对孩子说的话…（会在通关后的信封里拆开看到）">${b ? b.text : ''}</textarea>
+    </div>
+    <div class="m-actions"><button class="m-cancel" id="bnNo">取消</button>
+    <button class="m-ok" id="bnYes">${b ? '保存修改' : '保存'}</button></div>`,
+    { onShow(){
+      $('#bnNo').addEventListener('click', modalHide);
+      $('#bnYes').addEventListener('click', async () => {
+        const title = $('#bTitle').value.trim().slice(0,20);
+        const text = $('#bText').value.trim();
+        if(!text){ toast('写点内容再保存哦'); return; }
+        if(b){ b.title = title; b.text = text; }
+        else{
+          currentConfig.bonus_letters.push({ id:'b' + Date.now().toString(36) + Math.floor(Math.random()*999), title, text, created: new Date().toISOString() });
+        }
+        if(await saveConfig()){ modalHide(); refreshBonus(); toast('信件已保存 ✦'); }
+      });
+    }});
+}
+function bindBonus(){
+  $('#btnAddBonus').addEventListener('click', () => editBonus(null));
+}
+
+/* ---------- 数据管理 ---------- */
+function bindData(){
+  $('#btnExport').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(currentConfig, null, 2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = '星光赴梦-配置备份-' + new Date().toISOString().slice(0,10) + '.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    toast('配置已导出');
+  });
+  $('#btnImport').addEventListener('click', () => {
+    const file = document.createElement('input');
+    file.type = 'file'; file.accept = '.json,application/json';
+    file.addEventListener('change', () => {
+      const f = file.files[0]; if(!f) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        try{
+          const data = JSON.parse(reader.result);
+          if(!data || !data.profile || !data.levels) throw new Error('格式不对');
+          currentConfig = migrateConfig(data);
+          if(await saveConfig()){ refreshAll(); toast('配置导入成功 ✦'); }
+        }catch(e){ toast('导入失败：不是有效的备份文件'); }
+      };
+      reader.readAsText(f);
+    });
+    file.click();
+  });
+  $('#btnResetProg').addEventListener('click', () => {
+    confirmDlg('重置通关进度？', '将清空孩子的通关记录与收藏馆信件。您的自定义内容不受影响。', '确认重置', async () => {
+      const empty = { unlocked:[1], letters:[], achievement:false };
+      if(mode === 'cloud' && currentCode){
+        try{ await CLOUD.req('DELETE', 'xg_progress?game_code=eq.' + encodeURIComponent(currentCode)); toast('孩子进度已重置'); }
+        catch(e){ try{ await CLOUD.req('POST', 'xg_progress', { game_code: currentCode, data: empty }); toast('孩子进度已重置'); }catch(e2){ toast('重置失败'); } }
+      } else {
+        localStorage.setItem(PROG_KEY, JSON.stringify(empty));
+        toast('孩子进度已重置');
+      }
+      refreshChildProgress();
+    }, true);
+  });
+  $('#btnResetAll').addEventListener('click', () => {
+    confirmDlg('恢复系统默认模板？', '将清空称呼 / 寄语 / 彩蛋 / 信件等全部自定义内容，恢复内置默认。', '确认恢复', async () => {
+      const sec = currentConfig.security || { hash:'', salt:'' };
+      currentConfig = defaultConfig();
+      currentConfig.security = sec;
+      if(await saveConfig()){ refreshAll(); toast('已恢复系统默认模板'); }
+    }, true);
+  });
+  $('#btnChangePwd').addEventListener('click', () => {
+    if(mode === 'cloud'){
+      modal(`<h4>修改云账号密码</h4>
+        <div class="m-body">
+          <div style="margin-bottom:12px"><input type="password" id="oldPwd" placeholder="当前密码" autocomplete="current-password"></div>
+          <div style="margin-bottom:12px"><input type="password" id="newPwd1" placeholder="新密码（至少 4 位）" autocomplete="new-password"></div>
+          <div><input type="password" id="newPwd2" placeholder="再次输入新密码" autocomplete="new-password"></div>
+        </div>
+        <div class="m-actions"><button class="m-cancel" id="cpNo">取消</button>
+        <button class="m-ok" id="cpYes">确认修改</button></div>`,
+        { onShow(){
+          $('#cpNo').addEventListener('click', modalHide);
+          $('#cpYes').addEventListener('click', async () => {
+            const oldH = gamesPassHash(cloudUser + ':' + $('#oldPwd').value + ':' + 'miaodou-games-v1');
+            const ok = await CLOUD.login(cloudUser, oldH);
+            if(!ok){ toast('当前密码不正确'); return; }
+            const p1 = $('#newPwd1').value, p2 = $('#newPwd2').value;
+            if(p1.length < 4){ toast('新密码至少 4 位'); return; }
+            if(p1 !== p2){ toast('两次输入的新密码不一致'); return; }
+            await CLOUD.changePwd(cloudUser, gamesPassHash(cloudUser + ':' + p1 + ':' + 'miaodou-games-v1'));
+            modalHide(); toast('密码已更新');
+          });
+        }});
+    } else {
+      modal(`<h4>修改本地密码</h4>
+        <div class="m-body">
+          <div style="margin-bottom:12px"><input type="password" id="oldPwd" placeholder="当前密码" autocomplete="current-password"></div>
+          <div style="margin-bottom:12px"><input type="password" id="newPwd1" placeholder="新密码（至少 4 位）" autocomplete="new-password"></div>
+          <div><input type="password" id="newPwd2" placeholder="再次输入新密码" autocomplete="new-password"></div>
+        </div>
+        <div class="m-actions"><button class="m-cancel" id="cpNo">取消</button>
+        <button class="m-ok" id="cpYes">确认修改</button></div>`,
+        { onShow(){
+          $('#cpNo').addEventListener('click', modalHide);
+          $('#cpYes').addEventListener('click', async () => {
+            const cfg = currentConfig;
+            const oldH = await sha256Hex(cfg.security.salt + '::' + $('#oldPwd').value);
+            if(oldH !== cfg.security.hash){ toast('当前密码不正确'); return; }
+            const p1 = $('#newPwd1').value, p2 = $('#newPwd2').value;
+            if(p1.length < 4){ toast('新密码至少 4 位'); return; }
+            if(p1 !== p2){ toast('两次输入的新密码不一致'); return; }
+            const salt = genSalt();
+            cfg.security = { salt, hash: await sha256Hex(salt + '::' + p1) };
+            if(await saveConfig()){ modalHide(); toast('密码已更新'); }
+          });
+        }});
+    }
+  });
+  $('#btnPreview').addEventListener('click', () => {
+    toast('正在打开游戏…保存的内容刷新游戏页即可看到');
+    setTimeout(() => window.open('index.html', '_blank'), 200);
+  });
+}
+
+/* ---------- tabs & 刷新 ---------- */
+function bindTabs(){
+  $$('.tab').forEach(t => t.addEventListener('click', async () => {
+    $$('.tab').forEach(x => x.classList.toggle('active', x===t));
+    $$('.tab-page').forEach(p => p.classList.toggle('active', p.id === 'pg-' + t.dataset.tab));
+    /* 切换时刷新内容（含「已获取」标注最新状态） */
+    if(t.dataset.tab === 'tpl') refreshTpl();
+    if(t.dataset.tab === 'levels'){ await refreshChildProgress(); refreshLevels(); }
+    if(t.dataset.tab === 'letters'){ await refreshChildProgress(); refreshBonus(); }
+  }));
+}
+async function refreshAll(){
+  await refreshChildProgress();
+  refreshBasic(); refreshLevels(); refreshEggs(); refreshTpl(); refreshBonus(); applyTheme();
+}
+
+/* ---------- 启动 ---------- */
+document.addEventListener('DOMContentLoaded', () => {
+  applyTheme();
+  initAuth();
+  $('#btnNewGame').addEventListener('click', createGameFlow);
+  bindBasic();
+  bindLevels();
+  bindEggs();
+  bindTpl();
+  bindBonus();
+  bindTabs();
+  bindData();
+  $('#btnBack').addEventListener('click', () => {
+    if(mode === 'cloud'){ enterGames(); }
+    else { showLogin(); }
+  });
+  $('#btnLogout').addEventListener('click', () => {
+    cloudUser = null;
+    try{ sessionStorage.removeItem('xgf_admin_user'); }catch(e){}
+    currentCode = null; currentConfig = null;
+    showLogin();
+  });
+});
+</script>
+</body>
+</html>
