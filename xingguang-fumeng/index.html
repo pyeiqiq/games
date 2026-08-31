@@ -354,12 +354,12 @@ input,textarea{font-family:inherit}
     <div class="sky" id="codeSky"></div>
     <div class="code-box">
       <div class="logo"><span class="moon">🌙</span> 星光赴梦</div>
-      <div class="code-hint">输入爸爸妈妈给你的 <b>6 位游戏码</b><br>开启你的专属星光旅程</div>
+      <div class="code-hint">输入你的专属<b> 6 位游戏码</b><br>开启你的专属星光旅程</div>
       <input id="codeInput" maxlength="6" placeholder="· · · · · ·" autocomplete="off" autocapitalize="characters" spellcheck="false">
       <button class="btn-main" id="btnCodeEnter">✦ 进入星光</button>
       <div class="code-err" id="codeErr"></div>
-      <button class="btn-ghost" id="btnGuest">先随便逛逛（游客模式）</button>
-      <div class="cloud-tag">☁️ 爸爸妈妈在云端为你准备了惊喜</div>
+      <button class="btn-ghost" id="btnGuest">先进去逛逛</button>
+      <div class="cloud-tag">☁️ 有人在云端为你准备了惊喜</div>
     </div>
   </section>
 
@@ -378,7 +378,7 @@ input,textarea{font-family:inherit}
       <div class="home-foot">
         <button class="btn-ghost" id="btnTheme">🌙 夜间模式</button>
         <button class="btn-ghost" id="btnSwitch">🔄 切换游戏</button>
-        <button class="btn-ghost" id="btnAdmin">家长入口 ›</button>
+        <button class="btn-ghost" id="btnAdmin">后台入口 ›</button>
       </div>
     </div>
   </section>
@@ -740,21 +740,30 @@ XGF.getLevelCandidates = function(id){
   return list;
 };
 XGF.pickLevelMsg = function(id, letters){
-  /* 有套用 → 只用套用寄语（未收藏优先）；无套用 → 用内置寄语。
-     本地模式直接读磁盘最新（家长在后台更新后即时感知）；云端模式用云端缓存 */
+  /* 推送规则：有套用→优先用套用的（未获取优先）；自定义全部被获取→补充系统模板
+     中未获取的；全部用完→推送任意套用寄语。无套用→用内置寄语。
+     本地模式直接读磁盘最新；云端模式用云端缓存 */
   let cfg = XGF._cfgCache;
   if(!XGF.CLOUD.enabled){
     try{ const raw = localStorage.getItem(CFG_KEY); if(raw) cfg = XGF.migrateConfig(JSON.parse(raw)); }catch(e){}
   }
   if(!cfg) cfg = XGF.getConfig();
   const lv = cfg.levels.find(l => l.id === id);
-  const customs = ((lv && lv.custom_ids) || []).map(cid => cfg.custom_messages.find(m => m.id === cid))
+  const customTexts = ((lv && lv.custom_ids) || []).map(cid => cfg.custom_messages.find(m => m.id === cid))
     .filter(m => m && m.text && m.text.trim()).map(m => m.text);
   let base = (lv && lv.message && lv.message.trim()) ? lv.message : '';
   if(!base){ const d = XGF.DEFAULT_LEVELS.find(l => l.id === id); if(d) base = d.message; }
-  const cands = customs.length ? customs : [base];
-  const uncollected = cands.filter(m => !(letters || []).some(l => l.levelId === id && l.message === m));
-  return XGF.pick(uncollected.length ? uncollected : cands);
+  const collected = m => (letters || []).some(l => l.levelId === id && l.message === m);
+  /* 候选池：套用优先 */
+  let pool = customTexts.length ? customTexts.slice() : [];
+  /* 套用的自定义寄语全部被获取 → 补充系统模板（同样优先未获取） */
+  if(pool.length && pool.every(collected)){
+    const tpl = Object.values(XGF.TEMPLATES).flat();
+    tpl.forEach(t => { if(!pool.includes(t)) pool.push(t); });
+  }
+  if(!pool.length) pool = [base];
+  const uncollected = pool.filter(m => !collected(m));
+  return XGF.pick(uncollected.length ? uncollected : pool);
 };
 XGF.pickBonus = function(cfg, prog){
   const list = cfg.bonus_letters || [];
@@ -1951,7 +1960,7 @@ XGF.tips = {
   }
 };
 
-/* ---------------- [M13] message 信封拆信 + 寄语展示 ---------------- */
+/* ---------------- [M13] message 寄语展示（前 5 关直展 / 终章拆信） ---------------- */
 XGF.message = {
   render(levelId, score, msg, bonus){
     const m = XGF.LEVEL_META.find(l => l.id === levelId);
@@ -1961,6 +1970,37 @@ XGF.message = {
     const sign = cfg.signature || '爱你的爸爸妈妈';
     const isFinal = levelId === 6;
     const view = XGF.$('#view-message');
+    const scoreHtml = `<div class="m-score">⭐ 本段收获 ${score || 0} 分</div>`;
+    const bonusHtml = bonus
+      ? `<div class="m-bonus" style="margin-top:16px;padding:12px 16px;border:1.5px dashed rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.08);text-align:left;font-size:13.5px;line-height:1.9"><b style="color:#FFE9B8">💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
+    const achHtml = isFinal ? `<div class="m-ach">🏆 ${XGF.ACHIEVEMENT.title}</div>` : '';
+    const actionsHtml = `
+      <div class="msg-actions">
+        <button class="msg-save" id="psSave">🖼️ 保存图片</button>
+        ${isFinal
+          ? `<button class="msg-home" id="psHome">🏠 返回首页</button>`
+          : `<button class="msg-next" id="psNext">✦ 下一段旅程</button>
+             <button class="msg-home" id="psHome">🏠 返回首页</button>`}
+      </div>`;
+    if(!isFinal){
+      /* 前 5 关：直接展示寄语卡（不拆信） */
+      view.innerHTML = `
+        <div class="msg-card" style="animation:msgIn .8s ease both">
+          <span class="m-star">✦</span>
+          <div class="m-level">第 ${idx} 段旅程 · ${m.title}</div>
+          <div class="m-title">${m.title}</div>
+          <div class="m-nick">亲爱的${nick}：</div>
+          <div class="m-text">${msg}</div>
+          ${bonusHtml}
+          ${scoreHtml}
+          <div class="m-sign">— ${sign} · ${XGF.fmtDate(new Date()).slice(0,10)}</div>
+        </div>
+        ${actionsHtml}`;
+      XGF.router.show('message');
+      XGF.message.bindMsgActions(msg, nick, m.title, idx, isFinal, bonus, sign);
+      return;
+    }
+    /* 终章：信封拆信动画 */
     view.innerHTML = `
       <div class="env-scene" id="envScene">
         <div class="env" id="envBox">
@@ -1976,21 +2016,15 @@ XGF.message = {
           <div class="paper">
             <div class="p-star">✦</div>
             <div class="p-level">第 ${idx} 段旅程 · ${m.title}</div>
-            <div class="p-title">${isFinal ? '终章 · 奔赴山海' : m.title}</div>
+            <div class="p-title">终章 · 奔赴山海</div>
             <div class="p-nick">亲爱的${nick}：</div>
             <div class="p-text">${msg}</div>
-            ${bonus ? `<div class="p-bonus"><b>💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : ''}
+            ${bonusHtml}
             <div class="p-sign">— ${sign} · ${XGF.fmtDate(new Date()).slice(0,10)}</div>
-            ${isFinal ? `<div class="m-ach">🏆 ${XGF.ACHIEVEMENT.title}</div>` : ''}
+            ${achHtml}
             <div class="p-score" style="margin-top:12px;font-size:12px;color:#C9A87A;font-weight:700">⭐ 本段收获 ${score || 0} 分</div>
           </div>
-          <div class="paper-actions">
-            <button class="ps-save" id="psSave">🖼️ 保存图片</button>
-            ${isFinal
-              ? `<button class="ps-home" id="psHome">🏠 返回首页</button>`
-              : `<button class="ps-next" id="psNext">✦ 下一段旅程</button>
-                 <button class="ps-home" id="psHome">🏠 返回首页</button>`}
-          </div>
+          ${actionsHtml.replace('msg-actions', 'paper-actions')}
         </div>
       </div>`;
     XGF.router.show('message');
@@ -2010,23 +2044,26 @@ XGF.message = {
       XGF.audio.sfx('clear');
       setTimeout(() => {
         scene.classList.add('show-paper');
-        XGF.$('#psSave').addEventListener('click', () => {
-          XGF.audio.sfx('click');
-          XGF.message.capture(msg, nick, m.title, idx, isFinal, bonus, sign);
-        });
-        if(XGF.$('#psNext')) XGF.$('#psNext').addEventListener('click', () => {
-          XGF.audio.sfx('click');
-          const next = XGF.LEVEL_META[idx];
-          XGF.engine.start(next.id);
-        });
-        if(XGF.$('#psHome')) XGF.$('#psHome').addEventListener('click', () => {
-          XGF.audio.sfx('click');
-          XGF.router.show('home');
-        });
+        XGF.message.bindMsgActions(msg, nick, m.title, idx, isFinal, bonus, sign);
       }, 1350);
     });
-    /* 3 秒未点则自动拆开 */
     setTimeout(() => { if(!envBox.classList.contains('open')) envBox.click(); }, 3200);
+  },
+  /* 统一绑定寄语页操作按钮 */
+  bindMsgActions(msg, nick, title, idx, isFinal, bonus, sign){
+    XGF.$('#psSave').addEventListener('click', () => {
+      XGF.audio.sfx('click');
+      XGF.message.capture(msg, nick, title, idx, isFinal, bonus, sign);
+    });
+    if(XGF.$('#psNext')) XGF.$('#psNext').addEventListener('click', () => {
+      XGF.audio.sfx('click');
+      const next = XGF.LEVEL_META[idx];
+      XGF.engine.start(next.id);
+    });
+    if(XGF.$('#psHome')) XGF.$('#psHome').addEventListener('click', () => {
+      XGF.audio.sfx('click');
+      XGF.router.show('home');
+    });
   },
   capture(msg, nick, title, idx, isFinal, bonus, sign){
     const w = 900, h = 1280;
