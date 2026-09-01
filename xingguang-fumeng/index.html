@@ -777,35 +777,48 @@ XGF.getLevelCandidates = function(id){
   return list;
 };
 XGF.pickLevelMsg = function(id, letters){
-  /* 推送规则：
-     有套用 → 只用套用寄语（未获取优先）；自定义全部被获取 → 补充系统模板中未获取的；全用完 → 任意。
-     无套用 → 从「内置寄语 + 系统模板」池随机（未获取优先），保证重复游玩不单调。 */
+  /* 推送优先级（五级链，逐级下探，保证「所选分类」优先）：
+     ① 本关套用的寄语（未获取优先）
+     ② 玩家手写寄语（「我的寄语」库）中未获取的（未套用的）
+     ③ 本关内置寄语（当前 level_cat 分类的 message）
+     ④ 当前分类（level_cat）模板库中未获取的
+     ⑤ 全部寄语池（套用+手写+内置+全部模板）随机兜底 */
   let cfg = XGF._cfgCache;
   if(!XGF.CLOUD.enabled){
     try{ const raw = localStorage.getItem(GUEST_CFG_KEY); if(raw) cfg = XGF.migrateConfig(JSON.parse(raw)); }catch(e){}
   }
   if(!cfg) cfg = XGF.getConfig();
   const lv = cfg.levels.find(l => l.id === id);
-  const customTexts = ((lv && lv.custom_ids) || []).map(cid => cfg.custom_messages.find(m => m.id === cid))
-    .filter(m => m && m.text && m.text.trim()).map(m => m.text);
-  let base = (lv && lv.message && lv.message.trim()) ? lv.message : '';
-  if(!base){ const d = XGF.getDefaultLevels(cfg.level_cat).find(l => l.id === id); if(d) base = d.message; }
+  const cat = cfg.level_cat || '孩子';
   const collected = m => (letters || []).some(l => l.levelId === id && l.message === m);
-  const tpl = Object.values(XGF.TEMPLATES).flat();
-  let pool;
-  if(customTexts.length){
-    /* 有套用：只用套用的；全部被获取则补充系统模板 */
-    pool = customTexts.slice();
-    if(pool.every(collected)){
-      tpl.forEach(t => { if(!pool.includes(t)) pool.push(t); });
-    }
-  } else {
-    /* 无套用：内置 + 系统模板（去重） */
-    pool = [base];
-    tpl.forEach(t => { if(!pool.includes(t)) pool.push(t); });
+  const unread = arr => arr.filter(m => !collected(m));
+
+  /* ① 本关套用的寄语 */
+  const applied = ((lv && lv.custom_ids) || []).map(cid => cfg.custom_messages.find(m => m.id === cid))
+    .filter(m => m && m.text && m.text.trim()).map(m => m.text);
+  if(applied.length){
+    const u = unread(applied);
+    if(u.length) return XGF.pick(u);
+    /* 套用的全部被获取 → 继续下探（②③④⑤） */
   }
-  const uncollected = pool.filter(m => !collected(m));
-  return XGF.pick(uncollected.length ? uncollected : pool);
+  /* ② 玩家手写寄语中未获取的（排除已套用的，避免重复①） */
+  const custom = (cfg.custom_messages || []).map(m => m.text).filter(t => t && t.trim())
+    .filter(t => !applied.includes(t));
+  if(custom.length){
+    const u = unread(custom);
+    if(u.length) return XGF.pick(u);
+  }
+  /* ③ 本关内置寄语（当前分类） */
+  let base = (lv && lv.message && lv.message.trim()) ? lv.message : '';
+  if(!base){ const d = XGF.getDefaultLevels(cat).find(l => l.id === id); if(d) base = d.message; }
+  if(base && !collected(base)) return base;
+  /* ④ 当前分类模板库中未获取的 */
+  const catTpl = (XGF.TEMPLATES[cat] || []).filter(t => t && !collected(t));
+  if(catTpl.length) return XGF.pick(catTpl);
+  /* ⑤ 全部寄语池随机兜底 */
+  const all = [...new Set([...applied, ...custom, base, ...Object.values(XGF.TEMPLATES).flat()].filter(Boolean))];
+  const u5 = unread(all);
+  return XGF.pick(u5.length ? u5 : all);
 };
 XGF.pickBonus = function(cfg, prog){
   const list = cfg.bonus_letters || [];
