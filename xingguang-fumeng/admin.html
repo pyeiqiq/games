@@ -346,7 +346,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
     <div class="tab-page" id="pg-eggs">
       <div class="egg-box">
         <h3>✨ 暖心气泡彩蛋</h3>
-        <div class="desc">游戏行进中随机飘过的暖心小字，一行一条；点击气泡可得分。彩蛋会自动平均分配到 6 关（同关不重复、各关尽量不重复）。</div>
+        <div class="desc">游戏行进中随机飘过的暖心小字，一行一条；点击气泡可得分。每关从全部彩蛋中随机抽取任意一条，建议多写一些避免重复。</div>
         <textarea id="inEggs" placeholder="今天也辛苦啦&#10;累了就歇歇"></textarea>
         <div class="cnt" id="eggCnt"></div>
         <div class="actions" style="margin-top:12px">
@@ -567,7 +567,8 @@ const DEFAULT_LEVELS = [
   { id:6, title:'奔赴山海', sub:'终章 · 家的港湾',
     message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
 ];
-const DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'];
+const DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步','休息一下，世界不会跑掉','你做得已经很好了','深呼吸，放轻松','每一小步都算数','偶尔偷懒也没关系','给自己一个拥抱吧','今天也有在好好长大','别怕，有我们在','你是被爱包围的宝贝','星光会照亮你的路'];
+const LEGACY_DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'];
 const TEMPLATES = {
   '解压安慰': ['累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。','今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。','你不是机器，不用每一分钟都高效运转，慢一点也没关系。','烦躁的时候深呼吸三次，爸爸妈妈就在你身后。','那些让你烦心的事，先放一放，你的开心比什么都重要。'],
   '成长鼓励': ['每一次小小的努力，都在为未来的你铺路，加油，宝贝。','你不需要和别人比，你只需要比昨天的自己进步一点点。','坚持很难，但你已经在路上了，这本身就很了不起。','做错的题是宝藏，改正它，你就离优秀更近一步。','不要怕慢，怕的是停下，只要还在走，就一定会到达。'],
@@ -593,6 +594,12 @@ function migrateConfig(c){
   if(!c.profile) c.profile = defaultConfig().profile;
   if(!c.signature) c.signature = '爱你的爸爸妈妈';
   if(!Array.isArray(c.eggs) || !c.eggs.length) c.eggs = DEFAULT_EGGS.slice();
+  /* 旧 8 条默认彩蛋 → 自动升级为 18 条（家长自定义过的不动） */
+  if(c.eggs.length === LEGACY_DEFAULT_EGGS.length &&
+     c.eggs.every(e => LEGACY_DEFAULT_EGGS.includes(e)) &&
+     LEGACY_DEFAULT_EGGS.every(e => c.eggs.includes(e))){
+    c.eggs = DEFAULT_EGGS.slice();
+  }
   if(!c.settings) c.settings = { sound:true, darkMode:'auto' };
   if(!c.security) c.security = { hash:'', salt:'' };
   c.version = 2;
@@ -997,7 +1004,7 @@ function bindLevels(){
 function refreshEggs(){
   const eggs = (currentConfig.eggs && currentConfig.eggs.length) ? currentConfig.eggs : DEFAULT_EGGS;
   $('#inEggs').value = eggs.join('\n');
-  $('#eggCnt').textContent = '共 ' + eggs.length + ' 条 · 自动平均分配到 6 关';
+  $('#eggCnt').textContent = '共 ' + eggs.length + ' 条 · 每关随机抽取';
   $('#eggChips').innerHTML = eggs.map(e => `<span>${e}</span>`).join('');
 }
 function bindEggs(){
