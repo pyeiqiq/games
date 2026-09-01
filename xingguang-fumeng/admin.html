@@ -159,6 +159,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 .egg-box{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:22px;margin-bottom:18px;box-shadow:var(--shadow)}
 .egg-box .cnt{font-size:12px;color:var(--ink-soft);margin-top:8px}
+.egg-box textarea{min-height:240px;font-size:14.5px;width:100%;box-sizing:border-box}
 .egg-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
 .egg-chips span{background:var(--purple-soft);color:var(--purple-deep);border-radius:99px;
   padding:4px 14px;font-size:12.5px}
@@ -238,13 +239,13 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
   <div class="login-card">
     <button class="back-btn" id="btnAuthBack">‹ 返回</button>
     <div class="logo">🌙 星光赴梦</div>
-    <div class="sub">家长专属后台 · 为孩子定制专属星光</div>
+    <div class="sub">专属后台 · 为 TA 定制专属星光</div>
     <div class="auth-tabs">
       <button class="on" data-a="cloud" id="tabCloud">☁️ 云账号</button>
       <button data-a="local" id="tabLocal">💻 本地模式</button>
     </div>
     <div id="authCloud">
-      <div class="sub" style="margin-bottom:14px">登录后配置存云端，孩子用 6 位游戏码游玩（可跨设备）</div>
+      <div class="sub" style="margin-bottom:14px">登录后配置存云端，TA 用 6 位游戏码游玩（可跨设备）</div>
       <div class="field"><label>用户名</label><input id="cUser" placeholder="设置用户名" autocomplete="username"></div>
       <div class="field"><label>密码</label><input type="password" id="cPass" placeholder="密码" autocomplete="current-password"></div>
       <button class="btn" id="btnCLogin">登录</button>
@@ -253,9 +254,9 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <div class="err" id="cErr"></div>
     </div>
     <div id="authLocal" style="display:none">
-      <div class="sub" style="margin-bottom:14px">本地模式：配置只保存在这台设备（孩子须在同一设备游玩）</div>
+      <div class="sub" style="margin-bottom:14px">本地模式：配置只保存在这台设备（TA 须在同一设备游玩）</div>
       <div id="setPwdBox" style="display:none">
-        <div class="field"><label>设置家长密码（防孩子误入）</label>
+        <div class="field"><label>设置后台密码（防误入）</label>
           <input type="password" id="np1" placeholder="至少 4 位" autocomplete="new-password"></div>
         <div class="field"><label>再次输入确认</label>
           <input type="password" id="np2" placeholder="再次输入" autocomplete="new-password"></div>
@@ -299,7 +300,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
     <button class="tab" data-tab="levels">💌 关卡寄语</button>
     <button class="tab" data-tab="eggs">✨ 彩蛋文案</button>
     <button class="tab" data-tab="tpl">📚 模板库</button>
-    <button class="tab" data-tab="letters">💝 爸妈信件</button>
+    <button class="tab" data-tab="letters">💌 我写的信</button>
     <button class="tab" data-tab="data">⚙️ 数据管理</button>
   </div>
   <div class="main">
@@ -308,16 +309,16 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <div class="card">
         <h3>🏠 基础信息</h3>
         <div class="desc">展示在游戏首页、关卡、寄语和信封上</div>
-        <div class="field"><label>孩子专属称呼</label>
+        <div class="field"><label>他/她的专属称呼</label>
           <input type="text" id="inNick" maxlength="12" placeholder="宝贝"></div>
-        <div class="field"><label>孩子性别（影响角色形象）</label>
+        <div class="field"><label>对方性别（影响角色形象）</label>
           <div class="seg" id="segGender">
             <button data-g="neutral">🧑 通用</button><button data-g="boy">👦 男孩</button><button data-g="girl">👧 女孩</button>
           </div></div>
         <div class="field"><label>首页欢迎语</label>
           <input type="text" id="inWelcome" maxlength="30" placeholder="欢迎回家，今天也辛苦啦"></div>
         <div class="field"><label>寄语落款（显示在每一封信的结尾）</label>
-          <input type="text" id="inSign" maxlength="20" placeholder="爱你的爸爸妈妈"></div>
+          <input type="text" id="inSign" maxlength="20" placeholder="永远支持你的人"></div>
         <button class="btn-sm" id="btnSaveBasic">保存基础信息</button>
       </div>
       <div class="card">
@@ -333,11 +334,15 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
     <div class="tab-page" id="pg-levels">
       <div class="card">
         <h3>💌 关卡寄语</h3>
-        <div class="desc">孩子通关后看到的寄语。套用了「我的寄语」的关卡会优先推送未读的；孩子已收藏的寄语会标注「已获取」，不再优先推送。</div>
+        <div class="desc">对方通关后看到的寄语。套用了「我的寄语」的关卡会优先推送未读的；对方已收藏的寄语会标注「已获取」，不再优先推送。</div>
+        <div style="margin:14px 0 4px">
+          <div style="font-size:12.5px;color:var(--ink-soft);margin-bottom:8px">默认寄语分类（勾选即生效，与模板库分类对应）</div>
+          <div class="seg" id="segLevelCat" style="flex-wrap:wrap"></div>
+        </div>
         <div id="lvList"></div>
         <div class="actions" style="margin-top:6px">
           <button class="btn-sm" id="btnSaveLevels">保存全部寄语</button>
-          <button class="btn-sm ghost" id="btnRestoreLevels">恢复默认寄语</button>
+          <button class="btn-sm ghost" id="btnRestoreLevels">恢复该分类默认寄语</button>
         </div>
       </div>
     </div>
@@ -359,24 +364,24 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 
     <!-- 模板库 + 我的寄语 -->
     <div class="tab-page" id="pg-tpl">
-      <div class="card">
-        <h3>📚 暖心模板库</h3>
-        <div class="desc">内置全学段通用模板。点击「套用」可应用到某一关。</div>
-      </div>
-      <div class="tpl-grid" id="tplGrid"></div>
-      <div class="card" style="margin-top:22px">
+      <div class="card" style="border:1.5px solid var(--purple-soft)">
         <h3>✍️ 我的寄语 <span class="badge" style="font-size:11px;background:var(--purple-soft);color:var(--purple-deep);border-radius:99px;padding:2px 10px">自定义寄语库</span></h3>
-        <div class="desc">写过的寄语都会存在这里。可套用到关卡（孩子优先收到没读过的）；套用后在本模块或关卡寄语里编辑都会同步。</div>
+        <div class="desc">亲手写的寄语最真诚，会展示在最上方。写过的寄语都会存在这里。可套用到关卡（对方优先收到没读过的）；套用后在本模块或关卡寄语里编辑都会同步。</div>
         <button class="btn-sm gold" id="btnAddCustom">＋ 写一条新寄语</button>
         <div id="customList" style="margin-top:14px"></div>
       </div>
+      <div class="card" style="margin-top:22px">
+        <h3>📚 暖心模板库</h3>
+        <div class="desc">内置 5 类关系模板（孩子 / 爱人 / 同学 / 朋友 / 爸妈），点击「套用」可应用到某一关。</div>
+      </div>
+      <div class="tpl-grid" id="tplGrid"></div>
     </div>
 
-    <!-- 爸妈信件（奖励信） -->
+    <!-- 我写的信（奖励信） -->
     <div class="tab-page" id="pg-letters">
       <div class="card">
-        <h3>💝 写给孩子的信</h3>
-        <div class="desc">可以写很多封。孩子每次通关会<b>随机收到一封</b>作为惊喜奖励；孩子已收藏的信会标注「已被获取」，不再优先推送；信不够时也会补发，但孩子收藏馆里已有的不会重复收藏。</div>
+        <h3>💌 写给他/她的信</h3>
+        <div class="desc">可以写很多封。对方每次通关第 6 关（终章）会<b>随机收到一封</b>作为惊喜奖励；对方已收藏的信会标注「已被获取」，不再优先推送；信不够时也会补发，但对方收藏馆里已有的不会重复收藏。</div>
         <button class="btn-sm gold" id="btnAddBonus">✉️ 写一封信</button>
         <div id="bonusList" style="margin-top:14px"></div>
       </div>
@@ -399,7 +404,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <div class="data-item">
         <div class="di-icon">🎮</div>
         <div class="di-body"><div class="di-title">重置关卡通关进度</div>
-          <div class="di-desc">清空孩子的通关记录与收藏馆（不会动您的自定义内容）</div></div>
+          <div class="di-desc">清空对方的通关记录与收藏馆（不会动您的自定义内容）</div></div>
         <button class="btn-sm warn di-btn" id="btnResetProg">重置</button>
       </div>
       <div class="data-item">
@@ -553,33 +558,69 @@ const CLOUD = {
 /* ---------- 默认数据 ---------- */
 const CFG_KEY = 'xgfumeng_config_v1';
 const PROG_KEY = 'xgfumeng_progress_v1';
-const DEFAULT_LEVELS = [
-  { id:1, title:'重新出发', sub:'告别懈怠 · 重拾初心',
-    message:'宝贝，过去的懈怠和遗憾都已经翻篇了，敢于下定决心努力、愿意重新出发的你，真的特别勇敢。不用纠结过去，从现在开始往前走，就是最好的开始。' },
-  { id:2, title:'接纳不完美', sub:'接纳波动 · 允许犯错',
-    message:'孩子，没有人是完美的，做题失误、成绩波动、偶尔偷懒都是成长的常态。不用逼自己事事优秀，接纳普通的自己，慢慢来，稳稳走，就是最大的进步。' },
-  { id:3, title:'对抗疲惫焦虑', sub:'累了就休息 · 健康第一',
-    message:'学习从来都不轻松，你会累、会烦躁、会不想坚持，这些都太正常了。不用一直紧绷着自己，累了就休息，你的开心和健康，永远比成绩更重要。' },
-  { id:4, title:'点滴成长', sub:'日积月累 · 悄悄发光',
-    message:'成长从不是突然的高光，而是日复一日的坚持。你多学的一个知识点、多坚持的一分钟、多改正的一道错题，都在悄悄让你变得更优秀，爸爸妈妈都看在眼里。' },
-  { id:5, title:'无畏前路', sub:'勇敢向前 · 尽力就好',
-    message:'不用害怕考试，不用焦虑结果。认真努力、尽力而为，就是对自己最好的交代。无论结果如何，努力坚持的你，永远是我们的骄傲。' },
-  { id:6, title:'奔赴山海', sub:'终章 · 家的港湾',
-    message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
-];
-const DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步','休息一下，世界不会跑掉','你做得已经很好了','深呼吸，放轻松','每一小步都算数','偶尔偷懒也没关系','给自己一个拥抱吧','今天也有在好好长大','别怕，有我们在','你是被爱包围的宝贝','星光会照亮你的路'];
+const LEVEL_CATS = ['孩子','爱人','同学','朋友','爸妈'];
+/* 5 分类 × 6 关默认寄语（标题通用：重新出发 → 奔赴山海） */
+const DEFAULT_LEVELS_BY_CAT = {
+  '孩子': [
+    { id:1, title:'重新出发', message:'宝贝，过去的懈怠和遗憾都已经翻篇了，敢于下定决心努力、愿意重新出发的你，真的特别勇敢。不用纠结过去，从现在开始往前走，就是最好的开始。' },
+    { id:2, title:'接纳不完美', message:'孩子，没有人是完美的，做题失误、成绩波动、偶尔偷懒都是成长的常态。不用逼自己事事优秀，接纳普通的自己，慢慢来，稳稳走，就是最大的进步。' },
+    { id:3, title:'对抗疲惫焦虑', message:'学习从来都不轻松，你会累、会烦躁、会不想坚持，这些都太正常了。不用一直紧绷着自己，累了就休息，你的开心和健康，永远比成绩更重要。' },
+    { id:4, title:'点滴成长', message:'成长从不是突然的高光，而是日复一日的坚持。你多学的一个知识点、多坚持的一分钟、多改正的一道错题，都在悄悄让你变得更优秀，爸爸妈妈都看在眼里。' },
+    { id:5, title:'无畏前路', message:'不用害怕考试，不用焦虑结果。认真努力、尽力而为，就是对自己最好的交代。无论结果如何，努力坚持的你，永远是我们的骄傲。' },
+    { id:6, title:'奔赴山海', message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
+  ],
+  '爱人': [
+    { id:1, title:'重新出发', message:'亲爱的，过去的坎坷与错过都翻篇了。愿意和你一起重新出发，是我做过最勇敢也最值得的决定。不用回头，前方的路，我们并肩走。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，我们都会有情绪、有脾气、有不够好的时候。接纳真实的彼此，慢慢磨合，稳稳相守，就是我们最好的样子。' },
+    { id:3, title:'对抗疲惫焦虑', message:'生活不容易，你会累、会烦躁、会想放弃，这些都太正常了。累了就靠着我歇一歇，你的开心和健康，比一切都重要。' },
+    { id:4, title:'点滴成长', message:'感情从不是突然的圆满，而是日复一日的用心。多一句体谅、多一次拥抱、多一天的陪伴，都在让我们成为更好的我们。' },
+    { id:5, title:'无畏前路', message:'不用害怕未知，不用焦虑明天。尽力而为就好，无论结果如何，我都在你身边，和你一起面对。' },
+    { id:6, title:'奔赴山海', message:'亲爱的，一路走来我们有过欢笑也有过眼泪，但从来没有松开过彼此的手。未来漫漫长路，大胆去闯、大胆去爱就好。我永远在，永远陪你奔赴属于我们的山海。' }
+  ],
+  '同学': [
+    { id:1, title:'重新出发', message:'过去的松懈和遗憾都翻篇了，敢于下定决心重新出发的你，真的很酷。不用纠结过去，从现在开始，就是最好的开始。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，考试失误、状态起伏都是常态。不用逼自己事事优秀，接纳真实的自己，稳稳向前就好。' },
+    { id:3, title:'对抗疲惫焦虑', message:'备考从来都不轻松，你会累、会焦虑、会想摆烂，这些都太正常了。累了就休息，身体和心情，永远比分数重要。' },
+    { id:4, title:'点滴成长', message:'进步从不是突然的逆袭，而是一道题一道题地刷、一个知识点一个知识点地啃。你每天的努力，我们都看得见。' },
+    { id:5, title:'无畏前路', message:'别怕考试，别焦虑结果。认真复习、尽力作答，就是对这段时光最好的交代。无论结果如何，坚持到最后的你都很棒。' },
+    { id:6, title:'奔赴山海', message:'并肩作战的这段日子，会成为青春里最闪光的记忆。前路漫漫，各自奔赴，也别忘了顶峰相见。愿你前程似锦，一举夺魁。' }
+  ],
+  '朋友': [
+    { id:1, title:'重新出发', message:'过去的失落和迷茫都翻篇了。愿意重新开始的你，永远来得及。别回头，往前走，我一直在你身后。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，我们都会有低谷、有犹豫、有搞砸的时候。接纳不完美的自己，你不需要向任何人证明什么。' },
+    { id:3, title:'对抗疲惫焦虑', message:'生活有时真的挺累的，你会崩溃、会想躲起来，这都太正常了。先照顾好自己，好好睡一觉，明天我陪你再战。' },
+    { id:4, title:'点滴成长', message:'成长是慢功夫，是日复一日的坚持。你每一次没放弃的瞬间，都在悄悄变好，我看在眼里，替你骄傲。' },
+    { id:5, title:'无畏前路', message:'别怕选错，别怕失败。大胆去试，大胆去闯，尽力就好。无论你走到哪里，都有一个人永远为你撑腰。' },
+    { id:6, title:'奔赴山海', message:'一路走来，谢谢你陪我哭过笑过。未来很远，但值得期待。大胆去追你的山海，我永远是你的后盾，顶峰见。' }
+  ],
+  '爸妈': [
+    { id:1, title:'重新出发', message:'爸、妈，过去的辛苦和操劳，我们都记在心里。从今天起，换我来学着照顾你们。人生下半程，我们慢慢来，好好走。' },
+    { id:2, title:'接纳不完美', message:'你们不用做无所不能的父母，也不用事事为我安排好。允许自己休息、允许自己偶尔做不到，你们已经做得足够好了。' },
+    { id:3, title:'对抗疲惫焦虑', message:'这一生你们扛了太多。累了就歇歇，别总把什么都自己扛着。你们的健康和开心，比什么都重要。' },
+    { id:4, title:'点滴成长', message:'我长大了，也在学着像你们爱我一样爱你们。多陪你们吃一顿饭、多听你们说说话，这些小事，是我回报你们的方式。' },
+    { id:5, title:'无畏前路', message:'你们总怕我走错路，其实我早已学会自己面对。请放心大胆地让我去闯，无论走多远，我都会记得回家的路。' },
+    { id:6, title:'奔赴山海', message:'谢谢你们半生的守护与付出。前半生你们牵着我，后半生换我扶着你们。愿时光慢些，愿你们健康平安，我们一起奔赴更远的山海。' }
+  ]
+};
+function getDefaultLevels(){
+  return DEFAULT_LEVELS_BY_CAT[(currentConfig && currentConfig.level_cat) || '孩子'] || DEFAULT_LEVELS_BY_CAT['孩子'];
+}
+const DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步','休息一下，世界不会跑掉','你做得已经很好了','深呼吸，放轻松','每一小步都算数','偶尔偷懒也没关系','给自己一个拥抱吧','今天也有在好好长大','别怕，有我们在','你是被爱包围的人','星光会照亮你的路'];
 const LEGACY_DEFAULT_EGGS = ['今天也辛苦啦','累了就歇歇','记得喝水','你超棒的','慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'];
+/* 模板库：5 关系分类 × 20 条 */
 const TEMPLATES = {
-  '解压安慰': ['累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。','今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。','你不是机器，不用每一分钟都高效运转，慢一点也没关系。','烦躁的时候深呼吸三次，爸爸妈妈就在你身后。','那些让你烦心的事，先放一放，你的开心比什么都重要。'],
-  '成长鼓励': ['每一次小小的努力，都在为未来的你铺路，加油，宝贝。','你不需要和别人比，你只需要比昨天的自己进步一点点。','坚持很难，但你已经在路上了，这本身就很了不起。','做错的题是宝藏，改正它，你就离优秀更近一步。','不要怕慢，怕的是停下，只要还在走，就一定会到达。'],
-  '心态疏导': ['一次考试说明不了什么，你的人生还很长很长。','焦虑的时候，想想爸爸妈妈无条件爱你的样子。','结果只是旅程的一部分，过程中的你已经很棒了。','允许自己偶尔做不好，允许自己偶尔想休息，这不丢人。','把压力放下来，你背着的，不是全世界，只是一个小小的书包。'],
-  '亲子告白': ['宝贝，无论你考多少分，你都是爸爸妈妈最爱的孩子。','我们爱的是你这个人，不是你的成绩单。','你的笑容，是爸爸妈妈一天里最亮的星星。','无论走多远，家永远是你最温暖的港湾。','谢谢你来到我们身边，你是我们生命里最好的礼物。']
+  '孩子': ['累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。','今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。','你不是机器，不用每一分钟都高效运转，慢一点也没关系。','烦躁的时候深呼吸三次，爸爸妈妈就在你身后。','那些让你烦心的事，先放一放，你的开心比什么都重要。','每一次小小的努力，都在为未来的你铺路，加油，宝贝。','你不需要和别人比，你只需要比昨天的自己进步一点点。','坚持很难，但你已经在路上了，这本身就很了不起。','做错的题是宝藏，改正它，你就离优秀更近一步。','不要怕慢，怕的是停下，只要还在走，就一定会到达。','一次考试说明不了什么，你的人生还很长很长。','焦虑的时候，想想爸爸妈妈无条件爱你的样子。','结果只是旅程的一部分，过程中的你已经很棒了。','允许自己偶尔做不好，允许自己偶尔想休息，这不丢人。','把压力放下来，你背着的，不是全世界，只是一个小小的书包。','宝贝，无论你考多少分，你都是爸爸妈妈最爱的孩子。','我们爱的是你这个人，不是你的成绩单。','你的笑容，是爸爸妈妈一天里最亮的星星。','无论走多远，家永远是你最温暖的港湾。','谢谢你来到我们身边，你是我们生命里最好的礼物。'],
+  '爱人': ['你笑起来的时候，我的世界都亮了。','今天辛苦了，剩下的交给我。','不是因为你完美，而是因为是你，才特别。','慢慢来，我们有一辈子可以好好说话。','累的时候就靠着我，我一直在。','和你在一起的每一天，都值得纪念。','别怕，天塌下来有我陪着你一起扛。','你不需要改变什么，就这样，我就很喜欢。','无论发生什么，我都会站在你这边。','谢谢你愿意把心事说给我听。','你的快乐，是我最想守护的事。','我们已经走了很远，未来还要一起走更远。','吵架归吵架，我爱你这件事从来没有变过。','累了就休息，我永远是你最安稳的港湾。','在你面前，我可以做最真实的自己。','时光漫长，还好有你。','你值得所有的美好，包括最好的我。','今天的你，也辛苦了。','余生很长，请多指教。','我爱你，比你想象的还要多。'],
+  '同学': ['加油，这一战我们一定能赢。','别慌，稳住，你能行。','不会的题我们一起研究，没有过不去的坎。','今天也坚持下来了，很棒。','累了就歇会儿，别把自己绷太紧。','你的努力不会辜负你，时间看得见。','错题就是宝藏，改一道进步一道。','别和别人比，和昨天的自己比就够了。','考砸一次不代表什么，你还有无数次机会证明自己。','顶峰相见，我们说好的。','你在图书馆奋斗的样子，真的闪闪发光。','坚持住，胜利就在前方。','不管结果如何，这段并肩的日子都值得。','偷偷告诉你：你比自己以为的厉害多了。','压力大的时候，出去走走透口气，回来继续。','你的目标，我们陪着你一起够到。','别焦虑，按自己的节奏来就好。','每一天的努力，都在为未来铺路。','你认真的样子，最动人。','别怕，你身后还有我们。'],
+  '朋友': ['心情不好的时候，随时找我。','你永远可以相信，我站在你这边。','不必完美，做你自己就好。','低谷期陪着你，高光时刻为你鼓掌。','累了就说，肩膀借你。','你很好，值得被温柔以待。','谢谢你一直在我身边，真的。','别内耗了，你已经做得很好了。','无论你做什么决定，我都支持你。','我们之间的情谊，比什么都珍贵。','今天辛苦了，吃点好吃的犒劳自己。','偶尔摆烂也没关系，休息是为了更好地出发。','你笑的时候，好像一切都会好起来。','真正的朋友，是允许你脆弱的人，我在。','别怕失败，你还有我这个后盾。','想哭就哭，哭完我陪你好好吃一顿。','你值得世界上所有的美好。','无论走多远，别忘了常联系。','我见过你最狼狈的样子，依然觉得你很好。','有你在，什么都不怕。'],
+  '爸妈': ['爸、妈，你们辛苦了，谢谢你们。','以前是你们照顾我，以后换我来照顾你们。','你们的健康，是我最大的心愿。','别太操劳了，我长大了，可以自己撑起一片天。','常回家看看，多陪陪你们，是我现在最想做的事。','你们教我的道理，我都记在心里。','小时候你们是我的依靠，现在让我做你们的依靠。','慢点老去，我还有很多话想跟你们说。','谢谢你们给了我最好的爱。','你们的笑容，是我努力的最大动力。','我不在家的时候，也要好好吃饭。','你们辛苦了半辈子，该享享福了。','走得再远，家永远是我的牵挂。','有些话当面说不出口，写在这里：我爱你们。','愿时光慢些，让我多陪陪你们。','你们的付出，我都看在眼里，记在心里。','以后换我叮嘱你们：天冷了记得加衣。','你们是我见过最坚强的人，也请允许自己偶尔柔软。','家的方向，永远是我最安心的方向。','爸、妈，能成为你们的家人，是我的幸运。']
 };
 function defaultConfig(){
   return { version:2,
     profile:{ nickname:'宝贝', gender:'neutral', welcome:'欢迎回家，今天也辛苦啦' },
-    signature:'爱你的爸爸妈妈',
-    levels: DEFAULT_LEVELS.map(l => ({ id:l.id, title:l.title, message:l.message, custom_ids: [] })),
+    signature:'永远支持你的人',
+    level_cat:'孩子',
+    levels: DEFAULT_LEVELS_BY_CAT['孩子'].map(l => ({ id:l.id, title:l.title, message:l.message, custom_ids: [] })),
     custom_messages:[], bonus_letters:[],
     eggs: DEFAULT_EGGS.slice(),
     settings:{ sound:true, darkMode:'auto' },
@@ -592,7 +633,8 @@ function migrateConfig(c){
   if(!Array.isArray(c.custom_messages)) c.custom_messages = [];
   if(!Array.isArray(c.bonus_letters)) c.bonus_letters = [];
   if(!c.profile) c.profile = defaultConfig().profile;
-  if(!c.signature) c.signature = '爱你的爸爸妈妈';
+  if(!c.signature) c.signature = '永远支持你的人';
+  if(!c.level_cat || !LEVEL_CATS.includes(c.level_cat)) c.level_cat = '孩子';
   if(!Array.isArray(c.eggs) || !c.eggs.length) c.eggs = DEFAULT_EGGS.slice();
   /* 旧 8 条默认彩蛋 → 自动升级为 18 条（家长自定义过的不动） */
   if(c.eggs.length === LEGACY_DEFAULT_EGGS.length &&
@@ -772,7 +814,7 @@ async function renderGames(){
     if(!games.length){
       main.innerHTML = `<div class="games-empty">
         <div class="e-icon">💌</div><p>还没有创建游戏</p>
-        <p style="font-size:12.5px;margin-top:6px">创建一个游戏，会生成专属 6 位游戏码，孩子输入即可游玩</p>
+        <p style="font-size:12.5px;margin-top:6px">创建一个游戏，会生成专属 6 位游戏码，TA 输入即可游玩</p>
         <button class="btn-sm gold" style="margin-top:20px;padding:12px 30px" id="goNew">＋ 创建第一个游戏</button></div>`;
       $('#goNew').addEventListener('click', createGameFlow);
       return;
@@ -787,7 +829,7 @@ async function renderGames(){
         <div class="gc-body">
           <div class="gc-name">${nick} 的星光旅程</div>
           <div class="gc-code">${g.code}<button data-copy="${g.code}">复制</button></div>
-          <div class="gc-meta">创建于 ${(g.created_at||'').slice(0,10)} · 孩子输入上面的游戏码即可游玩</div>
+          <div class="gc-meta">创建于 ${(g.created_at||'').slice(0,10)} · TA 输入上面的游戏码即可游玩</div>
         </div>
         <div class="gc-ops">
           <button class="gc-edit" data-edit="${g.code}">✏️ 编辑配置</button>
@@ -808,7 +850,7 @@ async function renderGames(){
         enterPanel();
       });
       card.querySelector('[data-del]').addEventListener('click', () => {
-        confirmDlg('删除这个游戏？', '游戏码「' + g.code + '」将失效，孩子无法再进入。孩子进度数据也会一并删除。', '确认删除', async () => {
+        confirmDlg('删除这个游戏？', '游戏码「' + g.code + '」将失效，TA 无法再进入。TA 的进度数据也会一并删除。', '确认删除', async () => {
           try{
             await CLOUD.deleteGame(g.code);
             toast('游戏已删除');
@@ -825,7 +867,7 @@ async function renderGames(){
 }
 async function createGameFlow(){
   modal(`<h4>创建一个新游戏</h4>
-    <div class="m-body">会为您的孩子生成一个专属 6 位游戏码。可以创建多个（如：大宝 / 二宝，或不同年级版本）。</div>
+    <div class="m-body">会为他/她生成一个专属 6 位游戏码。可以创建多个。</div>
     <div class="m-actions"><button class="m-cancel" id="cgNo">取消</button>
     <button class="m-ok" id="cgYes">创建</button></div>`,
     { onShow(){
@@ -870,7 +912,7 @@ async function saveConfig(){
   saveLocalConfig(currentConfig);
   return true;
 }
-/* 读取孩子进度（标注已获取用） */
+/* 读取对方进度（标注已获取用） */
 let childProgress = null;
 async function refreshChildProgress(){
   childProgress = null;
@@ -890,14 +932,14 @@ function refreshBasic(){
   const c = currentConfig;
   $('#inNick').value = c.profile.nickname || '宝贝';
   $('#inWelcome').value = c.profile.welcome || '';
-  $('#inSign').value = c.signature || '爱你的爸爸妈妈';
+  $('#inSign').value = c.signature || '永远支持你的人';
   $$('#segGender button').forEach(b => b.classList.toggle('on', b.dataset.g === (c.profile.gender || 'neutral')));
 }
 function bindBasic(){
   $('#btnSaveBasic').addEventListener('click', async () => {
     currentConfig.profile.nickname = ($('#inNick').value.trim() || '宝贝').slice(0,12);
     currentConfig.profile.welcome = $('#inWelcome').value.trim().slice(0,30);
-    currentConfig.signature = ($('#inSign').value.trim() || '爱你的爸爸妈妈').slice(0,20);
+    currentConfig.signature = ($('#inSign').value.trim() || '永远支持你的人').slice(0,20);
     if(await saveConfig()) toast('已保存，游戏端刷新即生效 ✦');
   });
   $('#segGender').addEventListener('click', e => {
@@ -914,10 +956,35 @@ function bindBasic(){
 }
 
 /* ---------- 关卡寄语 ---------- */
+function renderLevelCat(){
+  const wrap = $('#segLevelCat');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  LEVEL_CATS.forEach(cat => {
+    const b = document.createElement('button');
+    b.textContent = cat;
+    b.dataset.cat = cat;
+    b.classList.toggle('on', currentConfig.level_cat === cat);
+    b.addEventListener('click', () => {
+      if(currentConfig.level_cat === cat){ return; }
+      confirmDlg('切换到「' + cat + '」分类？',
+        '6 段旅程的默认寄语将替换为「' + cat + '」分类版本（您手动改过的寄语也会被覆盖，已套用的「我的寄语」保留）。', '切换分类', async () => {
+        currentConfig.level_cat = cat;
+        getDefaultLevels().forEach(d => {
+          const lv = currentConfig.levels.find(l => l.id === d.id);
+          if(lv) lv.message = d.message;
+        });
+        if(await saveConfig()){ refreshLevels(); toast('已切换到「' + cat + '」分类 ✦'); }
+      }, true);
+    });
+    wrap.appendChild(b);
+  });
+}
 function refreshLevels(){
   const c = currentConfig;
   const list = $('#lvList'); list.innerHTML = '';
-  DEFAULT_LEVELS.forEach((d, i) => {
+  renderLevelCat();
+  getDefaultLevels().forEach((d, i) => {
     const lv = c.levels.find(l => l.id === d.id) || { id:d.id, title:d.title, message:d.message, custom_ids:[] };
     const customs = (lv.custom_ids || []).map(id => c.custom_messages.find(m => m.id === id)).filter(Boolean);
     const cands = [];
@@ -930,18 +997,18 @@ function refreshLevels(){
         <span class="lv-name">第 ${i+1} 关 · ${d.title}</span>
         ${i===5?'<span class="lv-tag">终章</span>':''}
         <span class="lv-tag" style="color:var(--purple-deep);background:var(--purple-soft)">已套用 ${customs.length} 条</span></div>
-      <textarea data-lv="${d.id}" placeholder="写给孩子的话…（未套用我的寄语时，从这里随机推送）">${lv.message||''}</textarea>
+      <textarea data-lv="${d.id}" placeholder="写给 TA 的话…（未套用我的寄语时，从这里随机推送）">${lv.message||''}</textarea>
       <div class="count">${(lv.message||'').length} 字 · <span style="color:var(--purple-deep)">套用我的寄语：${customs.map(x=>x.text.slice(0,12)+'…').join('、') || '未套用'}</span></div>
       <div class="lv-ops">
         <button data-app="${d.id}">📌 套用我的寄语</button>
         <button data-clr="${d.id}">清空</button>
         <button data-prev="${d.id}">预览效果</button>
       </div>
-      <div class="cand-list"><div class="cl-title">候选寄语（孩子按：套用优先 → 未获取优先 → 随机 推送）</div>
+      <div class="cand-list"><div class="cl-title">候选寄语（按：套用优先 → 未获取优先 → 随机 推送）</div>
         ${cands.length ? cands.map(ca => `
           <div class="cand-item"><span class="src">${ca.src}</span>
             <span class="txt">${ca.text}</span>
-            ${isCollected(ca.text) ? '<span class="got">✓ 孩子已获取</span>' : ''}</div>`).join('')
+            ${isCollected(ca.text) ? '<span class="got">✓ 已被获取</span>' : ''}</div>`).join('')
           : '<div class="cand-item" style="opacity:.6">（暂未设置，将使用系统默认寄语）</div>'}
       </div>`;
     const ta = box.querySelector('textarea');
@@ -966,7 +1033,7 @@ function applyCustomToLevel(levelId){
     ? c.custom_messages.map(m => `<label class="lv-check"><input type="checkbox" value="${m.id}" ${current.includes(m.id)?'checked':''}> ${m.text.slice(0,26)}${m.text.length>26?'…':''}</label>`).join('')
     : '<div style="color:var(--ink-soft);font-size:13px;padding:8px 0">还没有自定义寄语，先去「模板库 → 我的寄语」写一条吧</div>';
   modal(`<h4>📌 套用我的寄语到「第 ${levelId} 关」</h4>
-    <div class="m-body">勾选后可多条，孩子优先收到未获取的；已获取的会标注，不优先推送。</div>
+    <div class="m-body">勾选后可多条，对方优先收到未获取的；已获取的会标注，不优先推送。</div>
     ${opts}
     <div class="m-actions">
       <button class="m-cancel" id="apNo">取消</button>
@@ -990,9 +1057,9 @@ function bindLevels(){
     if(await saveConfig()) toast('全部寄语已保存 ✦');
   });
   $('#btnRestoreLevels').addEventListener('click', () => {
-    confirmDlg('恢复默认寄语？', '六段旅程的内置寄语将恢复默认（已套用的「我的寄语」保留）。', '恢复默认', async () => {
+    confirmDlg('恢复该分类默认寄语？', '六段旅程的内置寄语将恢复为「' + (currentConfig.level_cat||'孩子') + '」分类的默认版本（已套用的「我的寄语」保留）。', '恢复默认', async () => {
       currentConfig.levels.forEach(l => {
-        const d = DEFAULT_LEVELS.find(x => x.id === l.id);
+        const d = getDefaultLevels().find(x => x.id === l.id);
         if(d) l.message = d.message;
       });
       if(await saveConfig()){ refreshLevels(); toast('已恢复默认寄语'); }
@@ -1030,11 +1097,11 @@ function refreshTpl(){
       card.className = 'tpl-card';
       card.innerHTML = `<span class="cat">${cat}</span><p>${txt}</p>
         <div style="display:flex;align-items:center;gap:10px">
-          ${got ? '<span style="font-size:11px;color:var(--green);font-weight:600">✓ 孩子已获取</span>' : '<span style="font-size:11px;color:var(--ink-soft)">未获取</span>'}
+          ${got ? '<span style="font-size:11px;color:var(--green);font-weight:600">✓ 已被获取</span>' : '<span style="font-size:11px;color:var(--ink-soft)">未获取</span>'}
           <button class="apply" data-cat="${cat}" data-i="${i}" style="margin-left:auto">套用 ›</button>
         </div>`;
       card.querySelector('.apply').addEventListener('click', () => {
-        const list = DEFAULT_LEVELS.map((d,idx) => `<option value="${d.id}">第 ${idx+1} 关 · ${d.title}</option>`).join('');
+        const list = getDefaultLevels().map((d,idx) => `<option value="${d.id}">第 ${idx+1} 关 · ${d.title}</option>`).join('');
         modal(`<h4>把这条模板套用到哪一关？</h4>
           <div class="m-body" style="background:var(--bg2);border-radius:12px;padding:12px 14px;font-size:13.5px">${txt}</div>
           <select id="tplTarget">${list}</select>
@@ -1073,7 +1140,7 @@ function renderCustomList(){
         <div class="mm-text">${cm.text}</div>
         <div class="mm-meta">
           ${applied.length ? applied.map(l => `<span class="tag">套用于第 ${l.id} 关</span>`).join('') : '<span>未套用</span>'}
-          ${isCollected(cm.text) ? '<span class="tag" style="background:var(--green-soft);color:#5E8A68">✓ 孩子已获取</span>' : ''}
+          ${isCollected(cm.text) ? '<span class="tag" style="background:var(--green-soft);color:#5E8A68">✓ 已被获取</span>' : ''}
         </div>
       </div>
       <div class="mm-ops">
@@ -1094,7 +1161,7 @@ function renderCustomList(){
 function editCustom(cm){
   modal(`<h4>${cm ? '编辑寄语' : '写一条新寄语'}</h4>
     <div class="m-body" style="padding:0">
-      <textarea id="cmText" style="min-height:120px" placeholder="写想对孩子说的话…">${cm ? cm.text : ''}</textarea>
+      <textarea id="cmText" style="min-height:120px" placeholder="写想对 TA 说的话…">${cm ? cm.text : ''}</textarea>
       <div style="font-size:12px;color:var(--ink-soft);margin-top:6px">写好后可到「关卡寄语」里套用到某一关；编辑后会同步更新所有已套用的关卡。</div>
     </div>
     <div class="m-actions"><button class="m-cancel" id="cmNo">取消</button>
@@ -1116,13 +1183,13 @@ function bindTpl(){
   $('#btnAddCustom').addEventListener('click', () => editCustom(null));
 }
 
-/* ---------- 爸妈信件（奖励信） ---------- */
+/* ---------- 我写的信（奖励信） ---------- */
 function refreshBonus(){
   const c = currentConfig;
   const wrap = $('#bonusList');
   wrap.innerHTML = '';
   if(!c.bonus_letters.length){
-    wrap.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:10px 0">还没有信，点「写一封信」开始吧。孩子通关后会随机收到一封。</div>';
+    wrap.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:10px 0">还没有信，点「写一封信」开始吧。对方通关第 6 关（终章）后会随机收到一封。</div>';
     return;
   }
   c.bonus_letters.forEach(b => {
@@ -1132,7 +1199,7 @@ function refreshBonus(){
       <div class="bb-body">
         <div class="bb-title">💌 ${b.title || '（无标题）'}</div>
         <div class="bb-text">${b.text}</div>
-        <div class="bb-meta">${isCollected(b.text) ? '<span class="got">✓ 已被孩子获取</span>' : '尚未被孩子获取'}</div>
+        <div class="bb-meta">${isCollected(b.text) ? '<span class="got">✓ 已被获取</span>' : '尚未被获取'}</div>
       </div>
       <div class="bb-ops">
         <button data-e="${b.id}">编辑</button>
@@ -1140,7 +1207,7 @@ function refreshBonus(){
       </div>`;
     item.querySelector('[data-e]').addEventListener('click', () => editBonus(b));
     item.querySelector('[data-d]').addEventListener('click', () => {
-      confirmDlg('删除这封信？', '孩子通关后将不再收到这封信。', '确认删除', async () => {
+      confirmDlg('删除这封信？', '对方通关后将不再收到这封信。', '确认删除', async () => {
         currentConfig.bonus_letters = currentConfig.bonus_letters.filter(x => x.id !== b.id);
         if(await saveConfig()){ refreshBonus(); toast('已删除'); }
       }, true);
@@ -1151,8 +1218,8 @@ function refreshBonus(){
 function editBonus(b){
   modal(`<h4>${b ? '编辑信件' : '✉️ 写一封信'}</h4>
     <div class="m-body" style="padding:0">
-      <div style="margin-bottom:10px"><input id="bTitle" placeholder="信的主题（如：宝贝的晚安信）" value="${b ? b.title : ''}"></div>
-      <textarea id="bText" style="min-height:130px" placeholder="写下想对孩子说的话…（会在通关后的信封里拆开看到）">${b ? b.text : ''}</textarea>
+      <div style="margin-bottom:10px"><input id="bTitle" placeholder="信的主题（如：XX 的晚安信）" value="${b ? b.title : ''}"></div>
+      <textarea id="bText" style="min-height:130px" placeholder="写下想对 TA 说的话…（会在通关后的信封里拆开看到）">${b ? b.text : ''}</textarea>
     </div>
     <div class="m-actions"><button class="m-cancel" id="bnNo">取消</button>
     <button class="m-ok" id="bnYes">${b ? '保存修改' : '保存'}</button></div>`,
@@ -1203,14 +1270,14 @@ function bindData(){
     file.click();
   });
   $('#btnResetProg').addEventListener('click', () => {
-    confirmDlg('重置通关进度？', '将清空孩子的通关记录与收藏馆信件。您的自定义内容不受影响。', '确认重置', async () => {
+    confirmDlg('重置通关进度？', '将清空对方的通关记录与收藏馆信件。您的自定义内容不受影响。', '确认重置', async () => {
       const empty = { unlocked:[1], letters:[], achievement:false };
       if(mode === 'cloud' && currentCode){
-        try{ await CLOUD.req('DELETE', 'xg_progress?game_code=eq.' + encodeURIComponent(currentCode)); toast('孩子进度已重置'); }
-        catch(e){ try{ await CLOUD.req('POST', 'xg_progress', { game_code: currentCode, data: empty }); toast('孩子进度已重置'); }catch(e2){ toast('重置失败'); } }
+        try{ await CLOUD.req('DELETE', 'xg_progress?game_code=eq.' + encodeURIComponent(currentCode)); toast('对方进度已重置'); }
+        catch(e){ try{ await CLOUD.req('POST', 'xg_progress', { game_code: currentCode, data: empty }); toast('对方进度已重置'); }catch(e2){ toast('重置失败'); } }
       } else {
         localStorage.setItem(PROG_KEY, JSON.stringify(empty));
-        toast('孩子进度已重置');
+        toast('对方进度已重置');
       }
       refreshChildProgress();
     }, true);
