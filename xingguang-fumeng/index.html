@@ -180,7 +180,7 @@ input,textarea{font-family:inherit}
 .msg-card .m-title{color:#FFE9B8;font-size:26px;font-weight:800;margin-top:6px;letter-spacing:2px}
 .msg-card .m-nick{color:rgba(255,255,255,.85);font-size:14px;margin-top:16px}
 .msg-card .m-text{color:#fff;font-size:17.5px;line-height:2.1;margin-top:12px;letter-spacing:1px;
-  font-weight:400;text-align:justify}
+  font-weight:400;text-align:justify;white-space:pre-line}
 .msg-card .m-sign{margin-top:22px;color:rgba(255,255,255,.6);font-size:13px}
 .msg-card .m-score{display:inline-block;margin-top:18px;background:rgba(255,233,168,.16);
   color:#FFE9B8;font-size:14px;font-weight:700;border-radius:99px;padding:6px 22px;letter-spacing:2px;
@@ -211,7 +211,7 @@ input,textarea{font-family:inherit}
 .letter-item .li-title{font-weight:700;color:var(--ink-strong);font-size:15px}
 .letter-item .li-date{font-size:11.5px;color:var(--ink-soft)}
 .letter-item .li-text{font-size:13px;color:var(--ink-soft);margin-top:5px;
-  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
 .letter-item .li-score{font-size:12px;color:var(--yellow-deep);font-weight:600;margin-top:5px}
 .letter-item .li-ops{flex:0 0 auto;display:flex;flex-direction:column;gap:6px;align-items:center}
 .letter-item .li-love{font-size:19px;line-height:1;padding:4px;border-radius:50%;transition:.2s;filter:grayscale(.2)}
@@ -319,13 +319,13 @@ input,textarea{font-family:inherit}
 .paper .p-level{font-size:11px;letter-spacing:3px;opacity:.6;margin-top:6px}
 .paper .p-title{font-size:22px;font-weight:800;margin-top:4px;color:#7A5A38;letter-spacing:1px}
 .paper .p-nick{margin-top:14px;font-size:13px;opacity:.75}
-.paper .p-text{font-size:15px;line-height:2;margin-top:8px;text-align:left;text-indent:0}
+.paper .p-text{font-size:15px;line-height:2;margin-top:8px;text-align:left;text-indent:0;white-space:pre-line}
 .paper .p-sign{margin-top:14px;font-size:12px;opacity:.65}
 .paper .p-sep{margin:16px 0 10px;color:#C9A87A;font-size:11px;letter-spacing:6px;opacity:.75}
 .paper .p-score{margin-top:12px;font-size:12.5px;color:#A5714A;font-weight:700}
 .paper .m-ach{margin:0 0 4px;padding:7px 22px;font-size:13px}
 .paper .p-bonus{margin-top:16px;padding:12px 14px;border:1.5px dashed #D8B48E;border-radius:12px;
-  background:rgba(255,255,255,.5);text-align:left;font-size:13px;line-height:1.9}
+  background:rgba(255,255,255,.5);text-align:left;font-size:13px;line-height:1.9;white-space:pre-line}
 .paper .p-bonus b{color:#A5714A}
 .paper-actions{display:flex;gap:10px;justify-content:center;margin-top:16px;flex-wrap:wrap}
 .paper-actions button{padding:11px 22px;border-radius:99px;font-size:13.5px;font-weight:600;letter-spacing:1px;transition:.2s}
@@ -371,8 +371,8 @@ input,textarea{font-family:inherit}
     <div class="sky" id="homeSky"></div>
     <div class="home-inner">
       <div class="logo"><span class="moon">🌙</span> 星光赴梦</div>
-      <div class="slogan">送你一片星光，陪你慢慢长大</div>
-      <div class="greet" id="homeGreet">宝贝，欢迎回家</div>
+      <div class="slogan">送你一片星光，这是一款独属于你的游戏</div>
+      <div class="greet" id="homeGreet">欢迎回家</div>
       <div class="home-btns">
         <button class="btn-main" id="btnStart">✦ 开始游戏</button>
         <button class="btn-sub" id="btnLetters">💌 信件收藏馆</button>
@@ -553,60 +553,71 @@ XGF.DEFAULT_EGGS = [
   '慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步',
   '休息一下，世界不会跑掉','你做得已经很好了','深呼吸，放轻松','每一小步都算数',
   '偶尔偷懒也没关系','给自己一个拥抱吧','今天也有在好好长大','别怕，有我们在',
-  '你是被爱包围的宝贝','星光会照亮你的路'
+  '你是被爱包围的人','星光会照亮你的路'
 ];
 /* 旧版默认彩蛋（8 条）：用于检测「从未自定义」的配置并自动升级到 18 条 */
 XGF.LEGACY_DEFAULT_EGGS = [
   '今天也辛苦啦','累了就歇歇','记得喝水','你超棒的',
   '慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'
-];
-XGF.DEFAULT_WELCOME = '欢迎回家，今天也辛苦啦';
-XGF.DEFAULT_LEVELS = [
-  { id:1, title:'重新出发', sub:'告别懈怠 · 重拾初心',
-    message:'宝贝，过去的懈怠和遗憾都已经翻篇了，敢于下定决心努力、愿意重新出发的你，真的特别勇敢。不用纠结过去，从现在开始往前走，就是最好的开始。' },
-  { id:2, title:'接纳不完美', sub:'接纳波动 · 允许犯错',
-    message:'孩子，没有人是完美的，做题失误、成绩波动、偶尔偷懒都是成长的常态。不用逼自己事事优秀，接纳普通的自己，慢慢来，稳稳走，就是最大的进步。' },
-  { id:3, title:'对抗疲惫焦虑', sub:'累了就休息 · 健康第一',
-    message:'学习从来都不轻松，你会累、会烦躁、会不想坚持，这些都太正常了。不用一直紧绷着自己，累了就休息，你的开心和健康，永远比成绩更重要。' },
-  { id:4, title:'点滴成长', sub:'日积月累 · 悄悄发光',
-    message:'成长从不是突然的高光，而是日复一日的坚持。你多学的一个知识点、多坚持的一分钟、多改正的一道错题，都在悄悄让你变得更优秀，爸爸妈妈都看在眼里。' },
-  { id:5, title:'无畏前路', sub:'勇敢向前 · 尽力就好',
-    message:'不用害怕考试，不用焦虑结果。认真努力、尽力而为，就是对自己最好的交代。无论结果如何，努力坚持的你，永远是我们的骄傲。' },
-  { id:6, title:'奔赴山海', sub:'最终章 · 家的港湾',
-    message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
-];
-XGF.ACHIEVEMENT = { title:'不负时光，不负自己', desc:'完成了全部星光旅程，收获爸爸妈妈的终极祝福', icon:'🏆' };
+];XGF.DEFAULT_WELCOME = '欢迎回家，今天也辛苦啦';
+XGF.LEVEL_CATS = ['孩子','爱人','同学','朋友','爸妈'];
+/* 5 分类 × 6 关默认寄语（标题通用：重新出发 → 奔赴山海） */
+XGF.DEFAULT_LEVELS_BY_CAT = {
+  '孩子': [
+    { id:1, title:'重新出发', message:'宝贝，过去的懈怠和遗憾都已经翻篇了，敢于下定决心努力、愿意重新出发的你，真的特别勇敢。不用纠结过去，从现在开始往前走，就是最好的开始。' },
+    { id:2, title:'接纳不完美', message:'孩子，没有人是完美的，做题失误、成绩波动、偶尔偷懒都是成长的常态。不用逼自己事事优秀，接纳普通的自己，慢慢来，稳稳走，就是最大的进步。' },
+    { id:3, title:'对抗疲惫焦虑', message:'学习从来都不轻松，你会累、会烦躁、会不想坚持，这些都太正常了。不用一直紧绷着自己，累了就休息，你的开心和健康，永远比成绩更重要。' },
+    { id:4, title:'点滴成长', message:'成长从不是突然的高光，而是日复一日的坚持。你多学的一个知识点、多坚持的一分钟、多改正的一道错题，都在悄悄让你变得更优秀，爸爸妈妈都看在眼里。' },
+    { id:5, title:'无畏前路', message:'不用害怕考试，不用焦虑结果。认真努力、尽力而为，就是对自己最好的交代。无论结果如何，努力坚持的你，永远是我们的骄傲。' },
+    { id:6, title:'奔赴山海', message:'我的宝贝，一路走来的坚持、自律和勇敢，已经胜过所有分数和名次。学习是成长的路径，不是人生的全部。未来漫漫前路，大胆去闯、大胆追梦就好。家永远是你的港湾，我们永远无条件爱你、支持你，愿你心怀星光，奔赴属于自己的山海。' }
+  ],
+  '爱人': [
+    { id:1, title:'重新出发', message:'亲爱的，过去的坎坷与错过都翻篇了。愿意和你一起重新出发，是我做过最勇敢也最值得的决定。不用回头，前方的路，我们并肩走。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，我们都会有情绪、有脾气、有不够好的时候。接纳真实的彼此，慢慢磨合，稳稳相守，就是我们最好的样子。' },
+    { id:3, title:'对抗疲惫焦虑', message:'生活不容易，你会累、会烦躁、会想放弃，这些都太正常了。累了就靠着我歇一歇，你的开心和健康，比一切都重要。' },
+    { id:4, title:'点滴成长', message:'感情从不是突然的圆满，而是日复一日的用心。多一句体谅、多一次拥抱、多一天的陪伴，都在让我们成为更好的我们。' },
+    { id:5, title:'无畏前路', message:'不用害怕未知，不用焦虑明天。尽力而为就好，无论结果如何，我都在你身边，和你一起面对。' },
+    { id:6, title:'奔赴山海', message:'亲爱的，一路走来我们有过欢笑也有过眼泪，但从来没有松开过彼此的手。未来漫漫长路，大胆去闯、大胆去爱就好。我永远在，永远陪你奔赴属于我们的山海。' }
+  ],
+  '同学': [
+    { id:1, title:'重新出发', message:'过去的松懈和遗憾都翻篇了，敢于下定决心重新出发的你，真的很酷。不用纠结过去，从现在开始，就是最好的开始。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，考试失误、状态起伏都是常态。不用逼自己事事优秀，接纳真实的自己，稳稳向前就好。' },
+    { id:3, title:'对抗疲惫焦虑', message:'备考从来都不轻松，你会累、会焦虑、会想摆烂，这些都太正常了。累了就休息，身体和心情，永远比分数重要。' },
+    { id:4, title:'点滴成长', message:'进步从不是突然的逆袭，而是一道题一道题地刷、一个知识点一个知识点地啃。你每天的努力，我们都看得见。' },
+    { id:5, title:'无畏前路', message:'别怕考试，别焦虑结果。认真复习、尽力作答，就是对这段时光最好的交代。无论结果如何，坚持到最后的你都很棒。' },
+    { id:6, title:'奔赴山海', message:'并肩作战的这段日子，会成为青春里最闪光的记忆。前路漫漫，各自奔赴，也别忘了顶峰相见。愿你前程似锦，一举夺魁。' }
+  ],
+  '朋友': [
+    { id:1, title:'重新出发', message:'过去的失落和迷茫都翻篇了。愿意重新开始的你，永远来得及。别回头，往前走，我一直在你身后。' },
+    { id:2, title:'接纳不完美', message:'没有人是完美的，我们都会有低谷、有犹豫、有搞砸的时候。接纳不完美的自己，你不需要向任何人证明什么。' },
+    { id:3, title:'对抗疲惫焦虑', message:'生活有时真的挺累的，你会崩溃、会想躲起来，这都太正常了。先照顾好自己，好好睡一觉，明天我陪你再战。' },
+    { id:4, title:'点滴成长', message:'成长是慢功夫，是日复一日的坚持。你每一次没放弃的瞬间，都在悄悄变好，我看在眼里，替你骄傲。' },
+    { id:5, title:'无畏前路', message:'别怕选错，别怕失败。大胆去试，大胆去闯，尽力就好。无论你走到哪里，都有一个人永远为你撑腰。' },
+    { id:6, title:'奔赴山海', message:'一路走来，谢谢你陪我哭过笑过。未来很远，但值得期待。大胆去追你的山海，我永远是你的后盾，顶峰见。' }
+  ],
+  '爸妈': [
+    { id:1, title:'重新出发', message:'爸、妈，过去的辛苦和操劳，我们都记在心里。从今天起，换我来学着照顾你们。人生下半程，我们慢慢来，好好走。' },
+    { id:2, title:'接纳不完美', message:'你们不用做无所不能的父母，也不用事事为我安排好。允许自己休息、允许自己偶尔做不到，你们已经做得足够好了。' },
+    { id:3, title:'对抗疲惫焦虑', message:'这一生你们扛了太多。累了就歇歇，别总把什么都自己扛着。你们的健康和开心，比什么都重要。' },
+    { id:4, title:'点滴成长', message:'我长大了，也在学着像你们爱我一样爱你们。多陪你们吃一顿饭、多听你们说说话，这些小事，是我回报你们的方式。' },
+    { id:5, title:'无畏前路', message:'你们总怕我走错路，其实我早已学会自己面对。请放心大胆地让我去闯，无论走多远，我都会记得回家的路。' },
+    { id:6, title:'奔赴山海', message:'谢谢你们半生的守护与付出。前半生你们牵着我，后半生换我扶着你们。愿时光慢些，愿你们健康平安，我们一起奔赴更远的山海。' }
+  ]
+};
+XGF.getDefaultLevels = function(cat){
+  return XGF.DEFAULT_LEVELS_BY_CAT[cat] || XGF.DEFAULT_LEVELS_BY_CAT['孩子'];
+};
+/* 兼容旧引用：默认指向「孩子」分类 */
+XGF.DEFAULT_LEVELS = XGF.DEFAULT_LEVELS_BY_CAT['孩子'];
+XGF.ACHIEVEMENT = { title:'不负时光，不负自己', desc:'完成了全部星光旅程，收获到终极祝福', icon:'🏆' };
 
 /* 模板库（后台用）：四分类 */
 XGF.TEMPLATES = {
-  '解压安慰': [
-    '累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。',
-    '今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。',
-    '你不是机器，不用每一分钟都高效运转，慢一点也没关系。',
-    '烦躁的时候深呼吸三次，爸爸妈妈就在你身后。',
-    '那些让你烦心的事，先放一放，你的开心比什么都重要。'
-  ],
-  '成长鼓励': [
-    '每一次小小的努力，都在为未来的你铺路，加油，宝贝。',
-    '你不需要和别人比，你只需要比昨天的自己进步一点点。',
-    '坚持很难，但你已经在路上了，这本身就很了不起。',
-    '做错的题是宝藏，改正它，你就离优秀更近一步。',
-    '不要怕慢，怕的是停下，只要还在走，就一定会到达。'
-  ],
-  '心态疏导': [
-    '一次考试说明不了什么，你的人生还很长很长。',
-    '焦虑的时候，想想爸爸妈妈无条件爱你的样子。',
-    '结果只是旅程的一部分，过程中的你已经很棒了。',
-    '允许自己偶尔做不好，允许自己偶尔想休息，这不丢人。',
-    '把压力放下来，你背着的，不是全世界，只是一个小小的书包。'
-  ],
-  '亲子告白': [
-    '宝贝，无论你考多少分，你都是爸爸妈妈最爱的孩子。',
-    '我们爱的是你这个人，不是你的成绩单。',
-    '你的笑容，是爸爸妈妈一天里最亮的星星。',
-    '无论走多远，家永远是你最温暖的港湾。',
-    '谢谢你来到我们身边，你是我们生命里最好的礼物。'
-  ]
+  '孩子': ['累了就停下来歇一歇，天塌不下来，你也不用一直那么坚强。','今天的疲惫已经够多了，剩下的交给明天，好好睡一觉，一切都会好起来。','你不是机器，不用每一分钟都高效运转，慢一点也没关系。','烦躁的时候深呼吸三次，爸爸妈妈就在你身后。','那些让你烦心的事，先放一放，你的开心比什么都重要。','每一次小小的努力，都在为未来的你铺路，加油，宝贝。','你不需要和别人比，你只需要比昨天的自己进步一点点。','坚持很难，但你已经在路上了，这本身就很了不起。','做错的题是宝藏，改正它，你就离优秀更近一步。','不要怕慢，怕的是停下，只要还在走，就一定会到达。','一次考试说明不了什么，你的人生还很长很长。','焦虑的时候，想想爸爸妈妈无条件爱你的样子。','结果只是旅程的一部分，过程中的你已经很棒了。','允许自己偶尔做不好，允许自己偶尔想休息，这不丢人。','把压力放下来，你背着的，不是全世界，只是一个小小的书包。','宝贝，无论你考多少分，你都是爸爸妈妈最爱的孩子。','我们爱的是你这个人，不是你的成绩单。','你的笑容，是爸爸妈妈一天里最亮的星星。','无论走多远，家永远是你最温暖的港湾。','谢谢你来到我们身边，你是我们生命里最好的礼物。'],
+  '爱人': ['你笑起来的时候，我的世界都亮了。','今天辛苦了，剩下的交给我。','不是因为你完美，而是因为是你，才特别。','慢慢来，我们有一辈子可以好好说话。','累的时候就靠着我，我一直在。','和你在一起的每一天，都值得纪念。','别怕，天塌下来有我陪着你一起扛。','你不需要改变什么，就这样，我就很喜欢。','无论发生什么，我都会站在你这边。','谢谢你愿意把心事说给我听。','你的快乐，是我最想守护的事。','我们已经走了很远，未来还要一起走更远。','吵架归吵架，我爱你这件事从来没有变过。','累了就休息，我永远是你最安稳的港湾。','在你面前，我可以做最真实的自己。','时光漫长，还好有你。','你值得所有的美好，包括最好的我。','今天的你，也辛苦了。','余生很长，请多指教。','我爱你，比你想象的还要多。'],
+  '同学': ['加油，这一战我们一定能赢。','别慌，稳住，你能行。','不会的题我们一起研究，没有过不去的坎。','今天也坚持下来了，很棒。','累了就歇会儿，别把自己绷太紧。','你的努力不会辜负你，时间看得见。','错题就是宝藏，改一道进步一道。','别和别人比，和昨天的自己比就够了。','考砸一次不代表什么，你还有无数次机会证明自己。','顶峰相见，我们说好的。','你在图书馆奋斗的样子，真的闪闪发光。','坚持住，胜利就在前方。','不管结果如何，这段并肩的日子都值得。','偷偷告诉你：你比自己以为的厉害多了。','压力大的时候，出去走走透口气，回来继续。','你的目标，我们陪着你一起够到。','别焦虑，按自己的节奏来就好。','每一天的努力，都在为未来铺路。','你认真的样子，最动人。','别怕，你身后还有我们。'],
+  '朋友': ['心情不好的时候，随时找我。','你永远可以相信，我站在你这边。','不必完美，做你自己就好。','低谷期陪着你，高光时刻为你鼓掌。','累了就说，肩膀借你。','你很好，值得被温柔以待。','谢谢你一直在我身边，真的。','别内耗了，你已经做得很好了。','无论你做什么决定，我都支持你。','我们之间的情谊，比什么都珍贵。','今天辛苦了，吃点好吃的犒劳自己。','偶尔摆烂也没关系，休息是为了更好地出发。','你笑的时候，好像一切都会好起来。','真正的朋友，是允许你脆弱的人，我在。','别怕失败，你还有我这个后盾。','想哭就哭，哭完我陪你好好吃一顿。','你值得世界上所有的美好。','无论走多远，别忘了常联系。','我见过你最狼狈的样子，依然觉得你很好。','有你在，什么都不怕。'],
+  '爸妈': ['爸、妈，你们辛苦了，谢谢你们。','以前是你们照顾我，以后换我来照顾你们。','你们的健康，是我最大的心愿。','别太操劳了，我长大了，可以自己撑起一片天。','常回家看看，多陪陪你们，是我现在最想做的事。','你们教我的道理，我都记在心里。','小时候你们是我的依靠，现在让我做你们的依靠。','慢点老去，我还有很多话想跟你们说。','谢谢你们给了我最好的爱。','你们的笑容，是我努力的最大动力。','我不在家的时候，也要好好吃饭。','你们辛苦了半辈子，该享享福了。','走得再远，家永远是我的牵挂。','有些话当面说不出口，写在这里：我爱你们。','愿时光慢些，让我多陪陪你们。','你们的付出，我都看在眼里，记在心里。','以后换我叮嘱你们：天冷了记得加衣。','你们是我见过最坚强的人，也请允许自己偶尔柔软。','家的方向，永远是我最安心的方向。','爸、妈，能成为你们的家人，是我的幸运。']
 };
 
 /* ---------------- [M4] storage 本地/云端存储（按模式隔离） ---------------- */
@@ -670,7 +681,8 @@ XGF.defaultConfig = function(){
   return {
     version: 2,
     profile: { nickname:'宝贝', gender:'neutral', welcome: XGF.DEFAULT_WELCOME },
-    signature: '爱你的爸爸妈妈',
+    signature: '永远支持你的人',
+    level_cat: '孩子',
     levels: XGF.DEFAULT_LEVELS.map(l => ({ id:l.id, title:l.title, message:l.message, custom_ids: [] })),
     custom_messages: [],
     bonus_letters: [],
@@ -686,7 +698,8 @@ XGF.migrateConfig = function(c){
   if(!Array.isArray(c.custom_messages)) c.custom_messages = [];
   if(!Array.isArray(c.bonus_letters)) c.bonus_letters = [];
   if(!c.profile) c.profile = { nickname:'宝贝', gender:'neutral', welcome: XGF.DEFAULT_WELCOME };
-  if(!c.signature) c.signature = '爱你的爸爸妈妈';
+  if(!c.signature) c.signature = '永远支持你的人';
+  if(!c.level_cat || !XGF.LEVEL_CATS.includes(c.level_cat)) c.level_cat = '孩子';
   if(!Array.isArray(c.eggs) || !c.eggs.length) c.eggs = XGF.DEFAULT_EGGS.slice();
   /* 旧 8 条默认彩蛋 → 自动升级为 18 条（家长自定义过的不动） */
   if(c.eggs.length === XGF.LEGACY_DEFAULT_EGGS.length &&
@@ -758,7 +771,7 @@ XGF.getLevelCandidates = function(id){
     if(cm && cm.text && cm.text.trim() && !list.includes(cm.text)) list.push(cm.text);
   });
   if(!list.length){
-    const d = XGF.DEFAULT_LEVELS.find(l => l.id === id);
+    const d = XGF.getDefaultLevels(cfg.level_cat).find(l => l.id === id);
     if(d && d.message) list.push(d.message);
   }
   return list;
@@ -776,7 +789,7 @@ XGF.pickLevelMsg = function(id, letters){
   const customTexts = ((lv && lv.custom_ids) || []).map(cid => cfg.custom_messages.find(m => m.id === cid))
     .filter(m => m && m.text && m.text.trim()).map(m => m.text);
   let base = (lv && lv.message && lv.message.trim()) ? lv.message : '';
-  if(!base){ const d = XGF.DEFAULT_LEVELS.find(l => l.id === id); if(d) base = d.message; }
+  if(!base){ const d = XGF.getDefaultLevels(cfg.level_cat).find(l => l.id === id); if(d) base = d.message; }
   const collected = m => (letters || []).some(l => l.levelId === id && l.message === m);
   const tpl = Object.values(XGF.TEMPLATES).flat();
   let pool;
@@ -1000,7 +1013,7 @@ XGF.codePage = {
         XGF.router.show('home');
         XGF.toast('欢迎回来，专属旅程已加载 ✦');
       } else if(r === 'notfound'){
-        XGF.$('#codeErr').textContent = '没找到这个游戏码，跟爸爸妈妈确认一下哦';
+        XGF.$('#codeErr').textContent = '没找到这个游戏码，跟送你游戏码的人确认一下哦';
       } else {
         XGF.$('#codeErr').textContent = '网络开小差了，再试一次';
       }
@@ -1163,10 +1176,10 @@ XGF.engine = {
     this.state = 'ready';
     this.paused = false;
     this.runTime = 0;
-    this.bubbleTimer = XGF.rand(5,9);
+    this.bubbleTimer = XGF.rand(2,4);
     /* 本局状态：分数 / 跳跃 / 特效 */
     this.score = 0;
-    this.playerY = 0; this.jumping = false; this.jumpV = 0;
+    this.playerY = 0; this.jumping = false; this.jumpV = 0; this.jumpCount = 0;
     this.rainT = 0; this.rainSeed = 0; this.lightningT = 0; this.comp = null;
     XGF.$('#scoreNum').textContent = '0';
     XGF.router.show('game');
@@ -1293,10 +1306,26 @@ XGF.engine = {
     });
   },
   jump(){
-    if(this.state !== 'run' || this.paused || this.jumping) return;
-    this.jumping = true;
-    this.jumpV = -380;
-    XGF.audio.sfx('jump');
+    if(this.state !== 'run' || this.paused) return;
+    if(!this.jumping){
+      /* 地面起跳（第一跳） */
+      this.jumping = true;
+      this.jumpCount = 1;
+      this.jumpV = -380;
+      XGF.audio.sfx('jump');
+    } else if(this.jumpCount < 2){
+      /* 空中二段跳：重置垂直速度并追加向上冲量 */
+      this.jumpCount = 2;
+      this.jumpV = -330;
+      XGF.audio.sfx('jump');
+      /* 二段跳脚下粒子 */
+      const x = this.playerX, y = this.groundY - 44 + this.playerY;
+      for(let i=0;i<10;i++){
+        const a = XGF.rand(-Math.PI, 0), sp = XGF.rand(40, 130);
+        this.parts.push({ x, y, vx:Math.cos(a)*sp*0.6, vy:Math.sin(a)*sp, g:160,
+          life:XGF.rand(0.3,0.5), r:XGF.rand(1.5,3), c:XGF.pick(['#FFE9A8','#FFD98A','#C9D7FF']) });
+      }
+    }
   },
   addScore(n, sx, sy){
     this.score = Math.max(0, this.score + n);
@@ -1352,7 +1381,7 @@ XGF.engine = {
     if(this.jumping){
       this.jumpV += 1000 * dt;
       this.playerY += this.jumpV * dt;
-      if(this.playerY >= 0){ this.playerY = 0; this.jumping = false; }
+      if(this.playerY >= 0){ this.playerY = 0; this.jumping = false; this.jumpCount = 0; }
     }
     /* 特效计时 */
     if(this.rainT > 0) this.rainT -= dt;
@@ -1402,7 +1431,7 @@ XGF.engine = {
     this.bubbleTimer -= dt;
     if(this.bubbleTimer <= 0){
       XGF.game.bubble();
-      this.bubbleTimer = XGF.rand(8, 15);
+      this.bubbleTimer = XGF.rand(4, 8);
     }
     /* 通关检测 */
     if(this.worldX >= this.dist) this.finish();
@@ -2012,17 +2041,17 @@ XGF.message = {
     const idx = XGF.LEVEL_META.findIndex(l => l.id === levelId) + 1;
     const cfg = XGF.getConfig();
     const nick = cfg.profile.nickname || '宝贝';
-    const sign = cfg.signature || '爱你的爸爸妈妈';
+    const sign = cfg.signature || '永远支持你的人';
     const isFinal = levelId === 6;
     const view = XGF.$('#view-message');
     const scoreHtml = `<div class="m-score">⭐ 本段收获 ${score || 0} 分</div>`;
     const bonusHtml = bonus
-      ? `<div class="m-bonus" style="margin-top:16px;padding:12px 16px;border:1.5px dashed rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.08);text-align:left;font-size:13.5px;line-height:1.9"><b style="color:#FFE9B8">💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
+      ? `<div class="m-bonus" style="margin-top:16px;padding:12px 16px;border:1.5px dashed rgba(255,255,255,.45);border-radius:14px;background:rgba(255,255,255,.08);text-align:left;font-size:13.5px;line-height:1.9;white-space:pre-line"><b style="color:#FFE9B8">💌 写给 ${nick} 的信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
     const bonusPaperHtml = bonus
-      ? `<div class="p-bonus"><b>💌 爸爸妈妈的来信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
+      ? `<div class="p-bonus"><b>💌 写给 ${nick} 的信 · ${bonus.title}</b><br>${bonus.text}</div>` : '';
     const achHtml = isFinal ? `<div class="m-ach">🏆 ${XGF.ACHIEVEMENT.title}</div>` : '';
     const roundHtml = isFinal
-      ? `<div class="p-round" style="margin-top:8px;font-size:12.5px;color:#A5714A;letter-spacing:1px;opacity:.85">🌱 第 ${XGF.loadProgress().rounds || 1} 轮星光旅程完成！关卡已重新点亮，和爸爸妈妈再走一遍吧</div>` : '';
+      ? `<div class="p-round" style="margin-top:8px;font-size:12.5px;color:#A5714A;letter-spacing:1px;opacity:.85">🌱 第 ${XGF.loadProgress().rounds || 1} 轮星光旅程完成！关卡已重新点亮，随时可以再走一遍</div>` : '';
     const actionsHtml = `
       <div class="msg-actions">
         <button class="msg-save" id="psSave">🖼️ 保存图片</button>
@@ -2156,7 +2185,7 @@ XGF.message = {
       c.textAlign = 'center';
       c.font = '400 22px "PingFang SC","Microsoft YaHei",sans-serif';
       c.fillStyle = 'rgba(255,233,184,0.9)';
-      c.fillText('— — — 爸爸妈妈的来信 · ' + bonus.title + ' — — —', w/2, ly + 20);
+      c.fillText('— — — 一封给你的信 · ' + bonus.title + ' — — —', w/2, ly + 20);
       c.textAlign = 'left';
       c.font = '400 24px "PingFang SC","Microsoft YaHei",sans-serif';
       ly = this.wrapText(c, bonus.text, 150, ly + 58, w-300, 42, 24);
@@ -2223,7 +2252,7 @@ XGF.letters = {
       wrap.innerHTML = `<div class="letters-empty">
         <div class="e-icon">🌙</div>
         <p>收藏馆还是空的</p>
-        <p style="font-size:12.5px;margin-top:6px">去完成一段星光旅程，爸爸妈妈的寄语会在这里等你</p>
+        <p style="font-size:12.5px;margin-top:6px">去完成一段星光旅程，会有意想不到的收获在这里等你</p>
         <button class="btn-main" style="margin-top:22px;font-size:14px;padding:13px 34px" id="goPlay">✦ 去玩一关</button>
       </div>`;
       XGF.$('#goPlay').addEventListener('click', () => {
@@ -2247,7 +2276,7 @@ XGF.letters = {
         const el = document.createElement('div');
         el.className = 'letter-item' + (it.ach ? ' ach' : '');
         el.innerHTML = `
-          <div class="li-icon">${it.icon || '💌'}</div>
+          <div class="li-icon">${(it.levelId === 'ach' || it.levelId === 'bonus') ? '💌' : (it.icon || '💌')}</div>
           <div class="li-body">
             <div class="li-top"><span class="li-title">${it.levelId === 'bonus' ? '💌 ' + it.title : it.title}${!it.ach && !['bonus'].includes(String(it.levelId)) && seq > 1 ? ' · 第' + seq + '封' : ''}</span><span class="li-date">${it.date}</span></div>
             <div class="li-text">${it.message}</div>
@@ -2288,7 +2317,7 @@ XGF.letters = {
   },
   read(it){
     XGF.modal.show(`<div class="m-title">💌 ${it.title}</div>
-      <div class="m-body" style="font-size:15.5px;line-height:2.1;text-align:left;padding:4px 8px">${it.message}</div>
+      <div class="m-body" style="font-size:15.5px;line-height:2.1;text-align:left;padding:4px 8px;white-space:pre-line">${it.message}</div>
       <div style="margin-top:10px;color:var(--ink-soft);font-size:12px">${it.date} · 星光赴梦</div>
       <div class="m-actions"><button class="m-btn-ok" id="readOk">收好啦</button></div>`,
       { onShow(){ XGF.$('#readOk').addEventListener('click', () => XGF.modal.hide()); }});
