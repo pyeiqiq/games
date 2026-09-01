@@ -166,6 +166,10 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 
 /* 模板库 & 我的寄语 & 信件 */
 .tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.tpl-filter{margin-top:14px}
+.tpl-filter button{flex:0 0 auto}
+.tpl-sec{grid-column:1/-1;font-size:13px;font-weight:700;color:var(--purple-deep);
+  background:var(--purple-soft);border-radius:99px;padding:5px 16px;margin-top:4px;letter-spacing:1px}
 .tpl-card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
   padding:16px 18px;box-shadow:var(--shadow);display:flex;flex-direction:column;gap:10px;transition:.2s}
 .tpl-card:hover{transform:translateY(-2px)}
@@ -373,6 +377,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <div class="card" style="margin-top:22px">
         <h3>📚 暖心模板库</h3>
         <div class="desc">内置 5 类关系模板（孩子 / 爱人 / 同学 / 朋友 / 爸妈），点击「套用」可应用到某一关。</div>
+        <div class="seg tpl-filter" id="tplFilter"></div>
       </div>
       <div class="tpl-grid" id="tplGrid"></div>
     </div>
@@ -1088,9 +1093,29 @@ function bindEggs(){
 }
 
 /* ---------- 模板库 & 我的寄语 ---------- */
+let tplFilterCat = '全部';   /* 模板库分类筛选状态 */
+function renderTplFilter(){
+  const wrap = $('#tplFilter');
+  if(!wrap) return;
+  wrap.innerHTML = '';
+  ['全部', ...LEVEL_CATS].forEach(cat => {
+    const b = document.createElement('button');
+    b.textContent = cat + (cat === '全部' ? '（' + Object.values(TEMPLATES).reduce((s,a)=>s+a.length,0) + '）' : '');
+    b.classList.toggle('on', tplFilterCat === cat);
+    b.addEventListener('click', () => { tplFilterCat = cat; refreshTpl(); });
+    wrap.appendChild(b);
+  });
+}
 function refreshTpl(){
   const grid = $('#tplGrid'); grid.innerHTML = '';
+  renderTplFilter();
   Object.keys(TEMPLATES).forEach(cat => {
+    if(tplFilterCat !== '全部' && tplFilterCat !== cat) return;
+    /* 分类分区标题 */
+    const sec = document.createElement('div');
+    sec.className = 'tpl-sec';
+    sec.textContent = cat + ' · ' + TEMPLATES[cat].length + ' 条';
+    grid.appendChild(sec);
     TEMPLATES[cat].forEach((txt, i) => {
       const got = isCollected(txt);
       const card = document.createElement('div');
