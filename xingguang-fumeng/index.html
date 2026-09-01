@@ -790,7 +790,9 @@ XGF.pickLevelMsg = function(id, letters){
   if(!cfg) cfg = XGF.getConfig();
   const lv = cfg.levels.find(l => l.id === id);
   const cat = cfg.level_cat || '孩子';
-  const collected = m => (letters || []).some(l => l.levelId === id && l.message === m);
+  /* 「已获取」按寄语内容全局匹配（不限关卡）：同一句寄语无论在哪一关被收藏过，都视为已获取，
+     与后台标注逻辑保持一致（如手写寄语被第 1 关获取后，第 2 关不应再推送） */
+  const collected = m => (letters || []).some(l => l.message === m);
   const unread = arr => arr.filter(m => !collected(m));
 
   /* ① 本关套用的寄语 */
