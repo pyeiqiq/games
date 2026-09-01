@@ -550,6 +550,14 @@ XGF.genSalt = () => {
 /* ---------------- [M3] defaults 默认模板 ---------------- */
 XGF.DEFAULT_EGGS = [
   '今天也辛苦啦','累了就歇歇','记得喝水','你超棒的',
+  '慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步',
+  '休息一下，世界不会跑掉','你做得已经很好了','深呼吸，放轻松','每一小步都算数',
+  '偶尔偷懒也没关系','给自己一个拥抱吧','今天也有在好好长大','别怕，有我们在',
+  '你是被爱包围的宝贝','星光会照亮你的路'
+];
+/* 旧版默认彩蛋（8 条）：用于检测「从未自定义」的配置并自动升级到 18 条 */
+XGF.LEGACY_DEFAULT_EGGS = [
+  '今天也辛苦啦','累了就歇歇','记得喝水','你超棒的',
   '慢慢来就好','努力的你闪闪发光','不用着急','慢慢来也是进步'
 ];
 XGF.DEFAULT_WELCOME = '欢迎回家，今天也辛苦啦';
@@ -680,6 +688,12 @@ XGF.migrateConfig = function(c){
   if(!c.profile) c.profile = { nickname:'宝贝', gender:'neutral', welcome: XGF.DEFAULT_WELCOME };
   if(!c.signature) c.signature = '爱你的爸爸妈妈';
   if(!Array.isArray(c.eggs) || !c.eggs.length) c.eggs = XGF.DEFAULT_EGGS.slice();
+  /* 旧 8 条默认彩蛋 → 自动升级为 18 条（家长自定义过的不动） */
+  if(c.eggs.length === XGF.LEGACY_DEFAULT_EGGS.length &&
+     c.eggs.every(e => XGF.LEGACY_DEFAULT_EGGS.includes(e)) &&
+     XGF.LEGACY_DEFAULT_EGGS.every(e => c.eggs.includes(e))){
+    c.eggs = XGF.DEFAULT_EGGS.slice();
+  }
   if(!c.settings) c.settings = { sound:true, darkMode:'auto' };
   if(!c.security) c.security = { hash:'', salt:'' };
   c.version = 2;
@@ -795,7 +809,12 @@ XGF.cloud = {
       const cfg = await XGF.CLOUD.loadGame(code);
       if(!cfg) return 'notfound';
       /* 切换/进入游戏码：完全重置缓存，杜绝上一个游戏码的数据残留 */
-      XGF._cfgCache = XGF.migrateConfig(cfg);
+      const migrated = XGF.migrateConfig(cfg);
+      /* 迁移升级（如旧 8 条彩蛋 → 18 条）：静默写回云端持久化 */
+      if(JSON.stringify(migrated) !== JSON.stringify(cfg)){
+        XGF.CLOUD.saveGameConfig(migrated).catch(() => {});
+      }
+      XGF._cfgCache = migrated;
       XGF._progCache = null;
       XGF.CLOUD.enabled = true;
       XGF.CLOUD.code = code;
@@ -1213,18 +1232,15 @@ XGF.engine = {
     /* 本关彩蛋池（家长配置平均分配） */
     this.buildEggPool();
   },
-  /* 每局只洗牌一次：保证各关从同一序列取窗口，关卡间尽量不重复 */
+  /* 每局只洗牌一次：彩蛋顺序固定，但每关从全池随机抽取 */
   buildEggShuffle(){
     const cfg = XGF.getConfig();
     const eggs = (cfg.eggs && cfg.eggs.length) ? cfg.eggs : XGF.DEFAULT_EGGS;
     this._shuffledEggs = eggs.slice().sort(() => Math.random() - 0.5);
   },
   buildEggPool(){
-    const n = this._shuffledEggs.length;
-    const per = Math.max(1, Math.ceil(n / XGF.LEVEL_META.length));
-    const start = (this.levelIdx * per) % n;
-    this.eggPool = [];
-    for(let k=0;k<per;k++) this.eggPool.push(this._shuffledEggs[(start + k) % n]);
+    /* 不做平均分配：每关气泡从全部彩蛋中随机抽取任意一条 */
+    this.eggPool = this._shuffledEggs.slice();
   },
   spawnType(type, n){
     for(let i=0;i<n;i++){
@@ -1915,8 +1931,9 @@ XGF.game = {
       prog.letters.push({ levelId:m.id, title:m.title, message:msg,
         date: XGF.fmtDate(new Date()), icon:m.icon, score, loved:false });
     }
-    /* 奖励信：随机一封（孩子收藏馆已存在则不重复收藏） */
-    const bonus = XGF.pickBonus(cfg, prog);
+    /* 奖励信：仅终章（第 6 关）随机一封（孩子收藏馆已存在则不重复收藏）；
+       前 5 关只送寄语，不发信 */
+    const bonus = (m.id === 6) ? XGF.pickBonus(cfg, prog) : null;
     if(bonus){
       const dupB = prog.letters.find(l => l.levelId === 'bonus' && l.message === bonus.text);
       if(!dupB){
