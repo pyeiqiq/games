@@ -300,23 +300,34 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <button id="btnLogout">退出登录</button>
     </div>
   </div>
-  <!-- 运营数据总览（仅 admin 账号可见） -->
-  <div id="statsPanel" style="display:none">
-    <div class="stats-head">
-      <div class="st">📊 星光赴梦 · 运营数据总览</div>
-      <div class="right"><button class="btn-sm" id="btnRefreshStats">🔄 刷新</button></div>
-    </div>
-    <div class="stats-cards" id="statsCards"></div>
-    <div class="card" style="margin-top:16px">
-      <h3 style="margin-bottom:10px">🧾 游戏码明细</h3>
-      <div style="overflow-x:auto"><table class="stats-table" id="statsTable">
-        <thead><tr><th>游戏码</th><th>称呼</th><th>家长账号</th><th>创建时间</th><th>游玩状态</th><th>最近通关</th><th>通关轮次</th><th>收藏信件</th><th>成就</th></tr></thead>
-        <tbody></tbody>
-      </table></div>
-      <div style="font-size:12px;color:var(--ink-soft);margin-top:8px" id="statsNote"></div>
+  <div class="games-main" id="gamesMain"></div>
+</div>
+
+<!-- 开发者总览（admin 账号专属） -->
+<div id="devView" style="display:none">
+  <div class="games-head">
+    <div class="t">🚀 星光赴梦 · 开发者总览 <small>账号：admin</small></div>
+    <div class="right">
+      <button class="btn-sm" id="btnRefreshDev">🔄 刷新</button>
+      <button id="btnDevLogout">退出</button>
     </div>
   </div>
-  <div class="games-main" id="gamesMain"></div>
+  <div class="stats-cards" id="devCards"></div>
+  <div class="card" style="margin-top:16px">
+    <h3 style="margin-bottom:10px">👥 注册玩家账号（家长）</h3>
+    <div style="overflow-x:auto"><table class="stats-table" id="devUsersTable">
+      <thead><tr><th>账号</th><th>注册时间</th><th>游戏码数</th><th>已游玩</th><th>最近通关</th><th>累计轮次</th><th>收藏信件</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+  </div>
+  <div class="card" style="margin-top:16px">
+    <h3 style="margin-bottom:10px">🧾 游戏码明细</h3>
+    <div style="overflow-x:auto"><table class="stats-table" id="devCodesTable">
+      <thead><tr><th>游戏码</th><th>称呼</th><th>家长账号</th><th>创建时间</th><th>游玩状态</th><th>最近通关</th><th>通关轮次</th><th>收藏信件</th><th>成就</th></tr></thead>
+      <tbody></tbody>
+    </table></div>
+    <div style="font-size:12px;color:var(--ink-soft);margin-top:8px" id="devNote"></div>
+  </div>
 </div>
 
 <!-- 主面板 -->
@@ -568,6 +579,16 @@ const CLOUD = {
     const rows = await this.req('GET', 'users?username=eq.' + encodeURIComponent(username) + '&select=role');
     return rows && rows.length ? (rows[0].role || 'user') : 'user';
   },
+  async getUser(username){
+    const rows = await this.req('GET', 'users?username=eq.' + encodeURIComponent(username) + '&select=username,role,pass_hash,created_at');
+    return rows && rows.length ? rows[0] : null;
+  },
+  async setPwd(username, newHash){
+    await this.req('PATCH', 'users?username=eq.' + encodeURIComponent(username), { pass_hash: newHash });
+  },
+  async allUsers(){
+    return this.req('GET', 'users?order=created_at.asc&select=username,role,created_at&limit=1000');
+  },
   async allGames(){
     return this.req('GET', 'xg_games?order=created_at.asc&select=code,parent,config,created_at&limit=1000');
   },
@@ -745,9 +766,44 @@ function applyTheme(){
 function showLogin(){
   $('#loginView').style.display = 'flex';
   $('#gamesView').style.display = 'none';
+  $('#devView').style.display = 'none';
   $('#panelView').style.display = 'none';
   $('#cErr').textContent = '';
   if(mode === 'local') showLocalAuth();
+}
+/* 登录后按角色分流：admin → 开发者总览；普通家长 → 我的游戏 */
+async function enterByRole(){
+  const role = await CLOUD.myRole(cloudUser).catch(() => 'user');
+  if(role === 'admin') enterDev();
+  else enterGames();
+}
+/* 开发者账号首次登录（pass_hash 为空）：引导设置密码 */
+function firstAdminPwd(u){
+  modal(`<h4>👑 开发者账号首次登录</h4>
+    <div class="m-body">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px">为开发者账号「${u}」设置登录密码（至少 4 位），之后用该账号登录可查看全部玩家数据。</div>
+      <div style="margin-bottom:12px"><input type="password" id="ap1" placeholder="设置密码" autocomplete="new-password"></div>
+      <div><input type="password" id="ap2" placeholder="再次输入" autocomplete="new-password"></div>
+    </div>
+    <div class="m-actions"><button class="m-cancel" id="apNo">取消</button>
+    <button class="m-ok" id="apYes">设置并进入</button></div>`,
+    { onShow(){
+      $('#apNo').addEventListener('click', modalHide);
+      $('#apYes').addEventListener('click', async () => {
+        const p1 = $('#ap1').value, p2 = $('#ap2').value;
+        if(p1.length < 4){ toast('密码至少 4 位'); return; }
+        if(p1 !== p2){ toast('两次输入不一致'); return; }
+        const h = gamesPassHash(u + ':' + p1 + ':' + 'miaodou-games-v1');
+        try{
+          await CLOUD.setPwd(u, h);
+          modalHide();
+          cloudUser = u;
+          sessionStorage.setItem('xgf_admin_user', u);
+          toast('开发者密码已设置 ✓');
+          enterDev();
+        }catch(e){ toast('设置失败：' + e.message.slice(0,40)); }
+      });
+    }});
 }
 function showLocalAuth(){
   const cfg = loadLocalConfig();
@@ -781,8 +837,20 @@ function initAuth(){
     try{
       const h = gamesPassHash(u + ':' + p + ':' + 'miaodou-games-v1');
       const ok = await CLOUD.login(u, h);
-      if(ok){ cloudUser = u; sessionStorage.setItem('xgf_admin_user', u); enterGames(); }
-      else $('#cErr').textContent = '用户名或密码不对';
+      if(ok){
+        cloudUser = u;
+        sessionStorage.setItem('xgf_admin_user', u);
+        enterByRole();
+      } else {
+        /* 开发者账号首次登录（role=admin 且尚未设置密码）→ 引导设置 */
+        const rec = await CLOUD.getUser(u).catch(() => null);
+        if(rec && rec.role === 'admin' && !rec.pass_hash){
+          $('#cErr').textContent = '';
+          firstAdminPwd(u);
+          return;
+        }
+        $('#cErr').textContent = '用户名或密码不对';
+      }
     }catch(e){ $('#cErr').textContent = '网络异常，请重试（' + e.message.slice(0,40) + '）'; }
   });
   $('#cPass').addEventListener('keydown', e => { if(e.key === 'Enter') $('#btnCLogin').click(); });
@@ -839,7 +907,7 @@ function initAuth(){
   /* 恢复云会话 */
   try{
     const u = sessionStorage.getItem('xgf_admin_user');
-    if(u){ cloudUser = u; enterGames(); return; }
+    if(u){ cloudUser = u; enterByRole(); return; }
   }catch(e){}
   showLogin();
 }
@@ -847,37 +915,37 @@ function initAuth(){
 /* ---------- 我的游戏 ---------- */
 async function enterGames(){
   $('#loginView').style.display = 'none';
+  $('#devView').style.display = 'none';
   $('#panelView').style.display = 'none';
   $('#gamesView').style.display = 'block';
-  /* admin 角色显示运营数据总览 */
-  try{
-    const role = await CLOUD.myRole(cloudUser);
-    const panel = $('#statsPanel');
-    if(role === 'admin'){
-      panel.style.display = 'block';
-      $('#btnRefreshStats').onclick = () => loadStats();
-      loadStats();
-    } else panel.style.display = 'none';
-  }catch(e){ /* 查询失败不阻塞游戏列表 */ }
   await renderGames();
 }
-/* 运营数据总览（管理员） */
-let _statsBusy = false;
-async function loadStats(){
-  if(_statsBusy) return;
-  _statsBusy = true;
-  const cards = $('#statsCards');
-  const tbody = document.querySelector('#statsTable tbody');
-  const note = $('#statsNote');
+/* 开发者总览（admin 账号专属） */
+async function enterDev(){
+  $('#loginView').style.display = 'none';
+  $('#gamesView').style.display = 'none';
+  $('#panelView').style.display = 'none';
+  $('#devView').style.display = 'block';
+  loadDev();
+}
+let _devBusy = false;
+async function loadDev(){
+  if(_devBusy) return;
+  _devBusy = true;
+  const cards = $('#devCards');
+  const uBody = document.querySelector('#devUsersTable tbody');
+  const cBody = document.querySelector('#devCodesTable tbody');
+  const note = $('#devNote');
   cards.innerHTML = '<div style="grid-column:1/-1;color:var(--ink-soft);font-size:13px">加载中…</div>';
-  tbody.innerHTML = '';
+  uBody.innerHTML = ''; cBody.innerHTML = '';
   try{
-    const [games, progresses] = await Promise.all([CLOUD.allGames(), CLOUD.allProgress()]);
-    const gs = games || [], ps = progresses || [];
+    const [users, games, progresses] = await Promise.all([CLOUD.allUsers(), CLOUD.allGames(), CLOUD.allProgress()]);
+    const gs = games || [], ps = progresses || [], us = users || [];
     const pByCode = {};
     ps.forEach(p => { pByCode[p.game_code] = p; });
+    /* 玩家 = role=parent 的注册账号 */
+    const players = us.filter(u => u.role === 'parent');
     /* 指标 */
-    const parents = new Set(gs.map(g => g.parent));
     const played = gs.filter(g => pByCode[g.code] && pByCode[g.code].data);
     let totalRounds = 0, totalLetters = 0, totalAch = 0;
     played.forEach(g => {
@@ -889,21 +957,47 @@ async function loadStats(){
     const lastPlay = ps.filter(p => p.updated_at).map(p => p.updated_at).sort().pop() || '—';
     const fmt = t => t ? String(t).replace('T',' ').slice(0,16) : '—';
     cards.innerHTML = `
-      <div class="stat-card"><div class="v">${parents.size}</div><div class="k">注册家长账号</div><div class="s">创建过游戏码的账号</div></div>
+      <div class="stat-card"><div class="v">${players.length}</div><div class="k">注册玩家账号</div><div class="s">role=parent</div></div>
       <div class="stat-card"><div class="v">${gs.length}</div><div class="k">游戏码总数</div><div class="s">生成即计</div></div>
       <div class="stat-card"><div class="v">${played.length}</div><div class="k">已激活游玩</div><div class="s">至少通关过 1 关</div></div>
       <div class="stat-card"><div class="v">${totalRounds}</div><div class="k">累计通关轮次</div><div class="s">终章重置后累加</div></div>
-      <div class="stat-card"><div class="v">${totalLetters}</div><div class="k">收藏信件</div><div class="s">寄语 + 成就 + 奖励信</div></div>
+      <div class="stat-card"><div class="v">${totalLetters}</div><div class="k">收藏信件</div><div class="s">寄语+成就+奖励信</div></div>
       <div class="stat-card"><div class="v">${totalAch}</div><div class="k">达成终章</div><div class="s">通关第 6 关次数</div></div>`;
-    /* 明细 */
+    /* 注册账号表（每个玩家一行：名下码数/已游玩数/最近通关/轮次/信件） */
+    if(!players.length){
+      uBody.innerHTML = '<tr><td colspan="7" style="color:var(--ink-soft)">暂无注册玩家</td></tr>';
+    } else {
+      players.forEach(pu => {
+        const myGames = gs.filter(g => g.parent === pu.username);
+        const myPlayed = myGames.filter(g => pByCode[g.code] && pByCode[g.code].data);
+        let rounds = 0, letters = 0, last = null;
+        myPlayed.forEach(g => {
+          const d = pByCode[g.code].data || {};
+          rounds += (d.rounds || 0);
+          letters += (d.letters || []).length;
+          const up = pByCode[g.code].updated_at;
+          if(up && (!last || up > last)) last = up;
+        });
+        uBody.insertAdjacentHTML('beforeend', `<tr>
+          <td><b style="color:var(--purple-deep)">${pu.username}</b></td>
+          <td>${fmt(pu.created_at)}</td>
+          <td>${myGames.length}</td>
+          <td>${myPlayed.length > 0 ? '<span class="ok">✓ ' + myPlayed.length + ' 个</span>' : '<span class="no">—</span>'}</td>
+          <td>${last ? fmt(last) : '—'}</td>
+          <td>${rounds || '—'}</td>
+          <td>${letters || '—'}</td>
+        </tr>`);
+      });
+    }
+    /* 游戏码明细 */
     if(!gs.length){
-      tbody.innerHTML = '<tr><td colspan="9" style="color:var(--ink-soft)">暂无游戏码</td></tr>';
+      cBody.innerHTML = '<tr><td colspan="9" style="color:var(--ink-soft)">暂无游戏码</td></tr>';
     } else {
       gs.forEach(g => {
         const p = pByCode[g.code];
         const d = p ? (p.data || {}) : null;
         const nick = ((g.config || {}).profile || {}).nickname || '未设置';
-        tbody.insertAdjacentHTML('beforeend', `<tr>
+        cBody.insertAdjacentHTML('beforeend', `<tr>
           <td><b style="color:var(--purple-deep)">${g.code}</b></td>
           <td>${nick}</td>
           <td>${g.parent}</td>
@@ -912,15 +1006,15 @@ async function loadStats(){
           <td>${p && p.updated_at ? fmt(p.updated_at) : '—'}</td>
           <td>${d ? (d.rounds || 0) : '—'}</td>
           <td>${d ? (d.letters || []).length : '—'}</td>
-          <td>${d && d.achievement ? '🏆' : (d ? '—' : '—')}</td>
+          <td>${d && d.achievement ? '🏆' : '—'}</td>
         </tr>`);
       });
     }
-    note.textContent = `已游玩 = 云端存在通关进度记录（孩子至少通关 1 关）。最近一次通关：${fmt(lastPlay)}。数据实时从云端读取。`;
+    note.textContent = '已游玩 = 云端存在通关进度记录（孩子至少通关 1 关）。最近一次通关：' + fmt(lastPlay) + '。数据实时读取。';
   }catch(e){
     cards.innerHTML = `<div style="grid-column:1/-1;color:var(--red);font-size:13px">加载失败：${e.message.slice(0,80)}</div>`;
   }
-  _statsBusy = false;
+  _devBusy = false;
 }
 async function renderGames(){
   const main = $('#gamesMain');
@@ -1518,6 +1612,13 @@ document.addEventListener('DOMContentLoaded', () => {
     currentCode = null; currentConfig = null;
     showLogin();
   });
+  /* 开发者总览按钮 */
+  $('#btnDevLogout').addEventListener('click', () => {
+    cloudUser = null;
+    try{ sessionStorage.removeItem('xgf_admin_user'); }catch(e){}
+    showLogin();
+  });
+  $('#btnRefreshDev').addEventListener('click', () => loadDev());
 });
 </script>
 </body>
