@@ -190,6 +190,20 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 .my-msg-item .mm-ops button{font-size:12px;padding:5px 14px;border-radius:99px;border:1px solid var(--line);color:var(--ink-soft);transition:.2s}
 .my-msg-item .mm-ops button:hover{color:var(--purple-deep);border-color:var(--purple)}
 .my-msg-item .mm-ops button.del:hover{color:var(--red);border-color:var(--red)}
+/* 运营数据总览 */
+#statsPanel{padding:0 0 4px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.stats-head{display:flex;align-items:center;justify-content:space-between;padding:2px 0 12px}
+.stats-head .st{font-size:15px;font-weight:700;color:var(--ink-strong);letter-spacing:1px}
+.stats-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
+.stat-card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;box-shadow:var(--shadow)}
+.stat-card .v{font-size:26px;font-weight:800;color:var(--purple-deep);line-height:1.2}
+.stat-card .k{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.stat-card .s{font-size:11px;color:var(--ink-soft);margin-top:2px;opacity:.8}
+.stats-table{width:100%;border-collapse:collapse;font-size:13px}
+.stats-table th{text-align:left;font-size:11.5px;color:var(--ink-soft);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+.stats-table td{padding:9px 10px;border-bottom:1px solid var(--line-soft);color:var(--ink);white-space:nowrap}
+.stats-table td .ok{color:var(--green);font-weight:600}
+.stats-table td .no{color:var(--ink-soft)}
 /* 信件 */
 .bonus-item{display:flex;gap:12px;align-items:flex-start;background:var(--card);
   border:1px solid var(--line);border-radius:var(--radius);padding:14px 18px;margin-bottom:10px;box-shadow:var(--shadow)}
@@ -284,6 +298,22 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
     <div class="right">
       <button id="btnNewGame">＋ 新建游戏</button>
       <button id="btnLogout">退出登录</button>
+    </div>
+  </div>
+  <!-- 运营数据总览（仅 admin 账号可见） -->
+  <div id="statsPanel" style="display:none">
+    <div class="stats-head">
+      <div class="st">📊 星光赴梦 · 运营数据总览</div>
+      <div class="right"><button class="btn-sm" id="btnRefreshStats">🔄 刷新</button></div>
+    </div>
+    <div class="stats-cards" id="statsCards"></div>
+    <div class="card" style="margin-top:16px">
+      <h3 style="margin-bottom:10px">🧾 游戏码明细</h3>
+      <div style="overflow-x:auto"><table class="stats-table" id="statsTable">
+        <thead><tr><th>游戏码</th><th>称呼</th><th>家长账号</th><th>创建时间</th><th>游玩状态</th><th>最近通关</th><th>通关轮次</th><th>收藏信件</th><th>成就</th></tr></thead>
+        <tbody></tbody>
+      </table></div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:8px" id="statsNote"></div>
     </div>
   </div>
   <div class="games-main" id="gamesMain"></div>
@@ -533,6 +563,16 @@ const CLOUD = {
   },
   async changePwd(username, newHash){
     await this.req('PATCH', 'users?username=eq.' + encodeURIComponent(username), { pass_hash: newHash });
+  },
+  async myRole(username){
+    const rows = await this.req('GET', 'users?username=eq.' + encodeURIComponent(username) + '&select=role');
+    return rows && rows.length ? (rows[0].role || 'user') : 'user';
+  },
+  async allGames(){
+    return this.req('GET', 'xg_games?order=created_at.asc&select=code,parent,config,created_at&limit=1000');
+  },
+  async allProgress(){
+    return this.req('GET', 'xg_progress?order=updated_at.desc&select=game_code,data,updated_at&limit=1000');
   },
   async listGames(username){
     return this.req('GET', 'xg_games?parent=eq.' + encodeURIComponent(username) + '&order=created_at.desc&select=code,config,created_at');
@@ -809,7 +849,78 @@ async function enterGames(){
   $('#loginView').style.display = 'none';
   $('#panelView').style.display = 'none';
   $('#gamesView').style.display = 'block';
+  /* admin 角色显示运营数据总览 */
+  try{
+    const role = await CLOUD.myRole(cloudUser);
+    const panel = $('#statsPanel');
+    if(role === 'admin'){
+      panel.style.display = 'block';
+      $('#btnRefreshStats').onclick = () => loadStats();
+      loadStats();
+    } else panel.style.display = 'none';
+  }catch(e){ /* 查询失败不阻塞游戏列表 */ }
   await renderGames();
+}
+/* 运营数据总览（管理员） */
+let _statsBusy = false;
+async function loadStats(){
+  if(_statsBusy) return;
+  _statsBusy = true;
+  const cards = $('#statsCards');
+  const tbody = document.querySelector('#statsTable tbody');
+  const note = $('#statsNote');
+  cards.innerHTML = '<div style="grid-column:1/-1;color:var(--ink-soft);font-size:13px">加载中…</div>';
+  tbody.innerHTML = '';
+  try{
+    const [games, progresses] = await Promise.all([CLOUD.allGames(), CLOUD.allProgress()]);
+    const gs = games || [], ps = progresses || [];
+    const pByCode = {};
+    ps.forEach(p => { pByCode[p.game_code] = p; });
+    /* 指标 */
+    const parents = new Set(gs.map(g => g.parent));
+    const played = gs.filter(g => pByCode[g.code] && pByCode[g.code].data);
+    let totalRounds = 0, totalLetters = 0, totalAch = 0;
+    played.forEach(g => {
+      const d = pByCode[g.code].data || {};
+      totalRounds += (d.rounds || 0);
+      totalLetters += (d.letters || []).length;
+      if(d.achievement) totalAch++;
+    });
+    const lastPlay = ps.filter(p => p.updated_at).map(p => p.updated_at).sort().pop() || '—';
+    const fmt = t => t ? String(t).replace('T',' ').slice(0,16) : '—';
+    cards.innerHTML = `
+      <div class="stat-card"><div class="v">${parents.size}</div><div class="k">注册家长账号</div><div class="s">创建过游戏码的账号</div></div>
+      <div class="stat-card"><div class="v">${gs.length}</div><div class="k">游戏码总数</div><div class="s">生成即计</div></div>
+      <div class="stat-card"><div class="v">${played.length}</div><div class="k">已激活游玩</div><div class="s">至少通关过 1 关</div></div>
+      <div class="stat-card"><div class="v">${totalRounds}</div><div class="k">累计通关轮次</div><div class="s">终章重置后累加</div></div>
+      <div class="stat-card"><div class="v">${totalLetters}</div><div class="k">收藏信件</div><div class="s">寄语 + 成就 + 奖励信</div></div>
+      <div class="stat-card"><div class="v">${totalAch}</div><div class="k">达成终章</div><div class="s">通关第 6 关次数</div></div>`;
+    /* 明细 */
+    if(!gs.length){
+      tbody.innerHTML = '<tr><td colspan="9" style="color:var(--ink-soft)">暂无游戏码</td></tr>';
+    } else {
+      gs.forEach(g => {
+        const p = pByCode[g.code];
+        const d = p ? (p.data || {}) : null;
+        const nick = ((g.config || {}).profile || {}).nickname || '未设置';
+        tbody.insertAdjacentHTML('beforeend', `<tr>
+          <td><b style="color:var(--purple-deep)">${g.code}</b></td>
+          <td>${nick}</td>
+          <td>${g.parent}</td>
+          <td>${fmt(g.created_at)}</td>
+          <td>${d ? '<span class="ok">✓ 已游玩</span>' : '<span class="no">未游玩</span>'}</td>
+          <td>${p && p.updated_at ? fmt(p.updated_at) : '—'}</td>
+          <td>${d ? (d.rounds || 0) : '—'}</td>
+          <td>${d ? (d.letters || []).length : '—'}</td>
+          <td>${d && d.achievement ? '🏆' : (d ? '—' : '—')}</td>
+        </tr>`);
+      });
+    }
+    note.textContent = `已游玩 = 云端存在通关进度记录（孩子至少通关 1 关）。最近一次通关：${fmt(lastPlay)}。数据实时从云端读取。`;
+  }catch(e){
+    cards.innerHTML = `<div style="grid-column:1/-1;color:var(--red);font-size:13px">加载失败：${e.message.slice(0,80)}</div>`;
+  }
+  _statsBusy = false;
 }
 async function renderGames(){
   const main = $('#gamesMain');
