@@ -51,9 +51,6 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 .login-card .back-btn:hover{background:var(--bg2);color:var(--ink-strong)}
 .login-card .logo{font-size:23px;font-weight:800;color:var(--ink-strong);text-align:center;letter-spacing:2px}
 .login-card .sub{text-align:center;color:var(--ink-soft);font-size:13px;margin:6px 0 18px}
-.auth-tabs{display:flex;gap:6px;margin-bottom:20px;background:var(--bg2);border-radius:99px;padding:4px}
-.auth-tabs button{flex:1;padding:9px 0;border-radius:99px;font-size:13.5px;font-weight:600;color:var(--ink-soft);transition:.2s}
-.auth-tabs button.on{background:var(--card);color:var(--blue-deep);box-shadow:var(--shadow)}
 .field{margin-bottom:14px}
 .btn{display:block;width:100%;padding:13px 0;border-radius:99px;font-size:15px;font-weight:700;letter-spacing:2px;
   background:linear-gradient(135deg,#8FB4D4,#5B87AD);color:#fff;box-shadow:0 8px 20px rgba(91,135,173,.3);transition:.2s;margin-top:6px}
@@ -257,35 +254,14 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
     <button class="back-btn" id="btnAuthBack">‹ 返回</button>
     <div class="logo">🌙 星光赴梦</div>
     <div class="sub">专属后台 · 为 TA 定制专属星光</div>
-    <div class="auth-tabs">
-      <button class="on" data-a="cloud" id="tabCloud">☁️ 云账号</button>
-      <button data-a="local" id="tabLocal">💻 本地模式</button>
-    </div>
     <div id="authCloud">
       <div class="sub" style="margin-bottom:14px">登录后配置存云端，TA 用 6 位游戏码游玩（可跨设备）</div>
-      <div class="field"><label>用户名</label><input id="cUser" placeholder="设置用户名" autocomplete="username"></div>
+      <div class="field"><label>用户名</label><input id="cUser" placeholder="用户名" autocomplete="username"></div>
       <div class="field"><label>密码</label><input type="password" id="cPass" placeholder="密码" autocomplete="current-password"></div>
       <button class="btn" id="btnCLogin">登录</button>
       <button class="btn gray" id="btnCReg" style="margin-top:10px">注册新账号</button>
       <div class="link" id="btnCForgot">忘记密码？</div>
       <div class="err" id="cErr"></div>
-    </div>
-    <div id="authLocal" style="display:none">
-      <div class="sub" style="margin-bottom:14px">本地模式：配置只保存在这台设备（TA 须在同一设备游玩）</div>
-      <div id="setPwdBox" style="display:none">
-        <div class="field"><label>设置后台密码（防误入）</label>
-          <input type="password" id="np1" placeholder="至少 4 位" autocomplete="new-password"></div>
-        <div class="field"><label>再次输入确认</label>
-          <input type="password" id="np2" placeholder="再次输入" autocomplete="new-password"></div>
-        <button class="btn" id="btnSetPwd">创建本地密码</button>
-      </div>
-      <div id="pwdBox">
-        <div class="field"><label>输入本地密码</label>
-          <input type="password" id="pin" placeholder="请输入密码" autocomplete="current-password"></div>
-        <button class="btn" id="btnLogin">进入本地后台</button>
-        <div class="link" id="btnForgot">忘记密码？</div>
-      </div>
-      <div class="hint">本地密码仅保存在本机浏览器</div>
     </div>
   </div>
 </div>
@@ -461,7 +437,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
       <div class="data-item" id="pwdItem">
         <div class="di-icon">🔑</div>
         <div class="di-body"><div class="di-title" id="pwdTitle">修改密码</div>
-          <div class="di-desc" id="pwdDesc">更换后台登录密码</div></div>
+          <div class="di-desc" id="pwdDesc">更换云账号登录密码</div></div>
         <button class="btn-sm di-btn" id="btnChangePwd">修改</button>
       </div>
     </div>
@@ -475,7 +451,7 @@ label{font-size:13px;color:var(--ink-soft);display:block;margin:0 0 6px}
 <script>
 "use strict";
 /* ============================================================
-   星光赴梦 · 家长后台 v3（云账号 + 本地双模式）
+   星光赴梦 · 专属配置后台 v4（云账号 · 6 位游戏码）
    ============================================================ */
 const $ = s => document.querySelector(s);
 const $$ = s => Array.from(document.querySelectorAll(s));
@@ -533,16 +509,6 @@ const sha256 = (function(){
     return out;
   };
 })();
-async function sha256Hex(str){
-  try{
-    if(window.crypto && crypto.subtle){
-      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(str));
-      return Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,'0')).join('');
-    }
-  }catch(e){}
-  return sha256(str);
-}
-function genSalt(){ let s=''; const c='abcdefghijklmnopqrstuvwxyz0123456789'; for(let i=0;i<16;i++) s += c[Math.floor(Math.random()*c.length)]; return s; }
 /* 妙豆游戏屋密码规则：SHA-256(username:password:miaodou-games-v1) */
 const gamesPassHash = str => sha256(str);
 
@@ -621,8 +587,6 @@ const CLOUD = {
 };
 
 /* ---------- 默认数据 ---------- */
-const CFG_KEY = 'xgfumeng_config_v1';
-const PROG_KEY = 'xgfumeng_progress_v1';
 const LEVEL_CATS = ['孩子','爱人','同学','朋友','爸妈'];
 /* 5 分类 × 6 关默认寄语（标题通用：重新出发 → 奔赴山海） */
 const DEFAULT_LEVELS_BY_CAT = {
@@ -714,7 +678,6 @@ function migrateConfig(c){
 }
 
 /* ---------- 状态 ---------- */
-let mode = 'cloud';            /* cloud | local */
 let cloudUser = null;          /* 云用户名 */
 let currentCode = null;        /* 正在编辑的游戏码 */
 let currentConfig = null;      /* 当前编辑的配置 */
@@ -768,7 +731,6 @@ function showLogin(){
   $('#devView').style.display = 'none';
   $('#panelView').style.display = 'none';
   $('#cErr').textContent = '';
-  if(mode === 'local') showLocalAuth();
 }
 /* 登录后按角色分流：admin → 开发者总览；普通家长 → 我的游戏 */
 async function enterByRole(){
@@ -804,30 +766,7 @@ function firstAdminPwd(u){
       });
     }});
 }
-function showLocalAuth(){
-  const cfg = loadLocalConfig();
-  if(cfg && cfg.security && cfg.security.hash){
-    $('#setPwdBox').style.display = 'none'; $('#pwdBox').style.display = 'block'; $('#pin').value=''; $('#pin').focus();
-  } else {
-    $('#pwdBox').style.display = 'none'; $('#setPwdBox').style.display = 'block'; $('#np1').value=''; $('#np2').value=''; $('#np1').focus();
-  }
-}
-function loadLocalConfig(){
-  try{ const r = localStorage.getItem(CFG_KEY); if(r) return migrateConfig(JSON.parse(r)); }catch(e){}
-  return null;
-}
-function saveLocalConfig(c){
-  try{ localStorage.setItem(CFG_KEY, JSON.stringify(c)); }catch(e){}
-}
 function initAuth(){
-  $$('.auth-tabs button').forEach(b => b.addEventListener('click', () => {
-    $$('.auth-tabs button').forEach(x => x.classList.toggle('on', x === b));
-    mode = b.dataset.a;
-    $('#authCloud').style.display = mode === 'cloud' ? 'block' : 'none';
-    $('#authLocal').style.display = mode === 'local' ? 'block' : 'none';
-    $('#cErr').textContent = '';
-    if(mode === 'local') showLocalAuth();
-  }));
   /* 云登录 */
   $('#btnCLogin').addEventListener('click', async () => {
     const u = $('#cUser').value.trim(), p = $('#cPass').value;
@@ -871,37 +810,11 @@ function initAuth(){
     }
   });
   $('#btnCForgot').addEventListener('click', () => {
-    confirmDlg('忘记云账号密码？', '需要重置密码请联系管理员协助处理（本地数据不受影响）。', '知道了', null);
+    confirmDlg('忘记云账号密码？', '需要重置密码请联系开发者协助处理。', '知道了', null);
   });
   /* 登录页返回：始终回到游戏页（同目录 index.html），手机端更可靠 */
   $('#btnAuthBack').addEventListener('click', () => {
     window.location.href = 'index.html';
-  });
-  /* 本地模式 */
-  $('#btnSetPwd').addEventListener('click', async () => {
-    const p1 = $('#np1').value, p2 = $('#np2').value;
-    if(p1.length < 4){ toast('密码至少 4 位'); return; }
-    if(p1 !== p2){ toast('两次输入不一致'); return; }
-    let cfg = loadLocalConfig() || defaultConfig();
-    const salt = genSalt();
-    cfg.security = { salt, hash: await sha256Hex(salt + '::' + p1) };
-    saveLocalConfig(cfg);
-    toast('本地密码创建成功');
-    enterPanel();
-  });
-  $('#btnLogin').addEventListener('click', async () => {
-    const cfg = loadLocalConfig();
-    if(!cfg || !cfg.security || !cfg.security.hash){ showLocalAuth(); return; }
-    const h = await sha256Hex(cfg.security.salt + '::' + $('#pin').value);
-    if(h === cfg.security.hash){ enterPanel(); }
-    else { toast('密码不对哦，再想想～'); $('#pin').value=''; $('#pin').focus(); }
-  });
-  $('#pin').addEventListener('keydown', e => { if(e.key==='Enter') $('#btnLogin').click(); });
-  $('#np2').addEventListener('keydown', e => { if(e.key==='Enter') $('#btnSetPwd').click(); });
-  $('#btnForgot').addEventListener('click', () => {
-    confirmDlg('忘记本地密码了？', '将清空本机全部自定义配置并恢复默认，之后可重新设置密码。通关进度不受影响。', '确认清空', () => {
-      localStorage.removeItem(CFG_KEY); toast('已恢复默认'); showLocalAuth();
-    }, true);
   });
   /* 恢复云会话 */
   try{
@@ -1101,35 +1014,27 @@ function enterPanel(){
   $('#loginView').style.display = 'none';
   $('#gamesView').style.display = 'none';
   $('#panelView').style.display = 'block';
-  if(mode === 'local'){
-    currentCode = null;
-    currentConfig = loadLocalConfig() || defaultConfig();
-  }
-  $('#headMode').textContent = mode === 'cloud' ? ('云账号 · ' + cloudUser) : '本地模式';
-  $('#headCode').textContent = mode === 'cloud' ? ('码 ' + currentCode) : '本地';
-  $('#pwdItem').style.display = mode === 'cloud' ? 'none' : 'flex';
+  $('#headMode').textContent = '云账号 · ' + cloudUser;
+  $('#headCode').textContent = '码 ' + currentCode;
   refreshAll();
 }
 async function saveConfig(){
   currentConfig = migrateConfig(currentConfig);
-  if(mode === 'cloud' && currentCode){
-    try{
-      await CLOUD.saveGameConfig(currentCode, currentConfig);
-      return true;
-    }catch(e){ toast('云端保存失败：' + e.message.slice(0,40)); return false; }
+  if(!currentCode){
+    toast('请先创建一个游戏或进入已有游戏');
+    return false;
   }
-  saveLocalConfig(currentConfig);
-  return true;
+  try{
+    await CLOUD.saveGameConfig(currentCode, currentConfig);
+    return true;
+  }catch(e){ toast('云端保存失败：' + e.message.slice(0,40)); return false; }
 }
 /* 读取对方进度（标注已获取用） */
 let childProgress = null;
 async function refreshChildProgress(){
   childProgress = null;
-  if(mode === 'cloud' && currentCode){
-    try{ childProgress = await CLOUD.loadProgress(currentCode); }catch(e){}
-  } else {
-    try{ const r = localStorage.getItem(PROG_KEY); if(r) childProgress = JSON.parse(r); }catch(e){}
-  }
+  if(!currentCode) return;
+  try{ childProgress = await CLOUD.loadProgress(currentCode); }catch(e){}
 }
 function isCollected(text){
   if(!childProgress || !childProgress.letters) return false;
@@ -1501,13 +1406,9 @@ function bindData(){
   $('#btnResetProg').addEventListener('click', () => {
     confirmDlg('重置通关进度？', '将清空对方的通关记录与收藏馆信件。您的自定义内容不受影响。', '确认重置', async () => {
       const empty = { unlocked:[1], letters:[], achievement:false };
-      if(mode === 'cloud' && currentCode){
-        try{ await CLOUD.req('DELETE', 'xg_progress?game_code=eq.' + encodeURIComponent(currentCode)); toast('对方进度已重置'); }
-        catch(e){ try{ await CLOUD.req('POST', 'xg_progress', { game_code: currentCode, data: empty }); toast('对方进度已重置'); }catch(e2){ toast('重置失败'); } }
-      } else {
-        localStorage.setItem(PROG_KEY, JSON.stringify(empty));
-        toast('对方进度已重置');
-      }
+      if(!currentCode){ toast('请先进入一个游戏'); return; }
+      try{ await CLOUD.req('DELETE', 'xg_progress?game_code=eq.' + encodeURIComponent(currentCode)); toast('对方进度已重置'); }
+      catch(e){ try{ await CLOUD.req('POST', 'xg_progress', { game_code: currentCode, data: empty }); toast('对方进度已重置'); }catch(e2){ toast('重置失败'); } }
       refreshChildProgress();
     }, true);
   });
@@ -1520,52 +1421,27 @@ function bindData(){
     }, true);
   });
   $('#btnChangePwd').addEventListener('click', () => {
-    if(mode === 'cloud'){
-      modal(`<h4>修改云账号密码</h4>
-        <div class="m-body">
-          <div style="margin-bottom:12px"><input type="password" id="oldPwd" placeholder="当前密码" autocomplete="current-password"></div>
-          <div style="margin-bottom:12px"><input type="password" id="newPwd1" placeholder="新密码（至少 4 位）" autocomplete="new-password"></div>
-          <div><input type="password" id="newPwd2" placeholder="再次输入新密码" autocomplete="new-password"></div>
-        </div>
-        <div class="m-actions"><button class="m-cancel" id="cpNo">取消</button>
-        <button class="m-ok" id="cpYes">确认修改</button></div>`,
-        { onShow(){
-          $('#cpNo').addEventListener('click', modalHide);
-          $('#cpYes').addEventListener('click', async () => {
-            const oldH = gamesPassHash(cloudUser + ':' + $('#oldPwd').value + ':' + 'miaodou-games-v1');
-            const ok = await CLOUD.login(cloudUser, oldH);
-            if(!ok){ toast('当前密码不正确'); return; }
-            const p1 = $('#newPwd1').value, p2 = $('#newPwd2').value;
-            if(p1.length < 4){ toast('新密码至少 4 位'); return; }
-            if(p1 !== p2){ toast('两次输入的新密码不一致'); return; }
-            await CLOUD.changePwd(cloudUser, gamesPassHash(cloudUser + ':' + p1 + ':' + 'miaodou-games-v1'));
-            modalHide(); toast('密码已更新');
-          });
-        }});
-    } else {
-      modal(`<h4>修改本地密码</h4>
-        <div class="m-body">
-          <div style="margin-bottom:12px"><input type="password" id="oldPwd" placeholder="当前密码" autocomplete="current-password"></div>
-          <div style="margin-bottom:12px"><input type="password" id="newPwd1" placeholder="新密码（至少 4 位）" autocomplete="new-password"></div>
-          <div><input type="password" id="newPwd2" placeholder="再次输入新密码" autocomplete="new-password"></div>
-        </div>
-        <div class="m-actions"><button class="m-cancel" id="cpNo">取消</button>
-        <button class="m-ok" id="cpYes">确认修改</button></div>`,
-        { onShow(){
-          $('#cpNo').addEventListener('click', modalHide);
-          $('#cpYes').addEventListener('click', async () => {
-            const cfg = currentConfig;
-            const oldH = await sha256Hex(cfg.security.salt + '::' + $('#oldPwd').value);
-            if(oldH !== cfg.security.hash){ toast('当前密码不正确'); return; }
-            const p1 = $('#newPwd1').value, p2 = $('#newPwd2').value;
-            if(p1.length < 4){ toast('新密码至少 4 位'); return; }
-            if(p1 !== p2){ toast('两次输入的新密码不一致'); return; }
-            const salt = genSalt();
-            cfg.security = { salt, hash: await sha256Hex(salt + '::' + p1) };
-            if(await saveConfig()){ modalHide(); toast('密码已更新'); }
-          });
-        }});
-    }
+    modal(`<h4>修改云账号密码</h4>
+      <div class="m-body">
+        <div style="margin-bottom:12px"><input type="password" id="oldPwd" placeholder="当前密码" autocomplete="current-password"></div>
+        <div style="margin-bottom:12px"><input type="password" id="newPwd1" placeholder="新密码（至少 4 位）" autocomplete="new-password"></div>
+        <div><input type="password" id="newPwd2" placeholder="再次输入新密码" autocomplete="new-password"></div>
+      </div>
+      <div class="m-actions"><button class="m-cancel" id="cpNo">取消</button>
+      <button class="m-ok" id="cpYes">确认修改</button></div>`,
+      { onShow(){
+        $('#cpNo').addEventListener('click', modalHide);
+        $('#cpYes').addEventListener('click', async () => {
+          const oldH = gamesPassHash(cloudUser + ':' + $('#oldPwd').value + ':' + 'miaodou-games-v1');
+          const ok = await CLOUD.login(cloudUser, oldH);
+          if(!ok){ toast('当前密码不正确'); return; }
+          const p1 = $('#newPwd1').value, p2 = $('#newPwd2').value;
+          if(p1.length < 4){ toast('新密码至少 4 位'); return; }
+          if(p1 !== p2){ toast('两次输入的新密码不一致'); return; }
+          await CLOUD.changePwd(cloudUser, gamesPassHash(cloudUser + ':' + p1 + ':' + 'miaodou-games-v1'));
+          modalHide(); toast('密码已更新');
+        });
+      }});
   });
   $('#btnPreview').addEventListener('click', () => {
     toast('正在打开游戏…保存的内容刷新游戏页即可看到');
@@ -1602,8 +1478,7 @@ document.addEventListener('DOMContentLoaded', () => {
   bindTabs();
   bindData();
   $('#btnBack').addEventListener('click', () => {
-    if(mode === 'cloud'){ enterGames(); }
-    else { showLogin(); }
+    enterGames();
   });
   $('#btnLogout').addEventListener('click', () => {
     cloudUser = null;
